@@ -19,7 +19,7 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description></description>
     <defaultencoding></defaultencoding>
-    <versioncontrol/>
+    <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevfileview>
     <groups>
@@ -55,7 +55,7 @@
     <makeenvvars/>
     <run>
       <directoryradio>executable</directoryradio>
-      <mainprogram>.</mainprogram>
+      <mainprogram>/bin/true</mainprogram>
       <programargs></programargs>
       <globaldebugarguments></globaldebugarguments>
       <globalcwd>.</globalcwd>
@@ -145,8 +145,8 @@
   <kdevdocumentation>
     <projectdoc>
       <docsystem>Doxygen-Dokumentation</docsystem>
-      <docurl>vhci_hcd.tag</docurl>
-      <usermanualurl/>
+      <docurl></docurl>
+      <usermanualurl></usermanualurl>
     </projectdoc>
   </kdevdocumentation>
   <substmap>
@@ -239,7 +239,7 @@
     <useglobaltypes/>
   </kdevfilecreate>
   <ctagspart>
-    <customArguments/>
+    <customArguments></customArguments>
     <customTagfilePath>./tags</customTagfilePath>
     <activeTagsFiles/>
   </ctagspart>
