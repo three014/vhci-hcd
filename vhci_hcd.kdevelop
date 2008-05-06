@@ -55,10 +55,10 @@
     <makeenvvars/>
     <run>
       <directoryradio>executable</directoryradio>
-      <mainprogram>/home/michael/proj/vhci_hcd</mainprogram>
+      <mainprogram>.</mainprogram>
       <programargs></programargs>
       <globaldebugarguments></globaldebugarguments>
-      <globalcwd>/home/michael/proj/vhci_hcd</globalcwd>
+      <globalcwd>.</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <terminal>false</terminal>
       <autocompile>false</autocompile>
@@ -160,7 +160,7 @@
     <LICENSEFILE>COPYING</LICENSEFILE>
     <VERSION>0.1</VERSION>
     <YEAR>2008</YEAR>
-    <dest>/home/michael/proj/vhci_hcd</dest>
+    <dest>.</dest>
   </substmap>
   <kdevcppsupport>
     <qt>
@@ -240,7 +240,7 @@
   </kdevfilecreate>
   <ctagspart>
     <customArguments/>
-    <customTagfilePath>/home/michael/proj/vhci_hcd/tags</customTagfilePath>
+    <customTagfilePath>./tags</customTagfilePath>
     <activeTagsFiles/>
   </ctagspart>
 </kdevelop>

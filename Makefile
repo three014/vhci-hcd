@@ -58,4 +58,10 @@ patchkernel:
 	(patch -i $(PWD)/patch/Kconfig.patch || true) && \
 	popd
 
+clean-srcdox:
+	rm -rf html/*
+
+srcdox: clean-srcdox
+	doxygen
+
 -include $(KDIR)/Rules.make
