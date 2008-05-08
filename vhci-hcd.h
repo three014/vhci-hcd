@@ -96,6 +96,7 @@ struct vhci_ioc_urb
 	__s32 buffer_length;                         // Anzahl der Bytes, die für
 	                                             // den Puffer allociert wurden
 	__s32 interval;
+	__s32 packet_count;                          // Anzahl der ISO-Pakete
 	__u16 flags;
 #define VHCI_IOC_URB_FLAGS_SHORT_NOT_OK 0x0001   // Wenn bei einem IN zu kurze
                                                  // Packete übermittelt wurden,
@@ -142,12 +143,27 @@ struct vhci_ioc_work
 	                                      // Systemen durch vier teilbar sein
 } __attribute__((packed));                // und die selbe Größe haben.
 
+struct vhci_ioc_iso_packet_data
+{
+	__u32 offset;
+	__u32 packet_length;
+};
+
 struct vhci_ioc_urb_data
 {
 	__u64 handle;        // Handle, über welches der URB identifiziert wird
 	void *buffer;        // Zeiger auf den Anfang des Datenpuffers
+	struct vhci_ioc_iso_packet_data *iso_packets; // Zeiger auf den Anfang des
+	                                              // ISO-Paket-Arrays
 	__s32 buffer_length; // Anzahl der Bytes, die für den Puffer allociert
 	                     // wurden
+	__s32 packet_count;  // Anzahl der ISO-Pakete
+};
+
+struct vhci_ioc_iso_packet_giveback
+{
+	__u32 packet_actual;
+	__s32 status;
 };
 
 struct vhci_ioc_giveback
@@ -155,8 +171,14 @@ struct vhci_ioc_giveback
 	__u64 handle;
 	void *buffer;        // Nur für IN URBs: Die empfangenen Daten (für OUT URBs
 	                     // immer NULL)
-	__s32 status;
+	struct vhci_ioc_iso_packet_giveback *iso_packets; // Für ISO
+	__s32 status;        // (Wenn ISO, dann ignoriert)
 	__s32 buffer_actual; // Anzahl der Bytes, die tatsächlich übertragen wurden
+	                     // (Für IN-ISOs muss buffer_actual==buffer_length
+						 // gelten; Für OUT-ISOs wird dieser Wert ignoriert)
+	__s32 packet_count;  // Für ISO (muss mit dem Wert aus dem URB
+	                     // übereinstimmen)
+	__s32 error_count;   // Für ISO
 };
 
 #ifdef __KERNEL__
@@ -166,16 +188,20 @@ struct vhci_ioc_urb_data32
 {
 	__u64 handle;
 	compat_caddr_t buffer;
+	compat_caddr_t iso_packets;
 	__s32 buffer_length;
+	__s32 packet_count;
 };
 
 struct vhci_ioc_giveback32
 {
-	__u32 handle1, handle2; // verhindert, dass Größe der Struktur durch acht
-	                        // teilbar sein muss
+	__u64 handle;
 	compat_caddr_t buffer;
+	compat_caddr_t iso_packets;
 	__s32 status;
 	__s32 buffer_actual;
+	__s32 packet_count;
+	__s32 error_count;
 };
 #endif
 #endif
