@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.0 (06 May 2008)"
+#define DRIVER_VERSION "1.1 (09 May 2008)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -1499,6 +1499,7 @@ repeat:
 			__put_user(urbp->urb->transfer_buffer_length, &arg->work.urb.buffer_length);
 		}
 		__put_user(urbp->urb->interval, &arg->work.urb.interval);
+		__put_user(urbp->urb->number_of_packets, &arg->work.urb.packet_count);
 
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHWORK [work=PROCESS_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
@@ -1569,10 +1570,10 @@ static inline int is_urb_dir_in(const struct urb *urb)
 // Im Fehlerfall wird der URB, falls der Handle gefunden wurde, ebenfalls an den Erzeuger
 // zurückgegeben.
 // called in ioc_giveback{,32} only
-static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int status, int act, const void __user *buf)
+static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int status, int act, int iso_count, int err_count, const void __user *buf, const struct vhci_ioc_iso_packet_giveback __user *iso)
 {
 	unsigned long flags;
-	int retval = 0;
+	int retval = 0, is_in, is_iso, i;
 	struct vhci_urb_priv *urbp;
 
 	spin_lock_irqsave(&vhc->lock, flags);
@@ -1597,15 +1598,53 @@ static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int 
 		}
 	}
 
-	if(unlikely(act > urbp->urb->transfer_buffer_length))
+	is_in = is_urb_dir_in(urbp->urb);
+	is_iso = usb_pipeisoc(urbp->urb->pipe);
+
+	if(likely(is_iso))
+	{
+		if(unlikely(is_in && act != urbp->urb->transfer_buffer_length))
+		{
+#ifdef DEBUG
+			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: buffer_actual != buffer_length\n");
+#endif
+			retval = -ENOBUFS;
+			goto done_with_errors;
+		}
+		if(unlikely(iso_count != urbp->urb->number_of_packets))
+		{
+#ifdef DEBUG
+			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: number_of_packets missmatch\n");
+#endif
+			retval = -EINVAL;
+			goto done_with_errors;
+		}
+		if(unlikely(iso_count && !iso))
+		{
+#ifdef DEBUG
+			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: iso_packets must not be zero\n");
+#endif
+			retval = -EINVAL;
+			goto done_with_errors;
+		}
+		if(likely(iso_count))
+		{
+			if(!access_ok(VERIFY_READ, (void *)iso, iso_count * sizeof(struct vhci_ioc_iso_packet_giveback)))
+			{
+				retval = -EFAULT;
+				goto done_with_errors;
+			}
+		}
+	}
+	else if(unlikely(act > urbp->urb->transfer_buffer_length))
 	{
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: invalid: buffer_actual > buffer_length\n");
 #endif
-		retval = is_urb_dir_in(urbp->urb) ? -ENOBUFS : -EINVAL;
+		retval = is_in ? -ENOBUFS : -EINVAL;
 		goto done_with_errors;
 	}
-	if(is_urb_dir_in(urbp->urb))
+	if(is_in)
 	{
 		if(unlikely(act && !buf))
 		{
@@ -1633,7 +1672,16 @@ static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int 
 		retval = -EINVAL;
 		goto done_with_errors;
 	}
+	if(likely(is_iso && iso_count))
+	{
+		for(i = 0; i < iso_count; i++)
+		{
+			__get_user(urbp->urb->iso_frame_desc[i].status, &iso[i].status);
+			__get_user(urbp->urb->iso_frame_desc[i].actual_length, &iso[i].packet_actual);
+		}
+	}
 	urbp->urb->actual_length = act;
+	urbp->urb->error_count = err_count;
 
 	// Jetzt ist der URB fertig und darf wieder zu seinem Erzeuger zurück
 	maybe_set_status(urbp, status);
@@ -1659,7 +1707,8 @@ static inline int ioc_giveback(struct vhci *vhc, const struct vhci_ioc_giveback 
 	u64 handle64;
 	const void *handle;
 	const void __user *buf;
-	int status, act;
+	const struct vhci_ioc_iso_packet_giveback __user *iso;
+	int status, act, iso_count, err_count;
 
 #ifdef DEBUF
 	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCGIVEBACK\n");
@@ -1679,18 +1728,21 @@ static inline int ioc_giveback(struct vhci *vhc, const struct vhci_ioc_giveback 
 	}
 	__get_user(status, &arg->status);
 	__get_user(act, &arg->buffer_actual);
+	__get_user(iso_count, &arg->packet_count);
+	__get_user(err_count, &arg->error_count);
 	__get_user(buf, &arg->buffer);
+	__get_user(iso, &arg->iso_packets);
 	handle = (const void *)(unsigned long)handle64;
 	if(unlikely(!handle))
 		return -EINVAL;
-	return ioc_giveback_common(vhc, handle, status, act, buf);
+	return ioc_giveback_common(vhc, handle, status, act, iso_count, err_count, buf, iso);
 }
 
 // called in ioc_fetch_data{,32} only
-static inline int ioc_fetch_data_common(struct vhci *vhc, const void *handle, void __user *user_buf, int user_len)
+static inline int ioc_fetch_data_common(struct vhci *vhc, const void *handle, void __user *user_buf, int user_len, struct vhci_ioc_iso_packet_data __user *iso, int iso_count)
 {
 	unsigned long flags;
-	int tb_len;
+	int tb_len, is_in, is_iso, i;
 	struct vhci_urb_priv *urbp;
 
 	spin_lock_irqsave(&vhc->lock, flags);
@@ -1716,21 +1768,53 @@ static inline int ioc_fetch_data_common(struct vhci *vhc, const void *handle, vo
 		tb_len = le16_to_cpu(cmd->wLength);
 	}
 
-	if(unlikely(is_urb_dir_in(urbp->urb) || !tb_len || !urbp->urb->transfer_buffer))
+	is_in = is_urb_dir_in(urbp->urb);
+	is_iso = usb_pipeisoc(urbp->urb->pipe);
+
+	if(likely(is_iso))
+	{
+		if(unlikely(iso_count != urbp->urb->number_of_packets))
+		{
+			spin_unlock_irqrestore(&vhc->lock, flags);
+			return -EINVAL;
+		}
+		if(likely(iso_count))
+		{
+			if(unlikely(!iso))
+			{
+				spin_unlock_irqrestore(&vhc->lock, flags);
+				return -EINVAL;
+			}
+			if(!access_ok(VERIFY_WRITE, (void *)iso, iso_count * sizeof(struct vhci_ioc_iso_packet_data)))
+			{
+				spin_unlock_irqrestore(&vhc->lock, flags);
+				return -EFAULT;
+			}
+			for(i = 0; i < iso_count; i++)
+			{
+				__put_user(urbp->urb->iso_frame_desc[i].offset, &iso[i].offset);
+				__put_user(urbp->urb->iso_frame_desc[i].length, &iso[i].packet_length);
+			}
+		}
+	}
+	else if(unlikely(is_in || !tb_len || !urbp->urb->transfer_buffer))
 	{
 		spin_unlock_irqrestore(&vhc->lock, flags);
 		return -ENODATA;
 	}
 
-	if(unlikely(!user_buf || user_len < tb_len))
+	if(likely(!is_in && tb_len))
 	{
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -EINVAL;
-	}
-	if(unlikely(copy_to_user(user_buf, urbp->urb->transfer_buffer, tb_len)))
-	{
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -EFAULT;
+		if(unlikely(!user_buf || user_len < tb_len))
+		{
+			spin_unlock_irqrestore(&vhc->lock, flags);
+			return -EINVAL;
+		}
+		if(unlikely(copy_to_user(user_buf, urbp->urb->transfer_buffer, tb_len)))
+		{
+			spin_unlock_irqrestore(&vhc->lock, flags);
+			return -EFAULT;
+		}
 	}
 	spin_unlock_irqrestore(&vhc->lock, flags);
 	return 0;
@@ -1742,7 +1826,8 @@ static inline int ioc_fetch_data(struct vhci *vhc, struct vhci_ioc_urb_data __us
 	u64 handle64;
 	const void *handle;
 	void __user *user_buf;
-	int user_len;
+	struct vhci_ioc_iso_packet_data __user *iso;
+	int user_len, iso_count;
 
 #ifdef DEBUG
 	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHDATA\n");
@@ -1760,11 +1845,13 @@ static inline int ioc_fetch_data(struct vhci *vhc, struct vhci_ioc_urb_data __us
 			return -EINVAL;
 	}
 	__get_user(user_len, &arg->buffer_length);
+	__get_user(iso_count, &arg->packet_count);
 	__get_user(user_buf, &arg->buffer);
+	__get_user(iso, &arg->iso_packets);
 	handle = (const void *)(unsigned long)handle64;
 	if(unlikely(!handle))
 		return -EINVAL;
-	return ioc_fetch_data_common(vhc, handle, user_buf, user_len);
+	return ioc_fetch_data_common(vhc, handle, user_buf, user_len, iso, iso_count);
 }
 
 #ifdef CONFIG_COMPAT
@@ -1773,9 +1860,10 @@ static inline int ioc_giveback32(struct vhci *vhc, const struct vhci_ioc_givebac
 {
 	u64 handle64;
 	const void *handle;
-	u32 buf32;
+	u32 buf32, iso32;
 	const void __user *buf;
-	int status, act;
+	const struct vhci_ioc_iso_packet_giveback __user *iso;
+	int status, act, iso_count, err_count;
 
 #ifdef DEBUG
 	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCGIVEBACK32\n");
@@ -1783,12 +1871,16 @@ static inline int ioc_giveback32(struct vhci *vhc, const struct vhci_ioc_givebac
 	__get_user(handle64, &arg->handle);
 	__get_user(status, &arg->status);
 	__get_user(act, &arg->buffer_actual);
+	__get_user(iso_count, &arg->packet_count);
+	__get_user(err_count, &arg->error_count);
 	__get_user(buf32, &arg->buffer);
+	__get_user(iso32, &arg->iso_packets);
 	handle = (const void *)(unsigned long)handle64;
 	if(unlikely(!handle))
 		return -EINVAL;
 	buf = compat_ptr(buf32);
-	return ioc_giveback_common(vhc, handle, status, act, buf);
+	iso = compat_ptr(iso32);
+	return ioc_giveback_common(vhc, handle, status, act, iso_count, err_count, buf, iso);
 }
 
 // called in device_ioctl only
@@ -1796,9 +1888,10 @@ static inline int ioc_fetch_data32(struct vhci *vhc, struct vhci_ioc_urb_data32 
 {
 	u64 handle64;
 	const void *handle;
-	u32 user_buf32;
+	u32 user_buf32, iso32;
 	void __user *user_buf;
-	int user_len;
+	struct vhci_ioc_iso_packet_data __user *iso;
+	int user_len, iso_count;
 
 #ifdef DEBUG
 	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHDATA32\n");
@@ -1806,12 +1899,15 @@ static inline int ioc_fetch_data32(struct vhci *vhc, struct vhci_ioc_urb_data32 
 
 	__get_user(handle64, &arg->handle);
 	__get_user(user_len, &arg->buffer_length);
+	__get_user(iso_count, &arg->packet_count);
 	__get_user(user_buf32, &arg->buffer);
+	__get_user(iso32, &arg->iso_packets);
 	handle = (const void *)(unsigned long)handle64;
 	if(unlikely(!handle))
 		return -EINVAL;
 	user_buf = compat_ptr(user_buf32);
-	return ioc_fetch_data_common(vhc, handle, user_buf, user_len);
+	iso = compat_ptr(iso32);
+	return ioc_fetch_data_common(vhc, handle, user_buf, user_len, iso, iso_count);
 }
 #endif
 

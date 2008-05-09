@@ -17,8 +17,8 @@
     <projectname>vhci_hcd</projectname>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description></description>
-    <defaultencoding></defaultencoding>
+    <description/>
+    <defaultencoding/>
     <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevfileview>
@@ -31,33 +31,34 @@
     <tree>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
       <hidenonprojectfiles>false</hidenonprojectfiles>
+      <showvcsfields>false</showvcsfields>
     </tree>
   </kdevfileview>
   <kdevcustomproject>
     <envvars/>
     <build>
       <buildtool>make</buildtool>
-      <builddir></builddir>
+      <builddir/>
     </build>
     <make>
       <abortonerror>true</abortonerror>
       <numberofjobs>1</numberofjobs>
       <dontact>false</dontact>
-      <makebin></makebin>
+      <makebin/>
       <environments>
         <default/>
       </environments>
       <prio>0</prio>
-      <defaulttarget></defaulttarget>
-      <makeoptions></makeoptions>
+      <defaulttarget/>
+      <makeoptions/>
       <selectedenvironment>default</selectedenvironment>
     </make>
     <makeenvvars/>
     <run>
       <directoryradio>executable</directoryradio>
       <mainprogram>/bin/true</mainprogram>
-      <programargs></programargs>
-      <globaldebugarguments></globaldebugarguments>
+      <programargs/>
+      <globaldebugarguments/>
       <globalcwd>.</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <terminal>false</terminal>
@@ -82,12 +83,14 @@
       <filetype>Makefile</filetype>
       <filetype>CMakeLists.txt</filetype>
     </filetypes>
-    <blacklist/>
+    <blacklist>
+      <path>vhci-hcd.mod.c</path>
+    </blacklist>
     <other>
       <prio>0</prio>
-      <otherbin></otherbin>
-      <defaulttarget></defaulttarget>
-      <otheroptions></otheroptions>
+      <otherbin/>
+      <defaulttarget/>
+      <otheroptions/>
       <selectedenvironment>default</selectedenvironment>
       <environments>
         <default/>
@@ -145,8 +148,8 @@
   <kdevdocumentation>
     <projectdoc>
       <docsystem>Doxygen-Dokumentation</docsystem>
-      <docurl></docurl>
-      <usermanualurl></usermanualurl>
+      <docurl/>
+      <usermanualurl/>
     </projectdoc>
   </kdevdocumentation>
   <substmap>
@@ -197,7 +200,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet></prefixGet>
+      <prefixGet/>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -219,11 +222,11 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <gdbpath></gdbpath>
-      <dbgshell></dbgshell>
-      <configGdbScript></configGdbScript>
-      <runShellScript></runShellScript>
-      <runGdbScript></runGdbScript>
+      <gdbpath/>
+      <dbgshell/>
+      <configGdbScript/>
+      <runShellScript/>
+      <runGdbScript/>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -239,7 +242,7 @@
     <useglobaltypes/>
   </kdevfilecreate>
   <ctagspart>
-    <customArguments></customArguments>
+    <customArguments/>
     <customTagfilePath>./tags</customTagfilePath>
     <activeTagsFiles/>
   </ctagspart>
