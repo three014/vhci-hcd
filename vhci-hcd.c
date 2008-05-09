@@ -1780,7 +1780,7 @@ static inline int ioc_giveback32(struct vhci *vhc, const struct vhci_ioc_givebac
 #ifdef DEBUG
 	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCGIVEBACK32\n");
 #endif
-	__get_user(handle64, (const u64 __user *)&arg->handle1);
+	__get_user(handle64, &arg->handle);
 	__get_user(status, &arg->status);
 	__get_user(act, &arg->buffer_actual);
 	__get_user(buf32, &arg->buffer);
