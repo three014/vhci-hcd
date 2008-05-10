@@ -79,6 +79,7 @@ struct vhci_ioc_port_stat
 	__u8 index;      // Index des Ports
 	__u8 flags;      // Zusätzliche Informationen vom Kernel- zum Userspace
 #define VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0 // Zeigt den Zustand des Resuming an
+	__u8 reserved1, reserved2; // Größe soll durch vier teilbar sein
 };
 
 struct vhci_ioc_setup_packet
