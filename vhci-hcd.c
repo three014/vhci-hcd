@@ -202,7 +202,7 @@ static const char *get_status_str(int status)
 	case 0:            return "SUCCESS";
 	case -EINPROGRESS: return "-EINPROGRESS";
 	case -ECANCELED:   return "-ECANCELED";
-	case -EPROTO:      return "-EPROTO";
+	case -EPIPE:       return "-EPIPE";
 	default:           return "???";
 	}
 }
