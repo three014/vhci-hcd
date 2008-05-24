@@ -754,10 +754,10 @@ static inline ssize_t show_urb(char *buf, size_t size, struct urb *urb)
 #ifdef DEBUG
 static void dump_urb(struct urb *urb)
 {
-	if(!debug_output) return;
-	int i;
+	int i, j;
 	int max = urb->transfer_buffer_length;
 	int in = usb_pipein(urb->pipe);
+	if(!debug_output) return;
 	vhci_printk(KERN_DEBUG, "dump_urb 0x%016llx:\n", (u64)(unsigned long)urb);
 	vhci_printk(KERN_DEBUG, "dvadr=0x%02x epnum=%d epdir=%s eptpe=%s\n", (int)usb_pipedevice(urb->pipe), (int)usb_pipeendpoint(urb->pipe), (in ? "IN" : "OUT"), (usb_pipecontrol(urb->pipe) ? "CTRL" : (usb_pipebulk(urb->pipe) ? "BULK" : (usb_pipeint(urb->pipe) ? "INT" : (usb_pipeisoc(urb->pipe) ? "ISO" : "INV!")))));
 #ifdef OLD_GIVEBACK_MECH
@@ -782,7 +782,32 @@ static void dump_urb(struct urb *urb)
 			vhci_printk(KERN_DEBUG, "wValue=0x%04x wIndex=0x%04x wLength=0x%04x\n", urb->setup_packet[2] | (urb->setup_packet[3] << 8), urb->setup_packet[4] | (urb->setup_packet[5] << 8), max);
 		}
 	}
-	if(debug_output >= 2)
+	if(usb_pipeisoc(urb->pipe))
+	{
+		for(j = 0; j < urb->number_of_packets; j++)
+		{
+			vhci_printk(KERN_DEBUG, "PACKET%d: offset=%d pktlen=%d/%d status=%d\n", j, urb->iso_frame_desc[j].offset, urb->iso_frame_desc[j].actual_length, urb->iso_frame_desc[j].length, urb->iso_frame_desc[j].status);
+			if(debug_output >= 2)
+			{
+				vhci_printk(KERN_DEBUG, "PACKET%d: data stage (%d/%d bytes %s):\n", j, urb->iso_frame_desc[j].actual_length, urb->iso_frame_desc[j].length, in ? "received" : "transmitted");
+				vhci_printk(KERN_DEBUG, "PACKET%d: ", j);
+				max = in ? urb->iso_frame_desc[j].actual_length : urb->iso_frame_desc[j].length;
+				if(debug_output > 2 || max <= 16)
+					for(i = urb->iso_frame_desc[j].offset; i < max + urb->iso_frame_desc[j].offset; i++)
+						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+				else
+				{
+					for(i = urb->iso_frame_desc[j].offset; i < 8 + urb->iso_frame_desc[j].offset; i++)
+						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+					printk("... ");
+					for(i = max + urb->iso_frame_desc[j].offset - 8; i < max + urb->iso_frame_desc[j].offset; i++)
+						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+				}
+				printk("\n");
+			}
+		}
+	}
+	else if(debug_output >= 2)
 	{
 		vhci_printk(KERN_DEBUG, "data stage (%d/%d bytes %s):\n", urb->actual_length, max, in ? "received" : "transmitted");
 		vhci_printk(KERN_DEBUG, "");
@@ -800,7 +825,6 @@ static void dump_urb(struct urb *urb)
 		}
 		printk("\n");
 	}
-	else vhci_printk(KERN_DEBUG, "data stage: %d/%d bytes %s\n", urb->actual_length, max, in ? "received" : "transmitted");
 }
 #else
 static inline void dump_urb(struct urb *urb) {/* do nothing */}
