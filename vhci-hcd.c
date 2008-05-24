@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.1 (09 May 2008)"
+#define DRIVER_VERSION "1.1 (24 May 2008)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -87,7 +87,7 @@
 static const char driver_name[] = DRIVER_NAME;
 static const char driver_desc[] = DRIVER_DESC;
 #ifdef DEBUG
-static int debug_output = 0;
+static unsigned int debug_output = 0;
 #endif
 
 MODULE_DESCRIPTION(DRIVER_DESC " driver");
@@ -766,8 +766,10 @@ static void dump_urb(struct urb *urb)
 	vhci_printk(KERN_DEBUG, "flags=0x%08x buflen=%d/%d\n", urb->transfer_flags, urb->actual_length, max);
 #endif
 	vhci_printk(KERN_DEBUG, "tbuf=0x%p tdma=0x%016llx sbuf=0x%p sdma=0x%016llx\n", urb->transfer_buffer, (u64)urb->transfer_dma, urb->setup_packet, (u64)urb->setup_dma);
-	if(usb_pipeisoc(urb->pipe) || usb_pipeint(urb->pipe))
+	if(usb_pipeint(urb->pipe))
 		vhci_printk(KERN_DEBUG, "interval=%d\n", urb->interval);
+	else if(usb_pipeisoc(urb->pipe))
+		vhci_printk(KERN_DEBUG, "interval=%d err=%d packets=%d startfrm=%d\n", urb->interval, urb->error_count, urb->number_of_packets, urb->start_frame);
 	else if(usb_pipecontrol(urb->pipe))
 	{
 		max = urb->setup_packet[6] | (urb->setup_packet[7] << 8);
@@ -780,12 +782,25 @@ static void dump_urb(struct urb *urb)
 			vhci_printk(KERN_DEBUG, "wValue=0x%04x wIndex=0x%04x wLength=0x%04x\n", urb->setup_packet[2] | (urb->setup_packet[3] << 8), urb->setup_packet[4] | (urb->setup_packet[5] << 8), max);
 		}
 	}
-	vhci_printk(KERN_DEBUG, "data stage (%d/%d bytes %s):\n", urb->actual_length, max, in ? "received" : "transmitted");
-	vhci_printk(KERN_DEBUG, "");
-	if(in) max = urb->actual_length;
-	for(i = 0; i < max; i++)
-		printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-	printk("\n");
+	if(debug_output >= 2)
+	{
+		vhci_printk(KERN_DEBUG, "data stage (%d/%d bytes %s):\n", urb->actual_length, max, in ? "received" : "transmitted");
+		vhci_printk(KERN_DEBUG, "");
+		if(in) max = urb->actual_length;
+		if(debug_output > 2 || max <= 16)
+			for(i = 0; i < max; i++)
+				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+		else
+		{
+			for(i = 0; i < 8; i++)
+				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+			printk("... ");
+			for(i = max - 8; i < max; i++)
+				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
+		}
+		printk("\n");
+	}
+	else vhci_printk(KERN_DEBUG, "data stage: %d/%d bytes %s\n", urb->actual_length, max, in ? "received" : "transmitted");
 }
 #else
 static inline void dump_urb(struct urb *urb) {/* do nothing */}
@@ -1997,22 +2012,28 @@ static struct file_operations fops = {
 #ifdef DEBUG
 static ssize_t show_debug_output(struct device_driver *drv, char *buf)
 {
-	if(buf != NULL) *buf = debug_output ? '1' : '0';
+	if(buf != NULL)
+	{
+		switch(debug_output)
+		{
+		case 0:  *buf = '0'; break; // No debug output
+		case 1:  *buf = '1'; break; // Debug output without data buffer dumps
+		case 2:  *buf = '2'; break; // Debug output with short data buffer dumps
+		default: *buf = '3'; break; // Debug output with full data buffer dumps
+		}
+	}
 	return 1;
 }
 
 static ssize_t store_debug_output(struct device_driver *drv, const char *buf, size_t count)
 {
 	if(count != 1 || buf == NULL) return -EINVAL;
-	if(*buf == '0')
+	switch(*buf)
 	{
-		debug_output = 0;
-		return 1;
-	}
-	else if(*buf == '1')
-	{
-		debug_output = 1;
-		return 1;
+	case '0': debug_output = 0; return 1;
+	case '1': debug_output = 1; return 1;
+	case '2': debug_output = 2; return 1;
+	case '3': debug_output = 3; return 1;
 	}
 	return -EINVAL;
 }
