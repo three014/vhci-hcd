@@ -21,11 +21,13 @@ endif
 
 obj-m      := $(TARGET).o
 
+.PHONY: default install clean patchkernel clean-srcdox srcdox
+
 default:
 	make -C $(KDIR) SUBDIRS=$(PWD) PWD=$(PWD) BUILD_PREFIX=$(BUILD_PREFIX) KDIR=$(KDIR) KVERSION=$(KVERSION) modules
 
-$(TARGET).o: $(OBJS)
-	$(LD) $(LD_RFLAG) -r -o $@ $(OBJS)
+#$(TARGET).o: $(OBJS)
+#	$(LD) $(LD_RFLAG) -r -o $@ $(OBJS)
 
 ifneq (,$(findstring 2.4.,$(KVERSION)))
 ifneq (,$(INSTALL_PREFIX))
@@ -46,20 +48,18 @@ endif
 endif
 
 clean:
-	-rm -f *.o *.ko .*.cmd .*.flags *.mod.c
+	-rm -f *.o *.ko .*.cmd .*.flags *.mod.c Module.symvers
+	-rm -rf .tmp_versions/
 
 patchkernel:
-	cp -v vhci-hcd.c $(KSRC)/$(MDIR)/ && \
-	cp -v vhci-hcd.h $(KSRC)/include/linux/ && \
-	pushd $(KSRC) && \
-	(patch -Np1 -i $(PWD)/patch/vhci-hcd_compat_ioctl.patch || true) && \
-	cd $(MDIR) && \
-	(grep -q vhci-hcd.o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_HCD)  += vhci-hcd.o" >>Makefile) && \
-	(patch -i $(PWD)/patch/Kconfig.patch || true) && \
-	popd
+	cp -v vhci-hcd.c $(KSRC)/$(MDIR)/
+	cp -v vhci-hcd.h $(KSRC)/include/linux/
+	cd $(KSRC); patch -Np1 -i $(PWD)/patch/vhci-hcd_compat_ioctl.patch || true
+	cd $(KSRC)/$(MDIR); grep -q $(TARGET).o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_HCD)  += $(TARGET).o" >>Makefile
+	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || true
 
 clean-srcdox:
-	rm -rf html/*
+	-rm -rf html/*
 
 srcdox: clean-srcdox
 	doxygen
