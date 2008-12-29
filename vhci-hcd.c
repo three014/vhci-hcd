@@ -786,7 +786,7 @@ static void dump_urb(struct urb *urb)
 		vhci_printk(KERN_DEBUG, "interval=%d err=%d packets=%d startfrm=%d\n", urb->interval, urb->error_count, urb->number_of_packets, urb->start_frame);
 	else if(usb_pipecontrol(urb->pipe))
 	{
-		const char* const sr[13] =
+		const char *const sr[13] =
 		{
 			"GET_STATUS",
 			"CLEAR_FEATURE",
@@ -802,7 +802,7 @@ static void dump_urb(struct urb *urb)
 			"SET_INTERFACE",
 			"SYNCH_FRAME"
 		};
-		const char* const sd[9] =
+		const char *const sd[9] =
 		{
 			"invalid",
 			"DEVICE",
@@ -814,7 +814,7 @@ static void dump_urb(struct urb *urb)
 			"OTHER_SPEED_CONFIGURATION",
 			"INTERFACE_POWER"
 		};
-		const char* const sf[3] =
+		const char *const sf[3] =
 		{
 			"ENDPOINT_HALT",
 			"DEVICE_REMOTE_WAKEUP",
