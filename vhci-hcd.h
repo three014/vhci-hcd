@@ -140,9 +140,7 @@ struct vhci_ioc_work
 #define VHCI_IOC_WORK_TYPE_PROCESS_URB 1  // URB an die Hardware reichen
 #define VHCI_IOC_WORK_TYPE_CANCEL_URB  2  // URB zurückziehen, falls noch nicht
                                           // bearbeitet
-	__u8 reserved1, reserved2, reserved3; // Struktur soll auf 32- und 64-bit
-	                                      // Systemen durch vier teilbar sein
-} __attribute__((packed));                // und die selbe Größe haben.
+};
 
 struct vhci_ioc_iso_packet_data
 {

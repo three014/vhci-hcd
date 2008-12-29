@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.1 (25 May 2008)"
+#define DRIVER_VERSION "1.2 (29 December 2008)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -2167,6 +2167,14 @@ static int __init init(void)
 		vhci_printk(KERN_DEBUG, "driver_create_file(&vhci_hcd_driver, &driver_attr_debug_output) failed\n");
 		vhci_printk(KERN_DEBUG, "==> ignoring\n");
 	}
+#endif
+
+#ifdef DEBUG
+	vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCREGISTER  = %08x\n", (unsigned int)VHCI_HCD_IOCREGISTER);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCPORTSTAT  = %08x\n", (unsigned int)VHCI_HCD_IOCPORTSTAT);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHWORK = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHWORK);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCGIVEBACK  = %08x\n", (unsigned int)VHCI_HCD_IOCGIVEBACK);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHDATA = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHDATA);
 #endif
 
 	return 0;
