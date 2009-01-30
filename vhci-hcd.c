@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.2 (29 December 2008)"
+#define DRIVER_VERSION "1.3 (31 January 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -1205,9 +1205,10 @@ static int device_open(struct inode *inode, struct file *file)
 // called in device_ioctl only
 static inline int ioc_register(struct file *file, struct vhci_ioc_register __user *arg)
 {
-	int retval, i;
+	int retval, i, usbbusnum;
 	struct platform_device *pdev;
 	struct vhci_conf *conf;
+	struct usb_hcd *hcd;
 	u8 pc;
 
 	vhci_dbg("cmd=VHCI_HCD_IOCREGISTER\n");
@@ -1287,6 +1288,11 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	}
 	// Dafür sorgen, dass letztes Zeichen auf jeden Fall Null ist
 	__put_user('\0', arg->bus_id + i - 1);
+
+	hcd = platform_get_drvdata(pdev);
+	usbbusnum = hcd->self.busnum;
+	vhci_printk(KERN_INFO, "Usb bus #%d\n", usbbusnum);
+	__put_user(usbbusnum, &arg->usb_busnum);
 
 	return 0;
 

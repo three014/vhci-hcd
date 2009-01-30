@@ -67,9 +67,10 @@
 // Struktur, die mit VHCI_HCD_IOCREGISTER übergeben wird
 struct vhci_ioc_register
 {
-	__s32 id;        // [out] Die ID, die dem Controller zugewiesen wurde
-	char bus_id[20]; // [out] Bus-ID des Controllers als null-terminierter String
-	__u8 port_count; // [in]  Registriere Host-Controller mit Anzahl Ports
+	__s32 id;         // [out] Die ID, die dem Controller zugewiesen wurde
+	__s32 usb_busnum; // [out] Die Nummer des USB-Busses
+	char bus_id[20];  // [out] Bus-ID des Controllers als null-terminierter String
+	__u8 port_count;  // [in]  Registriere Host-Controller mit Anzahl Ports
 };
 
 struct vhci_ioc_port_stat
