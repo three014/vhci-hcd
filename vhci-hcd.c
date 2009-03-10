@@ -37,6 +37,7 @@
 #include <linux/platform_device.h>
 #include <linux/usb.h>
 #include <linux/fs.h>
+#include <linux/device.h>
 #ifdef KBUILD_EXTMOD
 #	include "vhci-hcd.h"
 #else
@@ -45,7 +46,6 @@
 
 #include <asm/atomic.h>
 #include <asm/bitops.h>
-//#include <asm/unaligned.h>
 #include <asm/uaccess.h>
 
 #ifdef KBUILD_EXTMOD
@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.3 (31 January 2009)"
+#define DRIVER_VERSION "1.4 (10 March 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -2134,6 +2134,22 @@ static ssize_t store_debug_output(struct device_driver *drv, const char *buf, si
 static DRIVER_ATTR(debug_output, S_IRUSR | S_IWUSR, show_debug_output, store_debug_output);
 #endif
 
+static void vhci_class_device_release(struct class_device *dev)
+{
+}
+
+static int vhci_major;
+
+static struct class vhci_class = {
+	.owner = THIS_MODULE,
+	.name = driver_name
+};
+
+static struct class_device vhci_class_device = {
+	.class = &vhci_class,
+	.release = vhci_class_device_release
+};
+
 static int __init init(void)
 {
 	int	retval;
@@ -2152,8 +2168,8 @@ static int __init init(void)
 		return retval;
 	}
 
-	retval = register_chrdev(VHCI_HCD_MAJOR_NUM, driver_name, &fops);
-	if(unlikely(retval < 0))
+	vhci_major = register_chrdev(0, driver_name, &fops);
+	if(unlikely(vhci_major < 0))
 	{
 		vhci_printk(KERN_ERR, "Sorry, registering the character device failed with %d.\n", retval);
 #ifdef DEBUG
@@ -2164,7 +2180,21 @@ static int __init init(void)
 	}
 
 	vhci_printk(KERN_INFO, "Successfully registered the character device.\n");
-	vhci_printk(KERN_INFO, "The major device number is %d.\n", VHCI_HCD_MAJOR_NUM);
+	vhci_printk(KERN_INFO, "The major device number is %d.\n", vhci_major);
+
+	if(unlikely(class_register(&vhci_class)))
+	{
+		vhci_printk(KERN_WARNING, "failed to register class %s\n", driver_name);
+	}
+	else
+	{
+		strlcpy((void *)&vhci_class_device.class_id, "vhci-ctrl", 10);
+		vhci_class_device.devt = MKDEV(vhci_major, 0);
+		if(unlikely(class_device_register(&vhci_class_device)))
+		{
+			vhci_printk(KERN_WARNING, "failed to register class device %s\n", "vhci-ctrl");
+		}
+	}
 
 #ifdef DEBUG
 	retval = driver_create_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
@@ -2192,7 +2222,9 @@ static void __exit cleanup(void)
 #ifdef DEBUG
 	driver_remove_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
 #endif
-	unregister_chrdev(VHCI_HCD_MAJOR_NUM, driver_name);
+	class_device_unregister(&vhci_class_device);
+	class_unregister(&vhci_class);
+	unregister_chrdev(vhci_major, driver_name);
 	vhci_dbg("unregister platform_driver %s\n", driver_name);
 	platform_driver_unregister(&vhci_hcd_driver);
 	vhci_dbg("bin weg\n");

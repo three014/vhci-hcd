@@ -37,8 +37,6 @@
 #endif
 #include <linux/ioctl.h>
 
-#define VHCI_HCD_MAJOR_NUM 138
-
 #ifndef __KERNEL__
 
 // wPortStatus bit field
@@ -206,7 +204,7 @@ struct vhci_ioc_giveback32
 #endif
 #endif
 
-#define VHCI_HCD_IOC_MAGIC      VHCI_HCD_MAJOR_NUM
+#define VHCI_HCD_IOC_MAGIC      138
 #define VHCI_HCD_IOCREGISTER    _IOWR(VHCI_HCD_IOC_MAGIC, 0, \
                                       struct vhci_ioc_register)
 #define VHCI_HCD_IOCPORTSTAT    _IOW (VHCI_HCD_IOC_MAGIC, 1, \
