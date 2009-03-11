@@ -2148,7 +2148,7 @@ static struct class vhci_class = {
 static struct device vhci_device = {
 	.class = &vhci_class,
 	.release = vhci_device_release,
-	.init_name = "vhci-ctrl",
+	//.init_name = "vhci-ctrl",  // erst ab 2.6.28, oder so
 	.driver = &vhci_hcd_driver.driver
 };
 
