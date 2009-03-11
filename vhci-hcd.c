@@ -56,7 +56,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.4 (10 March 2009)"
+#define DRIVER_VERSION "1.5 (11 March 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -2134,7 +2134,7 @@ static ssize_t store_debug_output(struct device_driver *drv, const char *buf, si
 static DRIVER_ATTR(debug_output, S_IRUSR | S_IWUSR, show_debug_output, store_debug_output);
 #endif
 
-static void vhci_class_device_release(struct class_device *dev)
+static void vhci_device_release(struct device *dev)
 {
 }
 
@@ -2145,9 +2145,11 @@ static struct class vhci_class = {
 	.name = driver_name
 };
 
-static struct class_device vhci_class_device = {
+static struct device vhci_device = {
 	.class = &vhci_class,
-	.release = vhci_class_device_release
+	.release = vhci_device_release,
+	.init_name = "vhci-ctrl",
+	.driver = &vhci_hcd_driver.driver
 };
 
 static int __init init(void)
@@ -2188,11 +2190,11 @@ static int __init init(void)
 	}
 	else
 	{
-		strlcpy((void *)&vhci_class_device.class_id, "vhci-ctrl", 10);
-		vhci_class_device.devt = MKDEV(vhci_major, 0);
-		if(unlikely(class_device_register(&vhci_class_device)))
+		strlcpy((void *)&vhci_device.bus_id, "vhci-ctrl", 10);
+		vhci_device.devt = MKDEV(vhci_major, 0);
+		if(unlikely(device_register(&vhci_device)))
 		{
-			vhci_printk(KERN_WARNING, "failed to register class device %s\n", "vhci-ctrl");
+			vhci_printk(KERN_WARNING, "failed to register device %s\n", "vhci-ctrl");
 		}
 	}
 
@@ -2222,7 +2224,7 @@ static void __exit cleanup(void)
 #ifdef DEBUG
 	driver_remove_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
 #endif
-	class_device_unregister(&vhci_class_device);
+	device_unregister(&vhci_device);
 	class_unregister(&vhci_class);
 	unregister_chrdev(vhci_major, driver_name);
 	vhci_dbg("unregister platform_driver %s\n", driver_name);
