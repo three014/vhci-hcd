@@ -1,0 +1,5 @@
+<area shape="rect" href="$vhci&#45;hcd_8c.html#a8ad7dce0fc9862016f8480b053a3ade" title="ioc_fetch_data_common" alt="" coords="192,5,371,32">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#389f5842863f702e75737f852bf093d8" title="ioc_giveback_common" alt="" coords="199,56,364,83">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#c01e8babdf2c516abb1e66d34c8e0615" title="ioc_fetch_data" alt="" coords="419,5,533,32">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="583,31,676,57">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#ba134330ab698e218aaa1998f59841c6" title="ioc_giveback" alt="" coords="425,56,527,83">

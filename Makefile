@@ -59,9 +59,10 @@ patchkernel:
 	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || true
 
 clean-srcdox:
-	-rm -rf html/*
+	-rm -rf html/* vhci_hcd.tag
 
 srcdox: clean-srcdox
 	doxygen
+	-rm -f vhci_hcd.tag
 
 -include $(KDIR)/Rules.make

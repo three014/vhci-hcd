@@ -1,0 +1,7 @@
+<area shape="rect" href="$vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="201,56,417,83">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="241,107,377,133">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="241,157,377,184">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#5a6f3ece62a5043c182bcc286d2ebc24" title="ioc_port_stat" alt="" coords="483,5,587,32">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="467,56,603,83">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="471,107,599,133">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="652,5,745,32">

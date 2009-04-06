@@ -1,0 +1,9 @@
+<area shape="rect" href="$vhci&#45;hcd_8c.html#d27a1cb6f41e63643c19d60699b542e1" title="conv_urb_flags" alt="" coords="183,5,300,32">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#83ef7539910f4da5a423ba21ebd717ee" title="conv_urb_type" alt="" coords="184,56,299,83">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="361,157,447,184">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#052202a54d37715152bc6a3e3f32f8d5" title="has_work" alt="" coords="201,157,281,184">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#60983b4f74308854907024142f4d933c" title="maybe_set_status" alt="" coords="172,208,311,235">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="365,309,443,336">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="173,259,309,285">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#a70aa0c4b41ff9ade79ee4a4f4e74019" title="get_status_str" alt="" coords="497,196,609,223">
+<area shape="rect" href="$vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="505,272,601,299">
