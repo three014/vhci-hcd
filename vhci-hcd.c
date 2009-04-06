@@ -1078,7 +1078,7 @@ static int vhci_hcd_probe(struct platform_device *pdev)
 	if(unlikely(!hcd)) return -ENOMEM;
 
 	retval = usb_add_hcd(hcd, 0, 0);
-	if(unlikely(retval != 0)) usb_put_hcd(hcd);
+	if(unlikely(retval)) usb_put_hcd(hcd);
 
 	return retval;
 }
@@ -1213,7 +1213,9 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 
 	vhci_dbg("cmd=VHCI_HCD_IOCREGISTER\n");
 
-	if(unlikely(file->private_data != NULL))
+	BUG_ON(in_interrupt());
+
+	if(unlikely(file->private_data))
 	{
 		vhci_printk(KERN_ERR, "file->private_data != NULL (VHCI_HCD_IOCREGISTER already done?)\n");
 		return -EPROTO;
@@ -1228,7 +1230,7 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	for(i = 0; i < 10000; i++)
 	{
 		retval = driver_for_each_device(&vhci_hcd_driver.driver, NULL, &i, device_enum);
-		if(unlikely(retval == 0)) break;
+		if(unlikely(!retval)) break;
 	}
 	if(unlikely(i >= 10000))
 	{
@@ -1255,7 +1257,7 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 
 	vhci_dbg("allocate and associate vhci_conf structure with file->private_data\n");
 	conf = kmalloc(sizeof(struct vhci_conf), GFP_KERNEL);
-	if(unlikely(conf == NULL))
+	if(unlikely(!conf))
 	{
 		spin_unlock(&dev_enum_lock);
 		retval = -ENOMEM;
