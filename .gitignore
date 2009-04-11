@@ -1,0 +1,10 @@
+*.o
+*.ko
+*.mod.c
+*.o.cmd
+*.ko.cmd
+*.kdevses
+*.pcs
+*.symvers
+/.tmp_versions
+/vhci_hcd.tag
