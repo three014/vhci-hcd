@@ -1213,8 +1213,6 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 
 	vhci_dbg("cmd=VHCI_HCD_IOCREGISTER\n");
 
-	BUG_ON(in_interrupt());
-
 	if(unlikely(file->private_data))
 	{
 		vhci_printk(KERN_ERR, "file->private_data != NULL (VHCI_HCD_IOCREGISTER already done?)\n");
@@ -1536,6 +1534,8 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *
 			vhc->port_sched_offset = 0;
 		for(_port = 0; _port < vhc->port_count; _port++)
 		{
+			// Der Port, der als erste geprüft wird, wird mit Hilfe von port_sched_offset rotiert, damit
+			// unter Volllast auch jeder mal drann kommt.
 			port = (_port + vhc->port_sched_offset) % vhc->port_count;
 			if(__test_and_clear_bit(port + 1, (unsigned long *)&vhc->port_update))
 			{
