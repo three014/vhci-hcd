@@ -1294,14 +1294,14 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	// Bus-ID in Userspace kopieren
 	dname = vhci_dev_name(&pdev->dev);
 	i = strlen(dname);
-	i = (i < sizeof(arg->bus_id)) ? i : sizeof(arg->bus_id);
-	if(copy_to_user(arg->bus_id, dname, i - 1))
+	i = (i < sizeof(arg->bus_id)) ? i : sizeof(arg->bus_id) - 1;
+	if(copy_to_user(arg->bus_id, dname, i))
 	{
 		vhci_printk(KERN_WARNING, "Failed to copy bus_id to userspace.\n");
 		__put_user('\0', arg->bus_id);
 	}
-	// Dafür sorgen, dass letztes Zeichen auf jeden Fall Null ist
-	__put_user('\0', arg->bus_id + i - 1);
+	// Dafür sorgen, dass letztes Zeichen Null ist
+	__put_user('\0', arg->bus_id + i);
 
 	hcd = platform_get_drvdata(pdev);
 	usbbusnum = hcd->self.busnum;
