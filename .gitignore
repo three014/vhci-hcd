@@ -8,3 +8,5 @@
 *.symvers
 /.tmp_versions
 /vhci_hcd.tag
+/Module.markers
+/modules.order

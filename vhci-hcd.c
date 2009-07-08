@@ -24,6 +24,8 @@
 // für Kernel Version < 2.6.24
 //#define OLD_GIVEBACK_MECH
 
+//#define OLD_DEV_BUS_ID
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -56,7 +58,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.5 (11 March 2009)"
+#define DRIVER_VERSION "1.6 (08 July 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -176,6 +178,15 @@ static inline struct device *vhci_dev(struct vhci *vhc)
 static inline struct vhci_conf *dev_to_vhci_conf(struct device *dev)
 {
 	return (struct vhci_conf *)(*((struct file **)dev->platform_data))->private_data;
+}
+
+static inline const char *vhci_dev_name(struct device *dev)
+{
+#ifdef OLD_DEV_BUS_ID
+	return dev->bus_id;
+#else
+	return dev_name(dev);
+#endif
 }
 
 static void maybe_set_status(struct vhci_urb_priv *urbp, int status)
@@ -1074,7 +1085,7 @@ static int vhci_hcd_probe(struct platform_device *pdev)
 #endif
 	dev_info(&pdev->dev, DRIVER_DESC "  Ver. " DRIVER_VERSION "\n");
 
-	hcd = usb_create_hcd(&vhci_hcd, &pdev->dev, pdev->dev.bus_id);
+	hcd = usb_create_hcd(&vhci_hcd, &pdev->dev, vhci_dev_name(&pdev->dev));
 	if(unlikely(!hcd)) return -ENOMEM;
 
 	retval = usb_add_hcd(hcd, 0, 0);
@@ -1205,6 +1216,7 @@ static int device_open(struct inode *inode, struct file *file)
 // called in device_ioctl only
 static inline int ioc_register(struct file *file, struct vhci_ioc_register __user *arg)
 {
+	const char *dname;
 	int retval, i, usbbusnum;
 	struct platform_device *pdev;
 	struct vhci_conf *conf;
@@ -1280,8 +1292,10 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	__put_user(pdev->id, &arg->id);
 
 	// Bus-ID in Userspace kopieren
-	i = (BUS_ID_SIZE < 20) ? BUS_ID_SIZE : 20;
-	if(copy_to_user(arg->bus_id, pdev->dev.bus_id, i - 1))
+	dname = vhci_dev_name(&pdev->dev);
+	i = strlen(dname);
+	i = (i < sizeof(arg->bus_id)) ? i : sizeof(arg->bus_id);
+	if(copy_to_user(arg->bus_id, dname, i - 1))
 	{
 		vhci_printk(KERN_WARNING, "Failed to copy bus_id to userspace.\n");
 		__put_user('\0', arg->bus_id);
@@ -1312,7 +1326,7 @@ static int device_release(struct inode *inode, struct file *file)
 
 	if(likely(conf))
 	{
-		vhci_dbg("unregister platform_device %s\n", conf->pdev->dev.bus_id);
+		vhci_dbg("unregister platform_device %s\n", vhci_dev_name(&conf->pdev->dev));
 		platform_device_unregister(conf->pdev);
 
 		kfree(conf);
@@ -2192,7 +2206,11 @@ static int __init init(void)
 	}
 	else
 	{
+#ifdef OLD_DEV_BUS_ID
 		strlcpy((void *)&vhci_device.bus_id, "vhci-ctrl", 10);
+#else
+		dev_set_name(&vhci_device, "vhci-ctrl");
+#endif
 		vhci_device.devt = MKDEV(vhci_major, 0);
 		if(unlikely(device_register(&vhci_device)))
 		{
