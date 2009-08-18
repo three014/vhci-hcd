@@ -1,8 +1,8 @@
 /*
  * vhci_hcd.h -- VHCI USB host controller driver header.
  *
- * Copyright (C) by Michael Singer, 2007-2008
- * <singer@conemis.com>
+ * Copyright (C) 2007-2008 Conemis AG Karlsruhe Germany
+ * Copyright (C) 2007-2009 Michael Singer <michael@a-singer.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
