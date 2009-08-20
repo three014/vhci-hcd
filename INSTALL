@@ -1,0 +1,35 @@
+Install as a module
+===================
+
+Just run
+
+  make
+
+and
+
+  make install
+
+to build and install the module for the currently running kernel.
+The module is called vhci-hcd. Run
+
+  modprobe vhci-hcd
+
+to load the module.
+
+
+Patch into kernel
+=================
+
+Run
+
+  make KSRC=<PATH_TO_KERNEL_SOURCE> patchkernel
+
+(replace <PATH_TO_KERNEL_SOURCE> with the actual path) to patch the vhci-hcd
+sources into the kernel source. If you want to do this for a kernel with a
+different version than the currently running one, then you need to create
+the config header first by running
+
+  make config
+
+and answering the few questions about the target kernel.
+
