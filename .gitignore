@@ -6,7 +6,8 @@
 *.kdevses
 *.pcs
 *.symvers
-/.tmp_versions
+.tmp_versions
 /vhci_hcd.tag
-/Module.markers
-/modules.order
+Module.markers
+modules.order
+/conf

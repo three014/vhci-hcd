@@ -21,11 +21,6 @@
 
 #define DEBUG
 
-// für Kernel Version < 2.6.24
-//#define OLD_GIVEBACK_MECH
-
-//#define OLD_DEV_BUS_ID
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/delay.h>
@@ -42,8 +37,10 @@
 #include <linux/device.h>
 #ifdef KBUILD_EXTMOD
 #	include "vhci-hcd.h"
+#	include "conf/vhci-hcd.config.h"
 #else
 #	include <linux/vhci-hcd.h>
+#	include "vhci-hcd.config.h"
 #endif
 
 #include <asm/atomic.h>
@@ -58,7 +55,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.6 (08 July 2009)"
+#define DRIVER_VERSION "1.7 (20 August 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -2164,7 +2161,9 @@ static struct class vhci_class = {
 static struct device vhci_device = {
 	.class = &vhci_class,
 	.release = vhci_device_release,
-	//.init_name = "vhci-ctrl",  // erst ab 2.6.28, oder so
+#ifndef NO_DEV_INIT_NAME
+	.init_name = "vhci-ctrl",
+#endif
 	.driver = &vhci_hcd_driver.driver
 };
 
@@ -2206,10 +2205,12 @@ static int __init init(void)
 	}
 	else
 	{
+#ifdef NO_DEV_INIT_NAME
 #ifdef OLD_DEV_BUS_ID
 		strlcpy((void *)&vhci_device.bus_id, "vhci-ctrl", 10);
 #else
 		dev_set_name(&vhci_device, "vhci-ctrl");
+#endif
 #endif
 		vhci_device.devt = MKDEV(vhci_major, 0);
 		if(unlikely(device_register(&vhci_device)))
