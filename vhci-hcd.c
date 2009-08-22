@@ -55,7 +55,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.8 (22 August 2009)"
+#define DRIVER_VERSION VHCI_HCD_VERSION " (" VHCI_HCD_DATE ")"
 
 #ifdef vhci_printk
 #	undef vhci_printk

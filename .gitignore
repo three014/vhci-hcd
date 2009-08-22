@@ -11,3 +11,5 @@
 Module.markers
 modules.order
 /conf
+/*.tar.bz2
+/*.tar.gz
