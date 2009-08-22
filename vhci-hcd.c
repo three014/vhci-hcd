@@ -55,7 +55,7 @@
 
 #define DRIVER_NAME "vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
-#define DRIVER_VERSION "1.7 (20 August 2009)"
+#define DRIVER_VERSION "1.8 (22 August 2009)"
 
 #ifdef vhci_printk
 #	undef vhci_printk
@@ -1274,12 +1274,12 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	conf->port_count = pc;
 	file->private_data = conf;
 
-	vhci_dbg("register platform_device %s.%d\n", pdev->name, pdev->id);
-	retval = platform_device_register(pdev);
+	vhci_dbg("add platform_device %s.%d\n", pdev->name, pdev->id);
+	retval = platform_device_add(pdev);
 	spin_unlock(&dev_enum_lock);
 	if(unlikely(retval < 0))
 	{
-		vhci_printk(KERN_ERR, "register platform_device %s.%d failed\n", pdev->name, pdev->id);
+		vhci_printk(KERN_ERR, "add platform_device %s.%d failed\n", pdev->name, pdev->id);
 		kfree(conf);
 		file->private_data = NULL;
 		goto pdev_put;
