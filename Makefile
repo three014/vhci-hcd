@@ -5,8 +5,14 @@ MDIR = drivers/usb/host
 PREFIX =
 BUILD_PREFIX = $(PREFIX)
 INSTALL_PREFIX = $(PREFIX)
-EXTRA_CFLAGS = -DEXPORT_SYMTAB -DKBUILD_EXTMOD -DINCLUDE_CORE_HCD=\"$(KDIR)/drivers/usb/core/hcd.h\"
+EXTRA_CFLAGS = -DEXPORT_SYMTAB -DKBUILD_EXTMOD -DINCLUDE_CORE_HCD=\"$(CORE_INCLUDE_DIR)/hcd.h\"
+ORIG_CORE_INCLUDE_DIR = $(KDIR)/drivers/usb/core
+COPY_CORE_INCLUDE_DIR = $(PWD)/linux/$(KVERSION_VERSION).$(KVERSION_PATCHLEVEL).$(KVERSION_SUBLEVEL)/drivers/usb/core
+CORE_INCLUDE_DIR = $(shell test -e $(ORIG_CORE_INCLUDE_DIR)/hcd.h -a -e $(ORIG_CORE_INCLUDE_DIR)/hub.h && echo $(ORIG_CORE_INCLUDE_DIR) || echo $(COPY_CORE_INCLUDE_DIR))
 KVERSION = $(shell uname -r)
+KVERSION_VERSION = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$1 }')
+KVERSION_PATCHLEVEL = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$2 }')
+KVERSION_SUBLEVEL = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$3 }')
 KDIR = $(BUILD_PREFIX)/lib/modules/$(KVERSION)/build
 PWD = $(shell pwd)
 DEST = $(INSTALL_PREFIX)/lib/modules/$(KVERSION)/kernel/$(MDIR)
@@ -14,7 +20,7 @@ KSRC = $(KDIR)
 
 CONF_H = conf/vhci-hcd.config.h
 
-VHCI_HCD_VERSION=1.8
+VHCI_HCD_VERSION=1.9
 DIST_DIRS = patch,test
 DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO vhci-hcd.c vhci-hcd.h patch/Kconfig.patch patch/vhci-hcd_compat_ioctl.patch test/Makefile test/test.c
 
