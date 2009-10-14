@@ -15,13 +15,14 @@ KVERSION_PATCHLEVEL = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk 
 KVERSION_SUBLEVEL = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$3 }')
 KDIR = $(BUILD_PREFIX)/lib/modules/$(KVERSION)/build
 PWD = $(shell pwd)
-DEST = $(INSTALL_PREFIX)/lib/modules/$(KVERSION)/kernel/$(MDIR)
+INSTALL_DIR = $(INSTALL_PREFIX)/lib/modules/$(KVERSION)
+DEST = $(INSTALL_DIR)/kernel/$(MDIR)
 KSRC = $(KDIR)
 
 CONF_H = conf/vhci-hcd.config.h
 
 VHCI_HCD_VERSION=1.9
-DIST_DIRS = patch,test
+DIST_DIRS = patch test
 DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO vhci-hcd.c vhci-hcd.h patch/Kconfig.patch patch/vhci-hcd_compat_ioctl.patch test/Makefile test/test.c
 
 obj-m      := $(TARGET).o
@@ -31,24 +32,19 @@ default: $(CONF_H)
 .PHONY: default
 .SUFFIXES:
 
-ifneq (,$(findstring 2.4.,$(KVERSION)))
 ifneq (,$(INSTALL_PREFIX))
-install:
-	su -c "mkdir -v -p $(DEST) && cp -v $(TARGET).o $(DEST) && /sbin/depmod -a -b $(INSTALL_PREFIX) -v $(KVERSION)"
+install: rename-usbip-vhci
+	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -b $(INSTALL_PREFIX) -v $(KVERSION)
 else
-install:
-	su -c "mkdir -v -p $(DEST) && cp -v $(TARGET).o $(DEST) && /sbin/depmod -a -v $(KVERSION)"
-endif
-else
-ifneq (,$(INSTALL_PREFIX))
-install:
-	su -c "mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -b $(INSTALL_PREFIX) -v $(KVERSION)"
-else
-install:
-	su -c "mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -v $(KVERSION)"
-endif
+install: rename-usbip-vhci
+	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -v $(KVERSION)
 endif
 .PHONY: install
+
+USBIP_VHCI_MODULE = $(INSTALL_DIR)/kernel/drivers/staging/usbip/vhci-hcd.ko
+
+rename-usbip-vhci:
+	test -e $(USBIP_VHCI_MODULE) && mv $(USBIP_VHCI_MODULE) $(USBIP_VHCI_MODULE).UNUSED || true
 
 clean-conf:
 	-rm -f $(CONF_H)
@@ -126,7 +122,7 @@ config:
 	echo "**********************************************************"; \
 	echo; \
 	echo "NOTE: You can let me do this for you automatically without answering this"; \
-	echo "      questions by running 'make testconf'. I will compile a few test modules"; \
+	echo "      questions by running 'make testconfig'. I will compile a few test modules"; \
 	echo "      for the target kernel which helps me guessing the answers. So if this"; \
 	echo "      is not possible on the currently running system and you just want to"; \
 	echo "      patch the sources into a kernel source tree, then answering them by"; \
@@ -209,7 +205,7 @@ TMP_MKDIST = $(TMP_MKDIST_ROOT)/vhci_hcd-$(VHCI_HCD_VERSION)
 dist:
 	-rm -rf $(TMP_MKDIST_ROOT)/
 	mkdir -p $(TMP_MKDIST)
-	mkdir -p $(TMP_MKDIST)/{$(DIST_DIRS)}
+	$(foreach x,$(DIST_DIRS),mkdir -p $(TMP_MKDIST)/$(x);)
 	$(foreach x,$(DIST_FILES),cp -p $(x) $(TMP_MKDIST)/$(x);)
 	cp -p -R linux/ $(TMP_MKDIST)/
 	(cd $(TMP_MKDIST_ROOT)/; tar -c vhci_hcd-$(VHCI_HCD_VERSION)) | bzip2 -cz9 >vhci_hcd-$(VHCI_HCD_VERSION).tar.bz2
