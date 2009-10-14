@@ -211,6 +211,7 @@ dist:
 	mkdir -p $(TMP_MKDIST)
 	mkdir -p $(TMP_MKDIST)/{$(DIST_DIRS)}
 	$(foreach x,$(DIST_FILES),cp -p $(x) $(TMP_MKDIST)/$(x);)
+	cp -p -R linux/ $(TMP_MKDIST)/
 	(cd $(TMP_MKDIST_ROOT)/; tar -c vhci_hcd-$(VHCI_HCD_VERSION)) | bzip2 -cz9 >vhci_hcd-$(VHCI_HCD_VERSION).tar.bz2
 	(cd $(TMP_MKDIST_ROOT)/; tar -c vhci_hcd-$(VHCI_HCD_VERSION)) | gzip -c >vhci_hcd-$(VHCI_HCD_VERSION).tar.gz
 	-rm -rf $(TMP_MKDIST_ROOT)/

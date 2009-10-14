@@ -7,7 +7,7 @@ Just run
 
 and
 
-  make install
+  make install   # (as root)
 
 to build and install the module for the currently running kernel.
 The module is called vhci-hcd. Run
