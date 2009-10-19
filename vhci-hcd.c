@@ -477,7 +477,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		switch(wValue)
 		{
 		case USB_PORT_FEAT_SUSPEND:
-			// (siehe USB 2.0 spec Sektion 11.5 und 11.24.2.7.1.3)
+			// (see USB 2.0 spec section 11.5 and 11.24.2.7.1.3)
 			if(*ps & USB_PORT_STAT_SUSPEND)
 			{
 #ifdef DEBUG
@@ -488,35 +488,35 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			}
 			break;
 		case USB_PORT_FEAT_POWER:
-			// (siehe USB 2.0 spec Sektion 11.11 und 11.24.2.7.1.6)
+			// (see USB 2.0 spec section 11.11 and 11.24.2.7.1.6)
 			if(*ps & USB_PORT_STAT_POWER)
 			{
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d power-off\n", (int)wIndex);
 #endif
-				// Alle status bits löschen, außer overcurrent (siehe USB 2.0 spec Sektion 11.24.2.7.1)
+				// clear all status bits except overcurrent (see USB 2.0 spec section 11.24.2.7.1)
 				*ps &= USB_PORT_STAT_OVERCURRENT;
-				// Alle change bits löschen, außer overcurrent (siehe USB 2.0 spec Sektion 11.24.2.7.2)
+				// clear all change bits except overcurrent (see USB 2.0 spec section 11.24.2.7.2)
 				*pc &= USB_PORT_STAT_C_OVERCURRENT;
-				// Falls resuming gesetzt
+				// clear resuming flag
 				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_ENABLE:
-			// (siehe USB 2.0 spec Sektion 11.5.1.4 und 11.24.2.7.{1,2}.2)
+			// (see USB 2.0 spec section 11.5.1.4 and 11.24.2.7.{1,2}.2)
 			if(*ps & USB_PORT_STAT_ENABLE)
 			{
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d disabled\n", (int)wIndex);
 #endif
-				// Enable und suspend bits löschen (siehe Sektion 11.24.2.7.1.{2,3})
+				// clear enable and suspend bits (see section 11.24.2.7.1.{2,3})
 				*ps &= ~(USB_PORT_STAT_ENABLE | USB_PORT_STAT_SUSPEND);
-				// Nicht ganz sicher, ob suspend change bit auch gelöscht werden soll (siehe Sektion 11.24.2.7.2.{2,3})
+				// i'm not quite sure if the suspend change bit should be cleared too (see section 11.24.2.7.2.{2,3})
 				*pc &= ~(USB_PORT_STAT_C_ENABLE | USB_PORT_STAT_C_SUSPEND);
-				// Falls resuming gesetzt
+				// clear resuming flag
 				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
-				// TODO: Vielleicht hier die low und high speed bits löschen (Sektion 11.24.2.7.1.{7,8})
+				// TODO: maybe we should clear the low/high speed bits here (section 11.24.2.7.1.{7,8})
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
@@ -580,12 +580,12 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		switch(wValue)
 		{
 		case USB_PORT_FEAT_SUSPEND:
-			// USB 2.0 spec Sektion 11.24.2.7.1.3:
+			// USB 2.0 spec section 11.24.2.7.1.3:
 			//  "This bit can be set only if the port’s PORT_ENABLE bit is set and the hub receives
 			//  a SetPortFeature(PORT_SUSPEND) request."
 			// Aus dem darauf folgendem Satz geht außerdem hervor, dass das suspend bit gelöscht werden soll,
 			// wann immer das enable bit gelöscht wird.
-			// (siehe auch Sektion 11.5)
+			// (see also section 11.5)
 			if((*ps & USB_PORT_STAT_ENABLE) && !(*ps & USB_PORT_STAT_SUSPEND))
 			{
 #ifdef DEBUG
@@ -596,7 +596,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			}
 			break;
 		case USB_PORT_FEAT_POWER:
-			// (siehe USB 2.0 spec Sektion 11.11 und 11.24.2.7.1.6)
+			// (see USB 2.0 spec section 11.11 and 11.24.2.7.1.6)
 			if(!(*ps & USB_PORT_STAT_POWER))
 			{
 #ifdef DEBUG
@@ -607,24 +607,24 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			}
 			break;
 		case USB_PORT_FEAT_RESET:
-			// (siehe USB 2.0 spec Sektion 11.24.2.7.1.5)
-			// Reset nur dann durchführen, wenn ein Device am Port hängt und das Reset Signal nicht bereits anliegt
+			// (see USB 2.0 spec section 11.24.2.7.1.5)
+			// initiate reset only if there is a device plugged into the port and if there isn't already a reset pending
 			if((*ps & USB_PORT_STAT_CONNECTION) && !(*ps & USB_PORT_STAT_RESET))
 			{
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d resetting\n", (int)wIndex);
 #endif
 
-				// Den Zustand dieser Bits beibehalten und alle anderen löschen
+				// keep the state of these bits and clear all others
 				*ps &= USB_PORT_STAT_POWER
 					 | USB_PORT_STAT_CONNECTION
 					 | USB_PORT_STAT_LOW_SPEED
 					 | USB_PORT_STAT_HIGH_SPEED
 					 | USB_PORT_STAT_OVERCURRENT;
 
-				*ps |= USB_PORT_STAT_RESET; // Reset Vorgang eingeleitet
+				*ps |= USB_PORT_STAT_RESET; // reset initiated
 
-				// Falls resuming gesetzt
+				// clear resuming flag
 				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
 
 				userspace_needs_port_update(vhc, wIndex);
@@ -647,7 +647,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(!__test_and_set_bit(wValue - 16, (unsigned long *)pc))
 				userspace_needs_port_update(vhc, wIndex);
 			break;
-		//case USB_PORT_FEAT_ENABLE: // Port wird nur nach einem Reset enabled. (USB 2.0 spec Sektion 11.24.2.7.1.2)
+		//case USB_PORT_FEAT_ENABLE: // port can't be enabled without reseting (USB 2.0 spec section 11.24.2.7.1.2)
 		//case USB_PORT_FEAT_TEST:
 		default:
 			goto err;
@@ -688,7 +688,7 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 
 	spin_lock_irqsave(&vhc->lock, flags);
 
-	// Ports suspenden
+	// suspend ports
 	for(port = 0; port < vhc->port_count; port++)
 	{
 		if((vhc->ports[port].port_status & USB_PORT_STAT_ENABLE) &&
@@ -701,7 +701,7 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 		}
 	}
 
-	// TODO: Irgendwie verhindern, dass einzelne Ports resumed werden, während der Bus suspended ist.
+	// TODO: somehow we have to suppress the resuming of ports while the bus is suspended
 
 	vhc->rh_state = VHCI_RH_SUSPENDED;
 	hcd->state = HC_STATE_SUSPENDED;
@@ -982,7 +982,7 @@ static int vhci_start(struct usb_hcd *hcd)
 	INIT_LIST_HEAD(&vhc->urbp_list_canceling);
 	vhc->rh_state = VHCI_RH_RUNNING;
 
-	hcd->power_budget = 30000; // haben genug davon, weil virtuell
+	hcd->power_budget = 30000; // practically we have unlimited power because this is a virtual device with virtual power
 	hcd->state = HC_STATE_RUNNING;
 	hcd->uses_new_polling = 1;
 
