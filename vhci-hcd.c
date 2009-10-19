@@ -112,7 +112,7 @@ struct vhci_port
 	u16 port_status;
 	u16 port_change;
 	u8 port_flags;
-#define VHCI_PORT_FLAGS_RESUMING         0 // Zeigt den Zustang des Resuming an
+#define VHCI_PORT_FLAGS_RESUMING         0 // indicates the state of resuming
 };
 
 struct vhci_conf
@@ -128,7 +128,7 @@ struct vhci
 
 	enum vhci_rh_state rh_state;
 
-	// TODO: Timer implementieren, um frame_num hochzählen zu lassen.
+	// TODO: implement timer for incrementing frame_num every millisecond
 	//struct timer_list timer;
 
 	struct vhci_port *ports;
@@ -140,20 +140,18 @@ struct vhci
 
 	wait_queue_head_t work_event;
 
-	// URBs, die noch nicht vom Userspace abgeholt wurden, befinden sich in dieser Liste
+	// urbs which are waiting to get fetched by user space are in this list
 	struct list_head urbp_list_inbox;
 
-	// URBs, die vom Userspace abgeholt wurden und noch nicht wieder zurückgekommen sind,
-	// befinden sich in dieser Liste
+	// urbs which were fetched by user space but not already given back are in this list
 	struct list_head urbp_list_fetched;
 
-	// URBs, die vom Userspace abgeholt wurden und noch nicht wieder zurückgekommen sind und
-	// vorzeitig abgebrochen werden sollen, befinden sich in dieser Liste
+	// urbs which were fetched by user space and not already given back, and which should be
+	// canceled are in this list
 	struct list_head urbp_list_cancel;
 
-	// URBs, die vom Userspace abgeholt wurden und noch nicht wieder zurückgekommen sind und
-	// der Userspace bereits darüber informiert wurde, dass sie vorzeitig abgebrochen werden
-	// sollen, befinden sich in dieser Liste
+	// urbs which were fetched by user space and not already given back, and for which the
+	// user space already knows about the cancelation state are in this list
 	struct list_head urbp_list_canceling;
 };
 
@@ -216,8 +214,8 @@ static const char *get_status_str(int status)
 }
 #endif
 
-// Gibt den URB an den ursprünglichen Besitzer zurück.
-// caller owns vhc->lock and has irq disabled
+// gives the urb back to its original owner/creator.
+// caller owns vhc->lock and has irq disabled.
 static void vhci_urb_giveback(struct vhci *vhc, struct vhci_urb_priv *urbp)
 {
 	struct urb *const urb = urbp->urb;
@@ -324,7 +322,7 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	}
 #endif
 
-	// Die Warteschlange der unbearbeiteten URBs (INBOX) durchsuchen
+	// search the queue of unprocessed urbs (inbox)
 	list_for_each_entry(entry, &vhc->urbp_list_inbox, urbp_list)
 	{
 		if(entry->urb == urb)
@@ -334,17 +332,17 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		}
 	}
 
-	// Falls in INBOX gefunden
+	// if found in inbox
 	if(urbp)
 		vhci_urb_giveback(vhc, urbp);
-	else // falls nicht gefunden...
+	else // if not found...
 	{
-		// ...dann nachschauen, ob der URB gerade durch den Userspace dümpelt
+		// ...then check if the urb is on a vacation through user space
 		list_for_each_entry(entry, &vhc->urbp_list_fetched, urbp_list)
 		{
 			if(entry->urb == urb)
 			{
-				// In die Cancel-Liste verschieben
+				// move it into the cancel list
 				list_move_tail(&entry->urbp_list, &vhc->urbp_list_cancel);
 				trigger_work_event(vhc);
 				break;

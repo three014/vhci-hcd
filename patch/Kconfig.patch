@@ -8,7 +8,7 @@
 +	tristate "VHCI HCD (Virtual Host Controller Interface) support (EXPERIMENTAL)"
 +	depends on USB && EXPERIMENTAL
 +	---help---
-+	  TODO: Tolles Blabla verfassen
++	  TODO: write some blahblah about what the module does
 +
 +	  To compile this driver as a module, choose M here: the
 +	  module will be called vhci-hcd.
