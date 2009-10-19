@@ -62,23 +62,24 @@
 
 #endif
 
-// Struktur, die mit VHCI_HCD_IOCREGISTER übergeben wird
+// structure for the VHCI_HCD_IOCREGISTER ioctl
 struct vhci_ioc_register
 {
-	__s32 id;         // [out] Die ID, die dem Controller zugewiesen wurde
-	__s32 usb_busnum; // [out] Die Nummer des USB-Busses
-	char bus_id[20];  // [out] Bus-ID des Controllers als null-terminierter String
-	__u8 port_count;  // [in]  Registriere Host-Controller mit Anzahl Ports
+	__s32 id;         // [out] identifier which was assigned by the kernel
+	__s32 usb_busnum; // [out] assigned USB bus number
+	char bus_id[20];  // [out] null-terminated bus-id of the controller
+	                  //       (something similar to vhci_hcd.<id>)
+	__u8 port_count;  // [in]  number of ports the controller should have
 };
 
 struct vhci_ioc_port_stat
 {
-	__u16 status;    // Status des Ports
-	__u16 change;    // Bits die sich geändert haben
-	__u8 index;      // Index des Ports
-	__u8 flags;      // Zusätzliche Informationen vom Kernel- zum Userspace
-#define VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0 // Zeigt den Zustand des Resuming an
-	__u8 reserved1, reserved2; // Größe soll durch vier teilbar sein
+	__u16 status;    // state of the port
+	__u16 change;    // indicates changed status bits
+	__u8 index;      // index of port
+	__u8 flags;      // additional information from kernel to user space:
+#define VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0 // indicates resuming
+	__u8 reserved1, reserved2; // size of the struct should be dividable by four
 };
 
 struct vhci_ioc_setup_packet
@@ -92,25 +93,23 @@ struct vhci_ioc_setup_packet
 
 struct vhci_ioc_urb
 {
-	struct vhci_ioc_setup_packet setup_packet;   // Für Control-URBs
-	__s32 buffer_length;                         // Anzahl der Bytes, die für
-	                                             // den Puffer allociert wurden
+	struct vhci_ioc_setup_packet setup_packet;   // only for control urbs
+	__s32 buffer_length;                         // number of bytes which were
+	                                             // allocated for the buffer
 	__s32 interval;
-	__s32 packet_count;                          // Anzahl der ISO-Pakete
-	__u16 flags;
-#define VHCI_IOC_URB_FLAGS_SHORT_NOT_OK 0x0001   // Wenn bei einem IN zu kurze
-                                                 // Packete übermittelt wurden,
-                                                 // dann soll dies als Fehler
-                                                 // interpretiert werden
-#define VHCI_IOC_URB_FLAGS_ISO_ASAP     0x0002   // ISO: Einschieben sobald
-                                                 // Bandbreite es erlaubt
-#define VHCI_IOC_URB_FLAGS_ZERO_PACKET  0x0040   // BULK OUT: Übertragung immer
-                                                 // mit kurzem Packet
-                                                 // abschließen (Notfalls mit
-                                                 // Länge 0)
-	__u8 address;                                // Adresse des USB Devices, an
-	                                             // das der URB gerichtet ist
-	__u8 endpoint;                               // Endpoint inkl. Richtung
+	__s32 packet_count;                          // number of iso packets
+	__u16 flags;                                 // flags:
+#define VHCI_IOC_URB_FLAGS_SHORT_NOT_OK 0x0001   // IN: treat incomming short
+                                                 // packets as an error
+#define VHCI_IOC_URB_FLAGS_ISO_ASAP     0x0002   // ISO: schedule as soon as
+                                                 // possible
+#define VHCI_IOC_URB_FLAGS_ZERO_PACKET  0x0040   // BULK OUT: always send a
+                                                 // short packet at the end
+                                                 // (send a zero length packet
+                                                 // if necessary)
+	__u8 address;                                // address of the usb device
+	                                             // for which this urb is for
+	__u8 endpoint;                               // endpoint incl. direction
 	__u8 type;
 #define VHCI_IOC_URB_TYPE_ISO     0
 #define VHCI_IOC_URB_TYPE_INT     1
@@ -120,25 +119,24 @@ struct vhci_ioc_urb
 
 union vhci_ioc_work_union
 {
-	struct vhci_ioc_urb urb;          // für VHCI_IOC_WORK_TYPE_PROCESS_URB
-	struct vhci_ioc_port_stat port;   // für VHCI_IOC_WORK_TYPE_PORT_STAT
+	struct vhci_ioc_urb urb;          // for VHCI_IOC_WORK_TYPE_PROCESS_URB
+	struct vhci_ioc_port_stat port;   // for VHCI_IOC_WORK_TYPE_PORT_STAT
 };
 
 struct vhci_ioc_work
 {
-	__u64 handle;                         // für VHCI_IOC_WORK_TYPE_PROCESS_URB
-	                                      // und VHCI_IOC_WORK_TYPE_CANCEL_URB
-	                                      // Handle, über welches der URB
-	                                      // identifiziert wird (ist in
-	                                      // Wirklichkeit einfach der Zeiger auf
-	                                      // den URB im Kernelspace)
+	__u64 handle;                         // for VHCI_IOC_WORK_TYPE_PROCESS_URB
+	                                      // and VHCI_IOC_WORK_TYPE_CANCEL_URB;
+	                                      // handle which identifies the urb
+	                                      // (it is just a pointer to the urb
+	                                      // in kernel space)
 	union vhci_ioc_work_union work;
 	__u8 type;
-#define VHCI_IOC_WORK_TYPE_PORT_STAT   0  // Status eines Ports hat sich
-                                          // geändert
-#define VHCI_IOC_WORK_TYPE_PROCESS_URB 1  // URB an die Hardware reichen
-#define VHCI_IOC_WORK_TYPE_CANCEL_URB  2  // URB zurückziehen, falls noch nicht
-                                          // bearbeitet
+#define VHCI_IOC_WORK_TYPE_PORT_STAT   0  // the state of a port has changed
+#define VHCI_IOC_WORK_TYPE_PROCESS_URB 1  // hand an urb to the (virtual)
+                                          // hardware
+#define VHCI_IOC_WORK_TYPE_CANCEL_URB  2  // cancel urb if it isn't processed
+                                          // already
 };
 
 struct vhci_ioc_iso_packet_data
@@ -149,13 +147,12 @@ struct vhci_ioc_iso_packet_data
 
 struct vhci_ioc_urb_data
 {
-	__u64 handle;        // Handle, über welches der URB identifiziert wird
-	void *buffer;        // Zeiger auf den Anfang des Datenpuffers
-	struct vhci_ioc_iso_packet_data *iso_packets; // Zeiger auf den Anfang des
-	                                              // ISO-Paket-Arrays
-	__s32 buffer_length; // Anzahl der Bytes, die für den Puffer allociert
-	                     // wurden
-	__s32 packet_count;  // Anzahl der ISO-Pakete
+	__u64 handle;        // handle which identifies the urb
+	void *buffer;        // points to the beginning of the data buffer
+	struct vhci_ioc_iso_packet_data *iso_packets; // points to the beginning of
+	                                              // the iso packet array
+	__s32 buffer_length; // number of bytes which were allocated for the buffer
+	__s32 packet_count;  // number of iso packets
 };
 
 struct vhci_ioc_iso_packet_giveback
@@ -167,16 +164,16 @@ struct vhci_ioc_iso_packet_giveback
 struct vhci_ioc_giveback
 {
 	__u64 handle;
-	void *buffer;        // Nur für IN URBs: Die empfangenen Daten (für OUT URBs
-	                     // immer NULL)
-	struct vhci_ioc_iso_packet_giveback *iso_packets; // Für ISO
-	__s32 status;        // (Wenn ISO, dann ignoriert)
-	__s32 buffer_actual; // Anzahl der Bytes, die tatsächlich übertragen wurden
-	                     // (Für IN-ISOs muss buffer_actual==buffer_length
-						 // gelten; Für OUT-ISOs wird dieser Wert ignoriert)
-	__s32 packet_count;  // Für ISO (muss mit dem Wert aus dem URB
-	                     // übereinstimmen)
-	__s32 error_count;   // Für ISO
+	void *buffer;        // only for IN URBs: the received data (for OUT URBs
+	                     // always a null pointer)
+	struct vhci_ioc_iso_packet_giveback *iso_packets; // for ISO
+	__s32 status;        // (ignored for ISO URBs)
+	__s32 buffer_actual; // number of bytes which were actually transfered
+	                     // (for IN-ISOs buffer_actual has to be equal to
+	                     // buffer_length; for OUT-ISOs this value will be
+	                     // ignored)
+	__s32 packet_count;  // for ISO (has to match with the value from the urb)
+	__s32 error_count;   // for ISO
 };
 
 #ifdef __KERNEL__
