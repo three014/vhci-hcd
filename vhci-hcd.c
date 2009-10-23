@@ -583,8 +583,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			// USB 2.0 spec section 11.24.2.7.1.3:
 			//  "This bit can be set only if the port’s PORT_ENABLE bit is set and the hub receives
 			//  a SetPortFeature(PORT_SUSPEND) request."
-			// Aus dem darauf folgendem Satz geht außerdem hervor, dass das suspend bit gelöscht werden soll,
-			// wann immer das enable bit gelöscht wird.
+			// The spec also says that the suspend bit has to be cleared whenever the enable bit is cleared.
 			// (see also section 11.5)
 			if((*ps & USB_PORT_STAT_ENABLE) && !(*ps & USB_PORT_STAT_SUSPEND))
 			{
@@ -1181,10 +1180,10 @@ static struct platform_driver vhci_hcd_driver = {
 	}
 };
 
-// Callback Funktion für driver_for_each_device(..) in ioc_register(...).
-// data zeigt auf device id, die geprüft werden soll.
-// Funktion liefert Fehler zurück, wenn das Device die zu prüfende id belegt (Enumeration wird bei
-// Fehler abgebrochen.).
+// Callback function for driver_for_each_device(..) in ioc_register(...).
+// Data points to the device-id we're looking for.
+// This funktion returns an error (-EINVAL), if the device has the given id assigned to it.
+// (Enumeration stops/finishes on errors.)
 static int device_enum(struct device *dev, void *data)
 {
 	struct platform_device *pdev;
@@ -1230,7 +1229,7 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 	if(pc > 31)
 		return -EINVAL;
 
-	// Nach freier device id suchen
+	// search for free device-id
 	spin_lock(&dev_enum_lock);
 	for(i = 0; i < 10000; i++)
 	{
@@ -1283,10 +1282,10 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 		goto pdev_put;
 	}
 
-	// ID in Userspace kopieren
+	// copy id to user space
 	__put_user(pdev->id, &arg->id);
 
-	// Bus-ID in Userspace kopieren
+	// copy bus-id to user space
 	dname = vhci_dev_name(&pdev->dev);
 	i = strlen(dname);
 	i = (i < sizeof(arg->bus_id)) ? i : sizeof(arg->bus_id) - 1;
@@ -1295,7 +1294,7 @@ static inline int ioc_register(struct file *file, struct vhci_ioc_register __use
 		vhci_printk(KERN_WARNING, "Failed to copy bus_id to userspace.\n");
 		__put_user('\0', arg->bus_id);
 	}
-	// Dafür sorgen, dass letztes Zeichen Null ist
+	// make sure the last character is null
 	__put_user('\0', arg->bus_id + i);
 
 	hcd = platform_get_drvdata(pdev);
@@ -1543,8 +1542,8 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *
 			vhc->port_sched_offset = 0;
 		for(_port = 0; _port < vhc->port_count; _port++)
 		{
-			// Der Port, der als erste geprüft wird, wird mit Hilfe von port_sched_offset rotiert, damit
-			// unter Volllast auch jeder mal drann kommt.
+			// The port which will be checked first, is rotated by port_sched_offset, so that every port
+			// has its chance to be reported to user space, even if the hcd is under heavy load.
 			port = (_port + vhc->port_sched_offset) % vhc->port_count;
 			if(__test_and_clear_bit(port + 1, (unsigned long *)&vhc->port_update))
 			{
@@ -1629,7 +1628,7 @@ repeat:
 		return 0;
 
 	invalid_urb:
-		// Ungueltige URBs gleich wieder abschieben
+		// reject invalid urbs immediately
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHWORK  <<< THROWING AWAY INVALID URB >>>  [handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
 #endif
@@ -1684,10 +1683,10 @@ static inline int is_urb_dir_in(const struct urb *urb)
 		return usb_pipein(urb->pipe);
 }
 
-// -ECANCELED stellt keinen Fehler dar, sondern zeigt an, dass sich der URB in der
-// Cancel- oder Canceling-Liste befand.
-// Im Fehlerfall wird der URB, falls der Handle gefunden wurde, ebenfalls an den Erzeuger
-// zurückgegeben.
+// -ECANCELED doesn't report an error, but it indicates that the urb was in the "cancel"
+// list or in the "canceling" list.
+// If this function reports an error, then the urb will be given back to its creator anyway,
+// if its handle was found.
 // called in ioc_giveback{,32} only
 static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int status, int act, int iso_count, int err_count, const void __user *buf, const struct vhci_ioc_iso_packet_giveback __user *iso)
 {
@@ -1698,7 +1697,7 @@ static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int 
 	spin_lock_irqsave(&vhc->lock, flags);
 	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
 	{
-		// Falls nicht gefunden, nachschauen, ob in Cancel{,ing}-Liste
+		// if not found, check the cancel{,ing} list
 		if(likely((urbp = urbp_from_handle_in_canceling(vhc, handle)) ||
 			(urbp = urbp_from_handle_in_cancel(vhc, handle))))
 		{
@@ -1787,7 +1786,7 @@ static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int 
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: invalid: buf should be NULL\n");
 #endif
-		// Erwartet keine Daten, also sollte buf NULL sein
+		// no data expected, so buf should be NULL
 		retval = -EINVAL;
 		goto done_with_errors;
 	}
@@ -1802,7 +1801,7 @@ static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int 
 	urbp->urb->actual_length = act;
 	urbp->urb->error_count = err_count;
 
-	// Jetzt ist der URB fertig und darf wieder zu seinem Erzeuger zurück
+	// now we are done with this urb and it can return to its creator
 	maybe_set_status(urbp, status);
 	vhci_urb_giveback(vhc, urbp);
 	spin_unlock_irqrestore(&vhc->lock, flags);
@@ -1867,11 +1866,12 @@ static inline int ioc_fetch_data_common(struct vhci *vhc, const void *handle, vo
 	spin_lock_irqsave(&vhc->lock, flags);
 	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
 	{
-		// Falls nicht gefunden, nachschauen, ob in Cancel{,ing}-Liste
+		// if not found, check the cancel{,ing} list
 		if(likely((urbp = urbp_from_handle_in_cancel(vhc, handle)) ||
 			(urbp = urbp_from_handle_in_canceling(vhc, handle))))
 		{
-			// URB an Erzeuger zurückgeben, weil Userspace weis jetzt, dass abgebrochen
+			// we can give the urb back to its creator now, because the user space is informed about
+			// its cancelation
 			vhci_urb_giveback(vhc, urbp);
 			spin_unlock_irqrestore(&vhc->lock, flags);
 			return -ECANCELED;
