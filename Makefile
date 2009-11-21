@@ -60,7 +60,7 @@ clean: clean-test clean-conf
 patchkernel: $(CONF_H)
 	cp -v vhci-hcd.c $(CONF_H) $(KSRC)/$(MDIR)/
 	cp -v vhci-hcd.h $(KSRC)/include/linux/
-	cd $(KSRC); patch -Np1 -i $(PWD)/patch/vhci-hcd_compat_ioctl.patch || true
+	cd $(KSRC); if [ $(KVERSION_SUBLEVEL) -lt 31 ]; then patch -Np1 -i $(PWD)/patch/vhci-hcd_compat_ioctl.patch || true; else patch -Np1 -i $(PWD)/patch/vhci-hcd_compat_ioctl-2.6.31.patch || true; fi
 	cd $(KSRC)/$(MDIR); grep -q $(TARGET).o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_HCD)  += $(TARGET).o" >>Makefile
 	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || true
 .PHONY: patchkernel
