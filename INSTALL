@@ -22,7 +22,7 @@ Patch into kernel
 
 Run
 
-  make KSRC=<PATH_TO_KERNEL_SOURCE> patchkernel
+  make KVERSION=<VERSION> KSRC=<PATH_TO_KERNEL_SOURCE> patchkernel
 
 (replace <PATH_TO_KERNEL_SOURCE> with the actual path) to patch the vhci-hcd
 sources into the kernel source. If you want to do this for a kernel with a
