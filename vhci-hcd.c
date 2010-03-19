@@ -1511,7 +1511,7 @@ static int has_work(struct vhci *vhc)
 }
 
 // called in device_ioctl only
-static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *arg)
+static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *arg, s16 timeout)
 {
 	unsigned long flags;
 	u8 _port, port;
@@ -1523,15 +1523,28 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *
 	//if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHWORK\n");
 #endif
 
-	wret = wait_event_interruptible_timeout(vhc->work_event, has_work(vhc), msecs_to_jiffies(100));
-	if(unlikely(wret < 0))
+	if(timeout)
 	{
-		if(likely(wret == -ERESTARTSYS))
-			return -EINTR;
-		return wret;
+		if(timeout > 1000)
+			timeout = 1000;
+		if(timeout > 0)
+			wret = wait_event_interruptible_timeout(vhc->work_event, has_work(vhc), msecs_to_jiffies(timeout));
+		else
+			wret = wait_event_interruptible(vhc->work_event, has_work(vhc));
+		if(unlikely(wret < 0))
+		{
+			if(likely(wret == -ERESTARTSYS))
+				return -EINTR;
+			return wret;
+		}
+		else if(!wret)
+			return -ETIMEDOUT;
 	}
-	else if(!wret)
-		return -ETIMEDOUT;
+	else
+	{
+		if(!has_work(vhc))
+			return -ETIMEDOUT;
+	}
 
 	spin_lock_irqsave(&vhc->lock, flags);
 	if(!list_empty(&vhc->urbp_list_cancel))
@@ -2050,6 +2063,7 @@ static int device_ioctl(struct inode *inode,
 	struct usb_hcd *hcd;
 	struct vhci *vhc;
 	int ret = 0;
+	s16 timeout;
 
 	// Floods the logs
 	//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
@@ -2079,8 +2093,13 @@ static int device_ioctl(struct inode *inode,
 		ret = ioc_port_stat(vhc, (struct vhci_ioc_port_stat __user *)arg);
 		break;
 
+	case VHCI_HCD_IOCFETCHWORK_RO:
+		ret = ioc_fetch_work(vhc, (struct vhci_ioc_work __user *)arg, 100);
+		break;
+
 	case VHCI_HCD_IOCFETCHWORK:
-		ret = ioc_fetch_work(vhc, (struct vhci_ioc_work __user *)arg);
+		__get_user(timeout, &((struct vhci_ioc_work __user *)arg)->timeout);
+		ret = ioc_fetch_work(vhc, (struct vhci_ioc_work __user *)arg, timeout);
 		break;
 
 	case VHCI_HCD_IOCGIVEBACK:
@@ -2238,11 +2257,12 @@ static int __init init(void)
 #endif
 
 #ifdef DEBUG
-	vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCREGISTER  = %08x\n", (unsigned int)VHCI_HCD_IOCREGISTER);
-    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCPORTSTAT  = %08x\n", (unsigned int)VHCI_HCD_IOCPORTSTAT);
-    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHWORK = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHWORK);
-    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCGIVEBACK  = %08x\n", (unsigned int)VHCI_HCD_IOCGIVEBACK);
-    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHDATA = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHDATA);
+	vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCREGISTER     = %08x\n", (unsigned int)VHCI_HCD_IOCREGISTER);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCPORTSTAT     = %08x\n", (unsigned int)VHCI_HCD_IOCPORTSTAT);
+	vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHWORK_RO = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHWORK_RO);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHWORK    = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHWORK);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCGIVEBACK     = %08x\n", (unsigned int)VHCI_HCD_IOCGIVEBACK);
+    vhci_printk(KERN_DEBUG, "VHCI_HCD_IOCFETCHDATA    = %08x\n", (unsigned int)VHCI_HCD_IOCFETCHDATA);
 #endif
 
 	return 0;
