@@ -78,7 +78,7 @@ struct vhci_ioc_port_stat
 	__u16 change;    // indicates changed status bits
 	__u8 index;      // index of port
 	__u8 flags;      // additional information from kernel to user space:
-#define VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0 // indicates resuming
+#define VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0x01 // indicates resuming
 	__u8 reserved1, reserved2; // size of the struct should be dividable by four
 };
 

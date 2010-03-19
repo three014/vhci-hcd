@@ -21,7 +21,7 @@ KSRC = $(KDIR)
 
 CONF_H = conf/vhci-hcd.config.h
 
-VHCI_HCD_VERSION=1.9
+VHCI_HCD_VERSION=1.10
 DIST_DIRS = patch test
 DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO vhci-hcd.c vhci-hcd.h patch/Kconfig.patch patch/vhci-hcd_compat_ioctl.patch patch/vhci-hcd_compat_ioctl-2.6.31.patch test/Makefile test/test.c
 

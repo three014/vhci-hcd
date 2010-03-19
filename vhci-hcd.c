@@ -112,7 +112,6 @@ struct vhci_port
 	u16 port_status;
 	u16 port_change;
 	u8 port_flags;
-#define VHCI_PORT_FLAGS_RESUMING         0 // indicates the state of resuming
 };
 
 struct vhci_conf
@@ -367,6 +366,7 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 	unsigned long flags;
 	u8 port;
 	int retval = 0;
+	int idx, rel_bit, abs_bit;
 
 	vhc = hcd_to_vhci(hcd);
 
@@ -385,7 +385,10 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 	{
 		if(vhc->ports[port].port_change)
 		{
-			__set_bit(port + 1, (unsigned long *)buf);
+			abs_bit = port + 1;
+			idx     = abs_bit / (sizeof *buf * 8);
+			rel_bit = abs_bit % (sizeof *buf * 8);
+			buf[idx] |= (1 << rel_bit);
 			retval = 1;
 		}
 #ifdef DEBUG
@@ -428,7 +431,7 @@ static inline void hub_descriptor(const struct vhci *vhc, char *buf, u16 len)
 // first port is port# 1 (not 0)
 static inline void userspace_needs_port_update(struct vhci *vhc, u8 port)
 {
-	__set_bit(port, (unsigned long *)&vhc->port_update);
+	vhc->port_update |= 1 << port;
 	trigger_work_event(vhc);
 }
 
@@ -483,7 +486,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d resuming\n", (int)wIndex);
 #endif
-				__set_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
+				*pf |= VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
@@ -499,7 +502,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// clear all change bits except overcurrent (see USB 2.0 spec section 11.24.2.7.2)
 				*pc &= USB_PORT_STAT_C_OVERCURRENT;
 				// clear resuming flag
-				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
+				*pf &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
@@ -515,7 +518,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// i'm not quite sure if the suspend change bit should be cleared too (see section 11.24.2.7.2.{2,3})
 				*pc &= ~(USB_PORT_STAT_C_ENABLE | USB_PORT_STAT_C_SUSPEND);
 				// clear resuming flag
-				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
+				*pf &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 				// TODO: maybe we should clear the low/high speed bits here (section 11.24.2.7.1.{7,8})
 				userspace_needs_port_update(vhc, wIndex);
 			}
@@ -532,8 +535,11 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		case USB_PORT_FEAT_C_SUSPEND:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_RESET:
-			if(__test_and_clear_bit(wValue - 16, (unsigned long *)pc))
+			if(*pc & (1 << (wValue - 16)))
+			{
+				*pc &= ~(1 << (wValue - 16));
 				userspace_needs_port_update(vhc, wIndex);
+			}
 			break;
 		//case USB_PORT_FEAT_TEST:
 		default:
@@ -554,7 +560,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 #endif
 		if(unlikely(wValue || wIndex || wLength != 4))
 			goto err;
-		*(__le32 *)buf = __constant_cpu_to_le32(0);
+		buf[0] = buf[1] = buf[2] = buf[3] = 0;
 		break;
 	case GetPortStatus:
 #ifdef DEBUG
@@ -565,8 +571,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: ==> [port_status=0x%04x] [port_change=0x%04x]\n", __FUNCTION__, (int)vhc->ports[wIndex - 1].port_status, (int)vhc->ports[wIndex - 1].port_change);
 #endif
-		((__le16 *)buf)[0] = cpu_to_le16(vhc->ports[wIndex - 1].port_status);
-		((__le16 *)buf)[1] = cpu_to_le16(vhc->ports[wIndex - 1].port_change);
+		buf[0] = (u8)vhc->ports[wIndex - 1].port_status;
+		buf[1] = (u8)(vhc->ports[wIndex - 1].port_status >> 8);
+		buf[2] = (u8)vhc->ports[wIndex - 1].port_change;
+		buf[3] = (u8)(vhc->ports[wIndex - 1].port_change >> 8);
 		break;
 	case SetPortFeature:
 #ifdef DEBUG
@@ -624,7 +632,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				*ps |= USB_PORT_STAT_RESET; // reset initiated
 
 				// clear resuming flag
-				__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)pf);
+				*pf &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 
 				userspace_needs_port_update(vhc, wIndex);
 			}
@@ -643,8 +651,11 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		case USB_PORT_FEAT_C_SUSPEND:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_RESET:
-			if(!__test_and_set_bit(wValue - 16, (unsigned long *)pc))
+			if(!(*pc & (1 << (wValue - 16))))
+			{
+				*pc |= 1 << (wValue - 16);
 				userspace_needs_port_update(vhc, wIndex);
+			}
 			break;
 		//case USB_PORT_FEAT_ENABLE: // port can't be enabled without reseting (USB 2.0 spec section 11.24.2.7.1.2)
 		//case USB_PORT_FEAT_TEST:
@@ -695,7 +706,7 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 		{
 			dev_dbg(vhci_dev(vhc), "Port %d suspended\n", (int)port + 1);
 			vhc->ports[port].port_status |= USB_PORT_STAT_SUSPEND;
-			__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)&vhc->ports[port].port_flags);
+			vhc->ports[port].port_flags &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 			userspace_needs_port_update(vhc, port + 1);
 		}
 	}
@@ -1400,7 +1411,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct vhci_ioc_port_stat __us
 				overcurrent;
 		else
 			vhc->ports[index - 1].port_status = USB_PORT_STAT_POWER | overcurrent;
-		__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)&vhc->ports[index - 1].port_flags);
+		vhc->ports[index - 1].port_flags &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 		break;
 
 	case USB_PORT_STAT_C_ENABLE:
@@ -1413,7 +1424,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct vhci_ioc_port_stat __us
 		}
 		vhc->ports[index - 1].port_change |= USB_PORT_STAT_C_ENABLE;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_ENABLE;
-		__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)&vhc->ports[index - 1].port_flags);
+		vhc->ports[index - 1].port_flags &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_SUSPEND;
 		break;
 
@@ -1426,7 +1437,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct vhci_ioc_port_stat __us
 			spin_unlock_irqrestore(&vhc->lock, flags);
 			return -EPROTO;
 		}
-		__clear_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)&vhc->ports[index - 1].port_flags);
+		vhc->ports[index - 1].port_flags &= ~VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
 		vhc->ports[index - 1].port_change |= USB_PORT_STAT_C_SUSPEND;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_SUSPEND;
 		break;
@@ -1545,8 +1556,9 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *
 			// The port which will be checked first, is rotated by port_sched_offset, so that every port
 			// has its chance to be reported to user space, even if the hcd is under heavy load.
 			port = (_port + vhc->port_sched_offset) % vhc->port_count;
-			if(__test_and_clear_bit(port + 1, (unsigned long *)&vhc->port_update))
+			if(vhc->port_update & (1 << (port + 1))) // test bit
 			{
+				vhc->port_update &= ~(1 << (port + 1)); // clear bit
 				vhc->port_sched_offset = port + 1;
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=VHCI_HCD_IOCFETCHWORK [work=PORT_STAT port=%d status=0x%04x change=0x%04x]\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
@@ -1555,8 +1567,7 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct vhci_ioc_work __user *
 				__put_user(port + 1, &arg->work.port.index);
 				__put_user(vhc->ports[port].port_status, &arg->work.port.status);
 				__put_user(vhc->ports[port].port_change, &arg->work.port.change);
-				__put_user(test_bit(VHCI_PORT_FLAGS_RESUMING, (unsigned long *)&vhc->ports[port].port_flags)
-					? (1 << VHCI_IOC_PORT_STAT_FLAGS_RESUMING) : 0, &arg->work.port.flags);
+				__put_user(vhc->ports[port].port_flags, &arg->work.port.flags);
 				spin_unlock_irqrestore(&vhc->lock, flags);
 				return 0;
 			}
