@@ -407,24 +407,28 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 // called in vhci_hub_control only
 static inline void hub_descriptor(const struct vhci *vhc, char *buf, u16 len)
 {
-	u16 l = sizeof(struct usb_hub_descriptor);
-	char temp[USB_DT_HUB_NONVAR_SIZE];
-	struct usb_hub_descriptor *const desc = (struct usb_hub_descriptor *const)temp;
+	struct usb_hub_descriptor desc;
+	int portArrLen = (vhc->port_count - 1) / 8 + 1; // length of one port bit-array in bytes
+	u16 l = USB_DT_HUB_NONVAR_SIZE + 2 * portArrLen; // length of our hub descriptor
+	memset(&desc, 0, USB_DT_HUB_NONVAR_SIZE);
 
 	if(likely(len > USB_DT_HUB_NONVAR_SIZE))
 	{
 		if(unlikely(len < l)) l = len;
 		if(likely(l > USB_DT_HUB_NONVAR_SIZE))
-			memset(buf + USB_DT_HUB_NONVAR_SIZE, 0xff, l - USB_DT_HUB_NONVAR_SIZE);
+		{
+			memset(buf + USB_DT_HUB_NONVAR_SIZE, 0, l - USB_DT_HUB_NONVAR_SIZE);
+			if(likely(l > USB_DT_HUB_NONVAR_SIZE + portArrLen))
+				memset(buf + USB_DT_HUB_NONVAR_SIZE + portArrLen, 0xff, l - (USB_DT_HUB_NONVAR_SIZE + portArrLen));
+		}
 	}
 	else l = len;
 
-	memset(temp, 0, USB_DT_HUB_NONVAR_SIZE);
-	desc->bDescLength = l;
-	desc->bDescriptorType = 0x29;
-	desc->bNbrPorts = vhc->port_count;
-	desc->wHubCharacteristics = __constant_cpu_to_le16(0x0009); // Per port power and overcurrent
-	memcpy(buf, temp, l);
+	desc.bDescLength = l;
+	desc.bDescriptorType = 0x29;
+	desc.bNbrPorts = vhc->port_count;
+	desc.wHubCharacteristics = __constant_cpu_to_le16(0x0009); // Per port power and overcurrent
+	memcpy(buf, &desc, l);
 }
 
 // caller has lock
