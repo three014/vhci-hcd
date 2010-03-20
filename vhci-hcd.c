@@ -408,7 +408,7 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 static inline void hub_descriptor(const struct vhci *vhc, char *buf, u16 len)
 {
 	struct usb_hub_descriptor desc;
-	int portArrLen = (vhc->port_count - 1) / 8 + 1; // length of one port bit-array in bytes
+	int portArrLen = vhc->port_count / 8 + 1; // length of one port bit-array in bytes
 	u16 l = USB_DT_HUB_NONVAR_SIZE + 2 * portArrLen; // length of our hub descriptor
 	memset(&desc, 0, USB_DT_HUB_NONVAR_SIZE);
 
@@ -628,10 +628,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 
 				// keep the state of these bits and clear all others
 				*ps &= USB_PORT_STAT_POWER
-					 | USB_PORT_STAT_CONNECTION
-					 | USB_PORT_STAT_LOW_SPEED
-					 | USB_PORT_STAT_HIGH_SPEED
-					 | USB_PORT_STAT_OVERCURRENT;
+				     | USB_PORT_STAT_CONNECTION
+				     | USB_PORT_STAT_LOW_SPEED
+				     | USB_PORT_STAT_HIGH_SPEED
+				     | USB_PORT_STAT_OVERCURRENT;
 
 				*ps |= USB_PORT_STAT_RESET; // reset initiated
 
