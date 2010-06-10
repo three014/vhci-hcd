@@ -11,7 +11,7 @@
 +	  TODO: write some blahblah about what the module does
 +
 +	  To compile this driver as a module, choose M here: the
-+	  module will be called vhci-hcd.
++	  module will be called usb-vhci-hcd.
 +
  config USB_U132_HCD
  	tristate "Elan U132 Adapter Host Controller"

@@ -1,0 +1,4 @@
+<area shape="rect" href="$unionusb__vhci__ioc__work__union.html" title="{usb_vhci_ioc_work_union\n|+ port\l+ urb\l|}" alt="" coords="140,499,319,600">
+<area shape="rect" href="$structusb__vhci__ioc__urb.html" title="{usb_vhci_ioc_urb\n|+ address\l+ buffer_length\l+ endpoint\l+ flags\l+ interval\l+ packet_count\l+ setup_packet\l+ type\l|}" alt="" coords="37,227,165,432">
+<area shape="rect" href="$structusb__vhci__ioc__setup__packet.html" title="{usb_vhci_ioc_setup_packet\n|+ bmRequestType\l+ bRequest\l+ wIndex\l+ wLength\l+ wValue\l|}" alt="" coords="5,7,197,159">
+<area shape="rect" href="$structusb__vhci__ioc__port__stat.html" title="{usb_vhci_ioc_port_stat\n|+ change\l+ flags\l+ index\l+ reserved1\l+ reserved2\l+ status\l|}" alt="" coords="189,244,355,415">

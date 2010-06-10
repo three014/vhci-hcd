@@ -374,7 +374,7 @@ main();
 
 
 ?>
-<hr size="1"><address style="text-align: right;"><small>Generated on Mon Apr 6 22:37:25 2009 for vhci_hcd by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Thu Jun 10 20:06:26 2010 for usb_vhci_hcd by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

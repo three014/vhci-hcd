@@ -1,5 +1,0 @@
-<area shape="rect" href="$vhci&#45;hcd_8c.html#5cb2205ae7102f35acff3976061cd536" title="hcd_to_vhci" alt="" coords="251,5,347,32">
-<area shape="rect" href="$vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="191,56,407,83">
-<area shape="rect" href="$vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="260,107,337,133">
-<area shape="rect" href="$vhci&#45;hcd_8c.html#85d659ba8e043c8a7fc47b5ca4df09dd" title="trigger_work_event" alt="" coords="457,56,601,83">
-<area shape="rect" href="$vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="481,107,577,133">

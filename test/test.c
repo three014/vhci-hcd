@@ -33,9 +33,9 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #ifdef KBUILD_EXTMOD
-#	include "../vhci-hcd.h"
+#	include "../usb-vhci.h"
 #else
-#	include <linux/vhci-hcd.h>
+#	include <linux/usb-vhci.h>
 #endif
 
 #include <asm/atomic.h>

@@ -1,0 +1,10 @@
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#3239c5bfd0c0a11b1377a726a8eda98f" title="is_urb_dir_in" alt="" coords="280,5,379,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#60983b4f74308854907024142f4d933c" title="maybe_set_status" alt="" coords="260,56,399,83">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#16448e55dd0962d64927bc1d419b2238" title="urbp_from_handle" alt="" coords="260,107,399,133">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#266cde7bb57f9edbb6cc5c3f8ac76c2a" title="urbp_from_handle_in_cancel" alt="" coords="228,157,431,184">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#1304cf94d1210cc6c73198cc88cfa28c" title="urbp_from_handle_in_canceling" alt="" coords="219,208,440,235">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="493,259,571,285">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="261,309,397,336">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="633,297,729,324">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="489,360,575,387">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a70aa0c4b41ff9ade79ee4a4f4e74019" title="get_status_str" alt="" coords="625,373,737,400">

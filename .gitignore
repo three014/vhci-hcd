@@ -7,7 +7,7 @@
 *.pcs
 *.symvers
 .tmp_versions
-/vhci_hcd.tag
+/usb_vhci_hcd.tag
 Module.markers
 modules.order
 /conf
