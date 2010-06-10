@@ -23,7 +23,7 @@ CONF_H = conf/usb-vhci.config.h
 
 USB_VHCI_HCD_VERSION=1.10
 DIST_DIRS = patch test
-DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO usb-vhci-hcd.c usb-vhci.h patch/Kconfig.patch patch/usb-vhci_compat_ioctl.patch patch/usb-vhci_compat_ioctl-2.6.31.patch test/Makefile test/test.c
+DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO usb-vhci-hcd.c usb-vhci.h patch/Kconfig.patch test/Makefile test/test.c
 
 obj-m      := $(TARGET).o
 
@@ -55,9 +55,8 @@ clean: clean-test clean-conf
 patchkernel: $(CONF_H)
 	cp -v usb-vhci-hcd.c $(CONF_H) $(KSRC)/$(MDIR)/
 	cp -v usb-vhci.h $(KSRC)/include/linux/
-	cd $(KSRC); if [ $(KVERSION_SUBLEVEL) -lt 31 ]; then patch -Np1 -i $(PWD)/patch/usb-vhci_compat_ioctl.patch || true; else patch -Np1 -i $(PWD)/patch/usb-vhci_compat_ioctl-2.6.31.patch || true; fi
 	cd $(KSRC)/$(MDIR); grep -q $(TARGET).o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_HCD)  += $(TARGET).o" >>Makefile
-	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || true
+	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || :
 .PHONY: patchkernel
 
 clean-srcdox:

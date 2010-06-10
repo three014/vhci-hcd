@@ -2082,236 +2082,254 @@
 <a name="l02058"></a>02058 }
 <a name="l02059"></a>02059 <span class="preprocessor">#endif</span>
 <a name="l02060"></a>02060 <span class="preprocessor"></span>
-<a name="l02061"></a><a class="code" href="usb-vhci-hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968">02061</a> <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="usb-vhci-hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968">device_ioctl</a>(<span class="keyword">struct</span> inode *inode,
-<a name="l02062"></a>02062                         <span class="keyword">struct</span> file *file,
-<a name="l02063"></a>02063                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cmd,
-<a name="l02064"></a>02064                         <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> arg)
-<a name="l02065"></a>02065 {
-<a name="l02066"></a>02066     <span class="keyword">struct </span><a class="code" href="structvhci__conf.html">vhci_conf</a> *conf;
-<a name="l02067"></a>02067     <span class="keyword">struct </span>usb_hcd *hcd;
-<a name="l02068"></a>02068     <span class="keyword">struct </span><a class="code" href="structvhci.html">vhci</a> *vhc;
-<a name="l02069"></a>02069     <span class="keywordtype">int</span> ret = 0;
-<a name="l02070"></a>02070     s16 timeout;
-<a name="l02071"></a>02071 
-<a name="l02072"></a>02072     <span class="comment">// Floods the logs</span>
-<a name="l02073"></a>02073     <span class="comment">//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);</span>
-<a name="l02074"></a>02074 
-<a name="l02075"></a>02075     <span class="keywordflow">if</span>(unlikely(_IOC_TYPE(cmd) != <a class="code" href="usb-vhci_8h.html#7ddf35105b6e939c586b5f960713e38c">USB_VHCI_HCD_IOC_MAGIC</a>)) <span class="keywordflow">return</span> -ENOTTY;
-<a name="l02076"></a>02076     <span class="keywordflow">if</span>(unlikely(_IOC_NR(cmd) &gt; <a class="code" href="usb-vhci_8h.html#d6986b66e7a5e58b0416134e475af05b">USB_VHCI_HCD_IOC_MAXNR</a>)) <span class="keywordflow">return</span> -ENOTTY;
-<a name="l02077"></a>02077 
-<a name="l02078"></a>02078     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_READ) &amp;&amp; !access_ok(VERIFY_WRITE, (<span class="keywordtype">void</span> *)arg, _IOC_SIZE(cmd))))
-<a name="l02079"></a>02079         <span class="keywordflow">return</span> -EFAULT;
-<a name="l02080"></a>02080     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_WRITE) &amp;&amp; !access_ok(VERIFY_READ, (<span class="keywordtype">void</span> *)arg, _IOC_SIZE(cmd))))
-<a name="l02081"></a>02081         <span class="keywordflow">return</span> -EFAULT;
-<a name="l02082"></a>02082 
-<a name="l02083"></a>02083     <span class="keywordflow">if</span>(unlikely(cmd == <a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>))
-<a name="l02084"></a>02084         <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255">ioc_register</a>(file, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__register.html">usb_vhci_ioc_register</a> __user *)arg);
-<a name="l02085"></a>02085 
-<a name="l02086"></a>02086     conf = file-&gt;private_data;
-<a name="l02087"></a>02087 
-<a name="l02088"></a>02088     <span class="keywordflow">if</span>(unlikely(!conf))
-<a name="l02089"></a>02089         <span class="keywordflow">return</span> -EPROTO;
-<a name="l02090"></a>02090 
-<a name="l02091"></a>02091     hcd = platform_get_drvdata(conf-&gt;<a class="code" href="structvhci__conf.html#f8e1f01d20ec1ab975561a5013d079cb">pdev</a>);
-<a name="l02092"></a>02092     vhc = <a class="code" href="usb-vhci-hcd_8c.html#5cb2205ae7102f35acff3976061cd536">hcd_to_vhci</a>(hcd);
-<a name="l02093"></a>02093 
-<a name="l02094"></a>02094     <span class="keywordflow">switch</span>(__builtin_expect(cmd, <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>))
-<a name="l02095"></a>02095     {
-<a name="l02096"></a>02096     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>:
-<a name="l02097"></a>02097         ret = <a class="code" href="usb-vhci-hcd_8c.html#929681909872034797aa47cdfaedb75b">ioc_port_stat</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__port__stat.html">usb_vhci_ioc_port_stat</a> __user *)arg);
-<a name="l02098"></a>02098         <span class="keywordflow">break</span>;
-<a name="l02099"></a>02099 
-<a name="l02100"></a>02100     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>:
-<a name="l02101"></a>02101         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, 100);
-<a name="l02102"></a>02102         <span class="keywordflow">break</span>;
-<a name="l02103"></a>02103 
-<a name="l02104"></a>02104     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>:
-<a name="l02105"></a>02105         __get_user(timeout, &amp;((<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg)-&gt;timeout);
-<a name="l02106"></a>02106         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, timeout);
-<a name="l02107"></a>02107         <span class="keywordflow">break</span>;
-<a name="l02108"></a>02108 
-<a name="l02109"></a>02109     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>:
-<a name="l02110"></a>02110         ret = <a class="code" href="usb-vhci-hcd_8c.html#87200ed5c692f0211815b055b32b19f1">ioc_giveback</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__giveback.html">usb_vhci_ioc_giveback</a> __user *)arg);
-<a name="l02111"></a>02111         <span class="keywordflow">break</span>;
-<a name="l02112"></a>02112 
-<a name="l02113"></a>02113     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>:
-<a name="l02114"></a>02114         ret = <a class="code" href="usb-vhci-hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a">ioc_fetch_data</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__urb__data.html">usb_vhci_ioc_urb_data</a> __user *)arg);
-<a name="l02115"></a>02115         <span class="keywordflow">break</span>;
-<a name="l02116"></a>02116 
-<a name="l02117"></a>02117 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
-<a name="l02118"></a>02118 <span class="preprocessor"></span>    <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#8990c8d5ab4c686b60d34dcf659fbf29">USB_VHCI_HCD_IOCGIVEBACK32</a>:
-<a name="l02119"></a>02119         ret = ioc_giveback32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_giveback32 __user *)arg);
-<a name="l02120"></a>02120         <span class="keywordflow">break</span>;
-<a name="l02121"></a>02121 
-<a name="l02122"></a>02122     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5480af655385635d5bc3a911822cdc5e">USB_VHCI_HCD_IOCFETCHDATA32</a>:
-<a name="l02123"></a>02123         ret = ioc_fetch_data32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_urb_data32 __user *)arg);
-<a name="l02124"></a>02124         <span class="keywordflow">break</span>;
-<a name="l02125"></a>02125 <span class="preprocessor">#endif</span>
-<a name="l02126"></a>02126 <span class="preprocessor"></span>
-<a name="l02127"></a>02127     <span class="keywordflow">default</span>:
-<a name="l02128"></a>02128         ret = -ENOTTY;
-<a name="l02129"></a>02129     }
-<a name="l02130"></a>02130 
-<a name="l02131"></a>02131     <span class="keywordflow">return</span> ret;
-<a name="l02132"></a>02132 }
-<a name="l02133"></a>02133 
-<a name="l02134"></a><a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">02134</a> <span class="keyword">static</span> loff_t <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>(<span class="keyword">struct</span> file *file, loff_t offset, <span class="keywordtype">int</span> origin)
-<a name="l02135"></a>02135 {
-<a name="l02136"></a>02136     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"%s(file=%p)\n"</span>, __FUNCTION__, file);
-<a name="l02137"></a>02137     <span class="keywordflow">return</span> -ESPIPE;
+<a name="l02061"></a><a class="code" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">02061</a> <span class="keyword">static</span> <span class="keywordtype">long</span> <a class="code" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">device_do_ioctl</a>(<span class="keyword">struct</span> file *file,
+<a name="l02062"></a>02062                            <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cmd,
+<a name="l02063"></a>02063                            <span class="keywordtype">void</span> __user *arg)
+<a name="l02064"></a>02064 {
+<a name="l02065"></a>02065     <span class="keyword">struct </span><a class="code" href="structvhci__conf.html">vhci_conf</a> *conf;
+<a name="l02066"></a>02066     <span class="keyword">struct </span>usb_hcd *hcd;
+<a name="l02067"></a>02067     <span class="keyword">struct </span><a class="code" href="structvhci.html">vhci</a> *vhc;
+<a name="l02068"></a>02068     <span class="keywordtype">long</span> ret = 0;
+<a name="l02069"></a>02069     s16 timeout;
+<a name="l02070"></a>02070 
+<a name="l02071"></a>02071     <span class="comment">// Floods the logs</span>
+<a name="l02072"></a>02072     <span class="comment">//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);</span>
+<a name="l02073"></a>02073 
+<a name="l02074"></a>02074     <span class="keywordflow">if</span>(unlikely(_IOC_TYPE(cmd) != <a class="code" href="usb-vhci_8h.html#7ddf35105b6e939c586b5f960713e38c">USB_VHCI_HCD_IOC_MAGIC</a>)) <span class="keywordflow">return</span> -ENOTTY;
+<a name="l02075"></a>02075     <span class="keywordflow">if</span>(unlikely(_IOC_NR(cmd) &gt; <a class="code" href="usb-vhci_8h.html#d6986b66e7a5e58b0416134e475af05b">USB_VHCI_HCD_IOC_MAXNR</a>)) <span class="keywordflow">return</span> -ENOTTY;
+<a name="l02076"></a>02076 
+<a name="l02077"></a>02077     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_READ) &amp;&amp; !access_ok(VERIFY_WRITE, arg, _IOC_SIZE(cmd))))
+<a name="l02078"></a>02078         <span class="keywordflow">return</span> -EFAULT;
+<a name="l02079"></a>02079     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_WRITE) &amp;&amp; !access_ok(VERIFY_READ, arg, _IOC_SIZE(cmd))))
+<a name="l02080"></a>02080         <span class="keywordflow">return</span> -EFAULT;
+<a name="l02081"></a>02081 
+<a name="l02082"></a>02082     <span class="keywordflow">if</span>(unlikely(cmd == <a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>))
+<a name="l02083"></a>02083         <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255">ioc_register</a>(file, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__register.html">usb_vhci_ioc_register</a> __user *)arg);
+<a name="l02084"></a>02084 
+<a name="l02085"></a>02085     conf = file-&gt;private_data;
+<a name="l02086"></a>02086 
+<a name="l02087"></a>02087     <span class="keywordflow">if</span>(unlikely(!conf))
+<a name="l02088"></a>02088         <span class="keywordflow">return</span> -EPROTO;
+<a name="l02089"></a>02089 
+<a name="l02090"></a>02090     hcd = platform_get_drvdata(conf-&gt;<a class="code" href="structvhci__conf.html#f8e1f01d20ec1ab975561a5013d079cb">pdev</a>);
+<a name="l02091"></a>02091     vhc = <a class="code" href="usb-vhci-hcd_8c.html#5cb2205ae7102f35acff3976061cd536">hcd_to_vhci</a>(hcd);
+<a name="l02092"></a>02092 
+<a name="l02093"></a>02093     <span class="keywordflow">switch</span>(__builtin_expect(cmd, <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>))
+<a name="l02094"></a>02094     {
+<a name="l02095"></a>02095     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>:
+<a name="l02096"></a>02096         ret = <a class="code" href="usb-vhci-hcd_8c.html#929681909872034797aa47cdfaedb75b">ioc_port_stat</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__port__stat.html">usb_vhci_ioc_port_stat</a> __user *)arg);
+<a name="l02097"></a>02097         <span class="keywordflow">break</span>;
+<a name="l02098"></a>02098 
+<a name="l02099"></a>02099     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>:
+<a name="l02100"></a>02100         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, 100);
+<a name="l02101"></a>02101         <span class="keywordflow">break</span>;
+<a name="l02102"></a>02102 
+<a name="l02103"></a>02103     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>:
+<a name="l02104"></a>02104         __get_user(timeout, &amp;((<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg)-&gt;timeout);
+<a name="l02105"></a>02105         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, timeout);
+<a name="l02106"></a>02106         <span class="keywordflow">break</span>;
+<a name="l02107"></a>02107 
+<a name="l02108"></a>02108     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>:
+<a name="l02109"></a>02109         ret = <a class="code" href="usb-vhci-hcd_8c.html#87200ed5c692f0211815b055b32b19f1">ioc_giveback</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__giveback.html">usb_vhci_ioc_giveback</a> __user *)arg);
+<a name="l02110"></a>02110         <span class="keywordflow">break</span>;
+<a name="l02111"></a>02111 
+<a name="l02112"></a>02112     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>:
+<a name="l02113"></a>02113         ret = <a class="code" href="usb-vhci-hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a">ioc_fetch_data</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__urb__data.html">usb_vhci_ioc_urb_data</a> __user *)arg);
+<a name="l02114"></a>02114         <span class="keywordflow">break</span>;
+<a name="l02115"></a>02115 
+<a name="l02116"></a>02116 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
+<a name="l02117"></a>02117 <span class="preprocessor"></span>    <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#8990c8d5ab4c686b60d34dcf659fbf29">USB_VHCI_HCD_IOCGIVEBACK32</a>:
+<a name="l02118"></a>02118         ret = ioc_giveback32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_giveback32 __user *)arg);
+<a name="l02119"></a>02119         <span class="keywordflow">break</span>;
+<a name="l02120"></a>02120 
+<a name="l02121"></a>02121     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5480af655385635d5bc3a911822cdc5e">USB_VHCI_HCD_IOCFETCHDATA32</a>:
+<a name="l02122"></a>02122         ret = ioc_fetch_data32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_urb_data32 __user *)arg);
+<a name="l02123"></a>02123         <span class="keywordflow">break</span>;
+<a name="l02124"></a>02124 <span class="preprocessor">#endif</span>
+<a name="l02125"></a>02125 <span class="preprocessor"></span>
+<a name="l02126"></a>02126     <span class="keywordflow">default</span>:
+<a name="l02127"></a>02127         ret = -ENOTTY;
+<a name="l02128"></a>02128     }
+<a name="l02129"></a>02129 
+<a name="l02130"></a>02130     <span class="keywordflow">return</span> ret;
+<a name="l02131"></a>02131 }
+<a name="l02132"></a>02132 
+<a name="l02133"></a><a class="code" href="usb-vhci-hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1">02133</a> <span class="keyword">static</span> <span class="keywordtype">long</span> <a class="code" href="usb-vhci-hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1">device_ioctl</a>(<span class="keyword">struct</span> file *file,
+<a name="l02134"></a>02134                          <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cmd,
+<a name="l02135"></a>02135                          <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> arg)
+<a name="l02136"></a>02136 {
+<a name="l02137"></a>02137     <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">device_do_ioctl</a>(file, cmd, (<span class="keywordtype">void</span> __user *)arg);
 <a name="l02138"></a>02138 }
 <a name="l02139"></a>02139 
-<a name="l02140"></a><a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">02140</a> <span class="keyword">static</span> <span class="keyword">struct </span>file_operations <a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">fops</a> = {
-<a name="l02141"></a>02141     .owner   = THIS_MODULE,
-<a name="l02142"></a>02142     .llseek  = <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>,
-<a name="l02143"></a>02143     .read    = <a class="code" href="usb-vhci-hcd_8c.html#c25a70ecbf8ce2c82fb3f7723e965da5">device_read</a>,
-<a name="l02144"></a>02144     .write   = <a class="code" href="usb-vhci-hcd_8c.html#e86da577c3ccf2267f8f17feb8bd4c58">device_write</a>,
-<a name="l02145"></a>02145     .ioctl   = <a class="code" href="usb-vhci-hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968">device_ioctl</a>,
-<a name="l02146"></a>02146     .open    = <a class="code" href="usb-vhci-hcd_8c.html#e551618a4770b820ca8e41cc4b1cfa48">device_open</a>,
-<a name="l02147"></a>02147     .release = <a class="code" href="usb-vhci-hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb">device_release</a> <span class="comment">// a.k.a. close</span>
-<a name="l02148"></a>02148 };
-<a name="l02149"></a>02149 
-<a name="l02150"></a>02150 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02151"></a><a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">02151</a> <span class="preprocessor"></span><span class="keyword">static</span> ssize_t <a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">show_debug_output</a>(<span class="keyword">struct</span> device_driver *drv, <span class="keywordtype">char</span> *buf)
-<a name="l02152"></a>02152 {
-<a name="l02153"></a>02153     <span class="keywordflow">if</span>(buf != NULL)
-<a name="l02154"></a>02154     {
-<a name="l02155"></a>02155         <span class="keywordflow">switch</span>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>)
-<a name="l02156"></a>02156         {
-<a name="l02157"></a>02157         <span class="keywordflow">case</span> 0:  *buf = <span class="charliteral">'0'</span>; <span class="keywordflow">break</span>; <span class="comment">// No debug output</span>
-<a name="l02158"></a>02158         <span class="keywordflow">case</span> 1:  *buf = <span class="charliteral">'1'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output without data buffer dumps</span>
-<a name="l02159"></a>02159         <span class="keywordflow">case</span> 2:  *buf = <span class="charliteral">'2'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with short data buffer dumps</span>
-<a name="l02160"></a>02160         <span class="keywordflow">default</span>: *buf = <span class="charliteral">'3'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with full data buffer dumps</span>
-<a name="l02161"></a>02161         }
-<a name="l02162"></a>02162     }
-<a name="l02163"></a>02163     <span class="keywordflow">return</span> 1;
-<a name="l02164"></a>02164 }
-<a name="l02165"></a>02165 
-<a name="l02166"></a><a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">02166</a> <span class="keyword">static</span> ssize_t <a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">store_debug_output</a>(<span class="keyword">struct</span> device_driver *drv, <span class="keyword">const</span> <span class="keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> count)
-<a name="l02167"></a>02167 {
-<a name="l02168"></a>02168     <span class="keywordflow">if</span>(count != 1 || buf == NULL) <span class="keywordflow">return</span> -EINVAL;
-<a name="l02169"></a>02169     <span class="keywordflow">switch</span>(*buf)
-<a name="l02170"></a>02170     {
-<a name="l02171"></a>02171     <span class="keywordflow">case</span> <span class="charliteral">'0'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 0; <span class="keywordflow">return</span> 1;
-<a name="l02172"></a>02172     <span class="keywordflow">case</span> <span class="charliteral">'1'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 1; <span class="keywordflow">return</span> 1;
-<a name="l02173"></a>02173     <span class="keywordflow">case</span> <span class="charliteral">'2'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 2; <span class="keywordflow">return</span> 1;
-<a name="l02174"></a>02174     <span class="keywordflow">case</span> <span class="charliteral">'3'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 3; <span class="keywordflow">return</span> 1;
-<a name="l02175"></a>02175     }
-<a name="l02176"></a>02176     <span class="keywordflow">return</span> -EINVAL;
-<a name="l02177"></a>02177 }
-<a name="l02178"></a>02178 
-<a name="l02179"></a>02179 <span class="keyword">static</span> <a class="code" href="usb-vhci-hcd_8c.html#0b3bd2d58d4267a5816b7414daccdf60">DRIVER_ATTR</a>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>, S_IRUSR | S_IWUSR, <a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">show_debug_output</a>, <a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">store_debug_output</a>);
-<a name="l02180"></a>02180 <span class="preprocessor">#endif</span>
-<a name="l02181"></a>02181 <span class="preprocessor"></span>
-<a name="l02182"></a><a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">02182</a> <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">vhci_device_release</a>(<span class="keyword">struct</span> device *dev)
-<a name="l02183"></a>02183 {
-<a name="l02184"></a>02184 }
-<a name="l02185"></a>02185 
-<a name="l02186"></a><a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">02186</a> <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>;
-<a name="l02187"></a>02187 
-<a name="l02188"></a><a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">02188</a> <span class="keyword">static</span> <span class="keyword">struct </span>class <a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a> = {
-<a name="l02189"></a>02189     .owner = THIS_MODULE,
-<a name="l02190"></a>02190     .name = <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>
-<a name="l02191"></a>02191 };
-<a name="l02192"></a>02192 
-<a name="l02193"></a><a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">02193</a> <span class="keyword">static</span> <span class="keyword">struct </span>device <a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a> = {
-<a name="l02194"></a>02194     .class = &amp;vhci_class,
-<a name="l02195"></a>02195     .release = <a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">vhci_device_release</a>,
-<a name="l02196"></a>02196 <span class="preprocessor">#ifndef NO_DEV_INIT_NAME</span>
-<a name="l02197"></a>02197 <span class="preprocessor"></span>    .init_name = <span class="stringliteral">"vhci-ctrl"</span>,
+<a name="l02140"></a>02140 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
+<a name="l02141"></a>02141 <span class="preprocessor"></span><span class="keyword">static</span> <span class="keywordtype">long</span> device_ioctl32(<span class="keyword">struct</span> file *file,
+<a name="l02142"></a>02142                            <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cmd,
+<a name="l02143"></a>02143                            <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> arg)
+<a name="l02144"></a>02144 {
+<a name="l02145"></a>02145     <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">device_do_ioctl</a>(file, cmd, compat_ptr(arg));
+<a name="l02146"></a>02146 }
+<a name="l02147"></a>02147 <span class="preprocessor">#endif</span>
+<a name="l02148"></a>02148 <span class="preprocessor"></span>
+<a name="l02149"></a><a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">02149</a> <span class="keyword">static</span> loff_t <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>(<span class="keyword">struct</span> file *file, loff_t offset, <span class="keywordtype">int</span> origin)
+<a name="l02150"></a>02150 {
+<a name="l02151"></a>02151     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"%s(file=%p)\n"</span>, __FUNCTION__, file);
+<a name="l02152"></a>02152     <span class="keywordflow">return</span> -ESPIPE;
+<a name="l02153"></a>02153 }
+<a name="l02154"></a>02154 
+<a name="l02155"></a><a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">02155</a> <span class="keyword">static</span> <span class="keyword">struct </span>file_operations <a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">fops</a> = {
+<a name="l02156"></a>02156     .owner          = THIS_MODULE,
+<a name="l02157"></a>02157     .llseek         = <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>,
+<a name="l02158"></a>02158     .read           = <a class="code" href="usb-vhci-hcd_8c.html#c25a70ecbf8ce2c82fb3f7723e965da5">device_read</a>,
+<a name="l02159"></a>02159     .write          = <a class="code" href="usb-vhci-hcd_8c.html#e86da577c3ccf2267f8f17feb8bd4c58">device_write</a>,
+<a name="l02160"></a>02160     .unlocked_ioctl = <a class="code" href="usb-vhci-hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1">device_ioctl</a>,
+<a name="l02161"></a>02161 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
+<a name="l02162"></a>02162 <span class="preprocessor"></span>    .compat_ioctl   = device_ioctl32,
+<a name="l02163"></a>02163 <span class="preprocessor">#endif</span>
+<a name="l02164"></a>02164 <span class="preprocessor"></span>    .open           = <a class="code" href="usb-vhci-hcd_8c.html#e551618a4770b820ca8e41cc4b1cfa48">device_open</a>,
+<a name="l02165"></a>02165     .release        = <a class="code" href="usb-vhci-hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb">device_release</a> <span class="comment">// a.k.a. close</span>
+<a name="l02166"></a>02166 };
+<a name="l02167"></a>02167 
+<a name="l02168"></a>02168 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02169"></a><a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">02169</a> <span class="preprocessor"></span><span class="keyword">static</span> ssize_t <a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">show_debug_output</a>(<span class="keyword">struct</span> device_driver *drv, <span class="keywordtype">char</span> *buf)
+<a name="l02170"></a>02170 {
+<a name="l02171"></a>02171     <span class="keywordflow">if</span>(buf != NULL)
+<a name="l02172"></a>02172     {
+<a name="l02173"></a>02173         <span class="keywordflow">switch</span>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>)
+<a name="l02174"></a>02174         {
+<a name="l02175"></a>02175         <span class="keywordflow">case</span> 0:  *buf = <span class="charliteral">'0'</span>; <span class="keywordflow">break</span>; <span class="comment">// No debug output</span>
+<a name="l02176"></a>02176         <span class="keywordflow">case</span> 1:  *buf = <span class="charliteral">'1'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output without data buffer dumps</span>
+<a name="l02177"></a>02177         <span class="keywordflow">case</span> 2:  *buf = <span class="charliteral">'2'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with short data buffer dumps</span>
+<a name="l02178"></a>02178         <span class="keywordflow">default</span>: *buf = <span class="charliteral">'3'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with full data buffer dumps</span>
+<a name="l02179"></a>02179         }
+<a name="l02180"></a>02180     }
+<a name="l02181"></a>02181     <span class="keywordflow">return</span> 1;
+<a name="l02182"></a>02182 }
+<a name="l02183"></a>02183 
+<a name="l02184"></a><a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">02184</a> <span class="keyword">static</span> ssize_t <a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">store_debug_output</a>(<span class="keyword">struct</span> device_driver *drv, <span class="keyword">const</span> <span class="keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> count)
+<a name="l02185"></a>02185 {
+<a name="l02186"></a>02186     <span class="keywordflow">if</span>(count != 1 || buf == NULL) <span class="keywordflow">return</span> -EINVAL;
+<a name="l02187"></a>02187     <span class="keywordflow">switch</span>(*buf)
+<a name="l02188"></a>02188     {
+<a name="l02189"></a>02189     <span class="keywordflow">case</span> <span class="charliteral">'0'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 0; <span class="keywordflow">return</span> 1;
+<a name="l02190"></a>02190     <span class="keywordflow">case</span> <span class="charliteral">'1'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 1; <span class="keywordflow">return</span> 1;
+<a name="l02191"></a>02191     <span class="keywordflow">case</span> <span class="charliteral">'2'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 2; <span class="keywordflow">return</span> 1;
+<a name="l02192"></a>02192     <span class="keywordflow">case</span> <span class="charliteral">'3'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 3; <span class="keywordflow">return</span> 1;
+<a name="l02193"></a>02193     }
+<a name="l02194"></a>02194     <span class="keywordflow">return</span> -EINVAL;
+<a name="l02195"></a>02195 }
+<a name="l02196"></a>02196 
+<a name="l02197"></a>02197 <span class="keyword">static</span> <a class="code" href="usb-vhci-hcd_8c.html#0b3bd2d58d4267a5816b7414daccdf60">DRIVER_ATTR</a>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>, S_IRUSR | S_IWUSR, <a class="code" href="usb-vhci-hcd_8c.html#40c0b33bac26a9ea81117025be610f58">show_debug_output</a>, <a class="code" href="usb-vhci-hcd_8c.html#85223bef2b31110ebda255ff25857b07">store_debug_output</a>);
 <a name="l02198"></a>02198 <span class="preprocessor">#endif</span>
-<a name="l02199"></a>02199 <span class="preprocessor"></span>    .driver = &amp;vhci_hcd_driver.driver
-<a name="l02200"></a>02200 };
-<a name="l02201"></a>02201 
-<a name="l02202"></a><a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">02202</a> <span class="keyword">static</span> <span class="keywordtype">int</span> __init <a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">init</a>(<span class="keywordtype">void</span>)
-<a name="l02203"></a>02203 {
-<a name="l02204"></a>02204     <span class="keywordtype">int</span> retval;
+<a name="l02199"></a>02199 <span class="preprocessor"></span>
+<a name="l02200"></a><a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">02200</a> <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">vhci_device_release</a>(<span class="keyword">struct</span> device *dev)
+<a name="l02201"></a>02201 {
+<a name="l02202"></a>02202 }
+<a name="l02203"></a>02203 
+<a name="l02204"></a><a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">02204</a> <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>;
 <a name="l02205"></a>02205 
-<a name="l02206"></a>02206     <span class="keywordflow">if</span>(usb_disabled()) <span class="keywordflow">return</span> -ENODEV;
-<a name="l02207"></a>02207 
-<a name="l02208"></a>02208     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <a class="code" href="usb-vhci-hcd_8c.html#ae26107a17c06584f8bbd0d6fb91013d">DRIVER_DESC</a> <span class="stringliteral">" -- Version "</span> <a class="code" href="usb-vhci-hcd_8c.html#e578001fe043b4cca7a0edd801cfe9c4">DRIVER_VERSION</a> <span class="stringliteral">"\n"</span>);
-<a name="l02209"></a>02209 
-<a name="l02210"></a>02210 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02211"></a>02211 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"register platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02212"></a>02212 <span class="preprocessor">#endif</span>
-<a name="l02213"></a>02213 <span class="preprocessor"></span>    retval = platform_driver_register(&amp;vhci_hcd_driver);
-<a name="l02214"></a>02214     <span class="keywordflow">if</span>(unlikely(retval &lt; 0))
-<a name="l02215"></a>02215     {
-<a name="l02216"></a>02216         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"register platform_driver failed\n"</span>);
-<a name="l02217"></a>02217         <span class="keywordflow">return</span> retval;
-<a name="l02218"></a>02218     }
+<a name="l02206"></a><a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">02206</a> <span class="keyword">static</span> <span class="keyword">struct </span>class <a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a> = {
+<a name="l02207"></a>02207     .owner = THIS_MODULE,
+<a name="l02208"></a>02208     .name = <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>
+<a name="l02209"></a>02209 };
+<a name="l02210"></a>02210 
+<a name="l02211"></a><a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">02211</a> <span class="keyword">static</span> <span class="keyword">struct </span>device <a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a> = {
+<a name="l02212"></a>02212     .class = &amp;vhci_class,
+<a name="l02213"></a>02213     .release = <a class="code" href="usb-vhci-hcd_8c.html#773ee294b61611b3ce243c8591c5a2e2">vhci_device_release</a>,
+<a name="l02214"></a>02214 <span class="preprocessor">#ifndef NO_DEV_INIT_NAME</span>
+<a name="l02215"></a>02215 <span class="preprocessor"></span>    .init_name = <span class="stringliteral">"vhci-ctrl"</span>,
+<a name="l02216"></a>02216 <span class="preprocessor">#endif</span>
+<a name="l02217"></a>02217 <span class="preprocessor"></span>    .driver = &amp;vhci_hcd_driver.driver
+<a name="l02218"></a>02218 };
 <a name="l02219"></a>02219 
-<a name="l02220"></a>02220     vhci_major = register_chrdev(0, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>, &amp;fops);
-<a name="l02221"></a>02221     <span class="keywordflow">if</span>(unlikely(vhci_major &lt; 0))
-<a name="l02222"></a>02222     {
-<a name="l02223"></a>02223         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"Sorry, registering the character device failed with %d.\n"</span>, retval);
-<a name="l02224"></a>02224 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02225"></a>02225 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02226"></a>02226 <span class="preprocessor">#endif</span>
-<a name="l02227"></a>02227 <span class="preprocessor"></span>        platform_driver_unregister(&amp;vhci_hcd_driver);
-<a name="l02228"></a>02228         <span class="keywordflow">return</span> retval;
-<a name="l02229"></a>02229     }
-<a name="l02230"></a>02230 
-<a name="l02231"></a>02231     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"Successfully registered the character device.\n"</span>);
-<a name="l02232"></a>02232     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"The major device number is %d.\n"</span>, vhci_major);
-<a name="l02233"></a>02233 
-<a name="l02234"></a>02234     <span class="keywordflow">if</span>(unlikely(class_register(&amp;vhci_class)))
-<a name="l02235"></a>02235     {
-<a name="l02236"></a>02236         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register class %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02237"></a>02237     }
-<a name="l02238"></a>02238     <span class="keywordflow">else</span>
-<a name="l02239"></a>02239     {
-<a name="l02240"></a>02240 <span class="preprocessor">#ifdef NO_DEV_INIT_NAME</span>
-<a name="l02241"></a>02241 <span class="preprocessor"></span><span class="preprocessor">#ifdef OLD_DEV_BUS_ID</span>
-<a name="l02242"></a>02242 <span class="preprocessor"></span>        strlcpy((<span class="keywordtype">void</span> *)&amp;vhci_device.bus_id, <span class="stringliteral">"vhci-ctrl"</span>, 10);
-<a name="l02243"></a>02243 <span class="preprocessor">#else</span>
-<a name="l02244"></a>02244 <span class="preprocessor"></span>        dev_set_name(&amp;vhci_device, <span class="stringliteral">"vhci-ctrl"</span>);
-<a name="l02245"></a>02245 <span class="preprocessor">#endif</span>
-<a name="l02246"></a>02246 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l02247"></a>02247 <span class="preprocessor"></span>        vhci_device.devt = MKDEV(vhci_major, 0);
-<a name="l02248"></a>02248         <span class="keywordflow">if</span>(unlikely(device_register(&amp;vhci_device)))
-<a name="l02249"></a>02249         {
-<a name="l02250"></a>02250             <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register device %s\n"</span>, <span class="stringliteral">"vhci-ctrl"</span>);
-<a name="l02251"></a>02251         }
-<a name="l02252"></a>02252     }
-<a name="l02253"></a>02253 
-<a name="l02254"></a>02254 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02255"></a>02255 <span class="preprocessor"></span>    retval = driver_create_file(&amp;vhci_hcd_driver.driver, &amp;driver_attr_debug_output);
-<a name="l02256"></a>02256     <span class="keywordflow">if</span>(unlikely(retval != 0))
+<a name="l02220"></a><a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">02220</a> <span class="keyword">static</span> <span class="keywordtype">int</span> __init <a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">init</a>(<span class="keywordtype">void</span>)
+<a name="l02221"></a>02221 {
+<a name="l02222"></a>02222     <span class="keywordtype">int</span> retval;
+<a name="l02223"></a>02223 
+<a name="l02224"></a>02224     <span class="keywordflow">if</span>(usb_disabled()) <span class="keywordflow">return</span> -ENODEV;
+<a name="l02225"></a>02225 
+<a name="l02226"></a>02226     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <a class="code" href="usb-vhci-hcd_8c.html#ae26107a17c06584f8bbd0d6fb91013d">DRIVER_DESC</a> <span class="stringliteral">" -- Version "</span> <a class="code" href="usb-vhci-hcd_8c.html#e578001fe043b4cca7a0edd801cfe9c4">DRIVER_VERSION</a> <span class="stringliteral">"\n"</span>);
+<a name="l02227"></a>02227 
+<a name="l02228"></a>02228 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02229"></a>02229 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"register platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02230"></a>02230 <span class="preprocessor">#endif</span>
+<a name="l02231"></a>02231 <span class="preprocessor"></span>    retval = platform_driver_register(&amp;vhci_hcd_driver);
+<a name="l02232"></a>02232     <span class="keywordflow">if</span>(unlikely(retval &lt; 0))
+<a name="l02233"></a>02233     {
+<a name="l02234"></a>02234         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"register platform_driver failed\n"</span>);
+<a name="l02235"></a>02235         <span class="keywordflow">return</span> retval;
+<a name="l02236"></a>02236     }
+<a name="l02237"></a>02237 
+<a name="l02238"></a>02238     vhci_major = register_chrdev(0, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>, &amp;fops);
+<a name="l02239"></a>02239     <span class="keywordflow">if</span>(unlikely(vhci_major &lt; 0))
+<a name="l02240"></a>02240     {
+<a name="l02241"></a>02241         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"Sorry, registering the character device failed with %d.\n"</span>, retval);
+<a name="l02242"></a>02242 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02243"></a>02243 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02244"></a>02244 <span class="preprocessor">#endif</span>
+<a name="l02245"></a>02245 <span class="preprocessor"></span>        platform_driver_unregister(&amp;vhci_hcd_driver);
+<a name="l02246"></a>02246         <span class="keywordflow">return</span> retval;
+<a name="l02247"></a>02247     }
+<a name="l02248"></a>02248 
+<a name="l02249"></a>02249     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"Successfully registered the character device.\n"</span>);
+<a name="l02250"></a>02250     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"The major device number is %d.\n"</span>, vhci_major);
+<a name="l02251"></a>02251 
+<a name="l02252"></a>02252     <span class="keywordflow">if</span>(unlikely(class_register(&amp;vhci_class)))
+<a name="l02253"></a>02253     {
+<a name="l02254"></a>02254         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register class %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02255"></a>02255     }
+<a name="l02256"></a>02256     <span class="keywordflow">else</span>
 <a name="l02257"></a>02257     {
-<a name="l02258"></a>02258         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"driver_create_file(&amp;vhci_hcd_driver, &amp;driver_attr_debug_output) failed\n"</span>);
-<a name="l02259"></a>02259         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"==&gt; ignoring\n"</span>);
-<a name="l02260"></a>02260     }
-<a name="l02261"></a>02261 <span class="preprocessor">#endif</span>
-<a name="l02262"></a>02262 <span class="preprocessor"></span>
-<a name="l02263"></a>02263 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02264"></a>02264 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCREGISTER     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>);
-<a name="l02265"></a>02265     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCPORTSTAT     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>);
-<a name="l02266"></a>02266     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK_RO = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>);
-<a name="l02267"></a>02267     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>);
-<a name="l02268"></a>02268     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCGIVEBACK     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>);
-<a name="l02269"></a>02269     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHDATA    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>);
-<a name="l02270"></a>02270 <span class="preprocessor">#endif</span>
-<a name="l02271"></a>02271 <span class="preprocessor"></span>
-<a name="l02272"></a>02272     <span class="keywordflow">return</span> 0;
-<a name="l02273"></a>02273 }
-<a name="l02274"></a>02274 <a class="code" href="usb-vhci-hcd_8c.html#960f82decaba583a9c7eec8a79789dc1">module_init</a>(<a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">init</a>);
-<a name="l02275"></a>02275 
-<a name="l02276"></a><a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">02276</a> <span class="keyword">static</span> <span class="keywordtype">void</span> __exit <a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">cleanup</a>(<span class="keywordtype">void</span>)
-<a name="l02277"></a>02277 {
-<a name="l02278"></a>02278 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02279"></a>02279 <span class="preprocessor"></span>    driver_remove_file(&amp;vhci_hcd_driver.driver, &amp;driver_attr_debug_output);
-<a name="l02280"></a>02280 <span class="preprocessor">#endif</span>
-<a name="l02281"></a>02281 <span class="preprocessor"></span>    device_unregister(&amp;vhci_device);
-<a name="l02282"></a>02282     class_unregister(&amp;vhci_class);
-<a name="l02283"></a>02283     unregister_chrdev(vhci_major, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02284"></a>02284     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02285"></a>02285     platform_driver_unregister(&amp;vhci_hcd_driver);
-<a name="l02286"></a>02286     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"bin weg\n"</span>);
-<a name="l02287"></a>02287 }
-<a name="l02288"></a>02288 <a class="code" href="usb-vhci-hcd_8c.html#26f1fe9613ac148f923593c5207c4499">module_exit</a>(<a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">cleanup</a>);
-<a name="l02289"></a>02289 
-</pre></div><hr size="1"><address style="text-align: right;"><small>Generated on Thu Jun 10 20:05:35 2010 for usb_vhci_hcd by&nbsp;
+<a name="l02258"></a>02258 <span class="preprocessor">#ifdef NO_DEV_INIT_NAME</span>
+<a name="l02259"></a>02259 <span class="preprocessor"></span><span class="preprocessor">#ifdef OLD_DEV_BUS_ID</span>
+<a name="l02260"></a>02260 <span class="preprocessor"></span>        strlcpy((<span class="keywordtype">void</span> *)&amp;vhci_device.bus_id, <span class="stringliteral">"vhci-ctrl"</span>, 10);
+<a name="l02261"></a>02261 <span class="preprocessor">#else</span>
+<a name="l02262"></a>02262 <span class="preprocessor"></span>        dev_set_name(&amp;vhci_device, <span class="stringliteral">"vhci-ctrl"</span>);
+<a name="l02263"></a>02263 <span class="preprocessor">#endif</span>
+<a name="l02264"></a>02264 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l02265"></a>02265 <span class="preprocessor"></span>        vhci_device.devt = MKDEV(vhci_major, 0);
+<a name="l02266"></a>02266         <span class="keywordflow">if</span>(unlikely(device_register(&amp;vhci_device)))
+<a name="l02267"></a>02267         {
+<a name="l02268"></a>02268             <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register device %s\n"</span>, <span class="stringliteral">"vhci-ctrl"</span>);
+<a name="l02269"></a>02269         }
+<a name="l02270"></a>02270     }
+<a name="l02271"></a>02271 
+<a name="l02272"></a>02272 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02273"></a>02273 <span class="preprocessor"></span>    retval = driver_create_file(&amp;vhci_hcd_driver.driver, &amp;driver_attr_debug_output);
+<a name="l02274"></a>02274     <span class="keywordflow">if</span>(unlikely(retval != 0))
+<a name="l02275"></a>02275     {
+<a name="l02276"></a>02276         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"driver_create_file(&amp;vhci_hcd_driver, &amp;driver_attr_debug_output) failed\n"</span>);
+<a name="l02277"></a>02277         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"==&gt; ignoring\n"</span>);
+<a name="l02278"></a>02278     }
+<a name="l02279"></a>02279 <span class="preprocessor">#endif</span>
+<a name="l02280"></a>02280 <span class="preprocessor"></span>
+<a name="l02281"></a>02281 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02282"></a>02282 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCREGISTER     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>);
+<a name="l02283"></a>02283     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCPORTSTAT     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>);
+<a name="l02284"></a>02284     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK_RO = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>);
+<a name="l02285"></a>02285     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>);
+<a name="l02286"></a>02286     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCGIVEBACK     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>);
+<a name="l02287"></a>02287     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHDATA    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>);
+<a name="l02288"></a>02288 <span class="preprocessor">#endif</span>
+<a name="l02289"></a>02289 <span class="preprocessor"></span>
+<a name="l02290"></a>02290     <span class="keywordflow">return</span> 0;
+<a name="l02291"></a>02291 }
+<a name="l02292"></a>02292 <a class="code" href="usb-vhci-hcd_8c.html#960f82decaba583a9c7eec8a79789dc1">module_init</a>(<a class="code" href="usb-vhci-hcd_8c.html#2592d708cc006802b5c679c12779c163">init</a>);
+<a name="l02293"></a>02293 
+<a name="l02294"></a><a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">02294</a> <span class="keyword">static</span> <span class="keywordtype">void</span> __exit <a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">cleanup</a>(<span class="keywordtype">void</span>)
+<a name="l02295"></a>02295 {
+<a name="l02296"></a>02296 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02297"></a>02297 <span class="preprocessor"></span>    driver_remove_file(&amp;vhci_hcd_driver.driver, &amp;driver_attr_debug_output);
+<a name="l02298"></a>02298 <span class="preprocessor">#endif</span>
+<a name="l02299"></a>02299 <span class="preprocessor"></span>    device_unregister(&amp;vhci_device);
+<a name="l02300"></a>02300     class_unregister(&amp;vhci_class);
+<a name="l02301"></a>02301     unregister_chrdev(vhci_major, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02302"></a>02302     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02303"></a>02303     platform_driver_unregister(&amp;vhci_hcd_driver);
+<a name="l02304"></a>02304     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"bin weg\n"</span>);
+<a name="l02305"></a>02305 }
+<a name="l02306"></a>02306 <a class="code" href="usb-vhci-hcd_8c.html#26f1fe9613ac148f923593c5207c4499">module_exit</a>(<a class="code" href="usb-vhci-hcd_8c.html#05892a023f8cebf7a30dfd319be2a6d0">cleanup</a>);
+<a name="l02307"></a>02307 
+</pre></div><hr size="1"><address style="text-align: right;"><small>Generated on Thu Jun 10 21:20:21 2010 for usb_vhci_hcd by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

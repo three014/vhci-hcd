@@ -2058,15 +2058,14 @@ static inline int ioc_fetch_data32(struct vhci *vhc, struct usb_vhci_ioc_urb_dat
 }
 #endif
 
-static int device_ioctl(struct inode *inode,
-                        struct file *file,
-                        unsigned int cmd,
-                        unsigned long arg)
+static long device_do_ioctl(struct file *file,
+                           unsigned int cmd,
+                           void __user *arg)
 {
 	struct vhci_conf *conf;
 	struct usb_hcd *hcd;
 	struct vhci *vhc;
-	int ret = 0;
+	long ret = 0;
 	s16 timeout;
 
 	// Floods the logs
@@ -2075,9 +2074,9 @@ static int device_ioctl(struct inode *inode,
 	if(unlikely(_IOC_TYPE(cmd) != USB_VHCI_HCD_IOC_MAGIC)) return -ENOTTY;
 	if(unlikely(_IOC_NR(cmd) > USB_VHCI_HCD_IOC_MAXNR)) return -ENOTTY;
 
-	if(unlikely((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(VERIFY_WRITE, (void *)arg, _IOC_SIZE(cmd))))
+	if(unlikely((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(VERIFY_WRITE, arg, _IOC_SIZE(cmd))))
 		return -EFAULT;
-	if(unlikely((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(VERIFY_READ, (void *)arg, _IOC_SIZE(cmd))))
+	if(unlikely((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(VERIFY_READ, arg, _IOC_SIZE(cmd))))
 		return -EFAULT;
 
 	if(unlikely(cmd == USB_VHCI_HCD_IOCREGISTER))
@@ -2131,6 +2130,22 @@ static int device_ioctl(struct inode *inode,
 	return ret;
 }
 
+static long device_ioctl(struct file *file,
+                         unsigned int cmd,
+                         unsigned long arg)
+{
+	return device_do_ioctl(file, cmd, (void __user *)arg);
+}
+
+#ifdef CONFIG_COMPAT
+static long device_ioctl32(struct file *file,
+                           unsigned int cmd,
+                           unsigned long arg)
+{
+	return device_do_ioctl(file, cmd, compat_ptr(arg));
+}
+#endif
+
 static loff_t device_llseek(struct file *file, loff_t offset, int origin)
 {
 	vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
@@ -2138,13 +2153,16 @@ static loff_t device_llseek(struct file *file, loff_t offset, int origin)
 }
 
 static struct file_operations fops = {
-	.owner   = THIS_MODULE,
-	.llseek  = device_llseek,
-	.read    = device_read,
-	.write   = device_write,
-	.ioctl   = device_ioctl,
-	.open    = device_open,
-	.release = device_release // a.k.a. close
+	.owner          = THIS_MODULE,
+	.llseek         = device_llseek,
+	.read           = device_read,
+	.write          = device_write,
+	.unlocked_ioctl = device_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl   = device_ioctl32,
+#endif
+	.open           = device_open,
+	.release        = device_release // a.k.a. close
 };
 
 #ifdef DEBUG

@@ -1,4 +1,4 @@
-<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="172,5,265,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="160,5,277,32">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="175,56,263,83">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="153,107,284,133">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="151,157,287,184">
@@ -12,3 +12,4 @@
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="179,563,259,589">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="151,613,287,640">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="151,664,287,691">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="337,5,431,32">

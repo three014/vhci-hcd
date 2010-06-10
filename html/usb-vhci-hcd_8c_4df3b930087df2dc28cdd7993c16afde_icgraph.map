@@ -1,6 +1,7 @@
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="360,5,475,32">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="143,95,279,121">
-<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="719,56,812,83">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="717,56,835,83">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="884,56,977,83">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="328,56,507,83">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="335,107,500,133">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="351,157,484,184">

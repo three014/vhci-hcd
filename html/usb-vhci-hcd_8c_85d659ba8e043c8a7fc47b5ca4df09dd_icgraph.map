@@ -4,4 +4,5 @@
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="483,5,587,32">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="467,56,603,83">
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="471,107,599,133">
-<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="652,5,745,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="651,5,768,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="817,5,911,32">

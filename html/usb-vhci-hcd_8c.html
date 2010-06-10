@@ -100,9 +100,11 @@ Include dependency graph for usb-vhci-hcd.c:</div>
 
 <tr><td class="memItemLeft" nowrap align="right" valign="top">static&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#6697c4f13b6d038d7d26b61aa753e58d">DEVICE_ATTR</a> (urbs_inbox, S_IRUSR, show_urbs, NULL)</td></tr>
 
+<tr><td class="memItemLeft" nowrap align="right" valign="top">static long&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">device_do_ioctl</a> (struct file *file, unsigned int cmd, void __user *arg)</td></tr>
+
 <tr><td class="memItemLeft" nowrap align="right" valign="top">static int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#af4d1da19a68d7b6944c5b59fc4d2bf7">device_enum</a> (struct device *dev, void *data)</td></tr>
 
-<tr><td class="memItemLeft" nowrap align="right" valign="top">static int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968">device_ioctl</a> (struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">static long&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1">device_ioctl</a> (struct file *file, unsigned int cmd, unsigned long arg)</td></tr>
 
 <tr><td class="memItemLeft" nowrap align="right" valign="top">static loff_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a> (struct file *file, loff_t offset, int origin)</td></tr>
 
@@ -272,7 +274,7 @@ platform_driver&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00057">57</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02202">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02220">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>.</p>
 
 </div>
 </div><p>
@@ -308,7 +310,7 @@ platform_driver&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00058">58</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02202">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02220">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>.</p>
 
 </div>
 </div><p>
@@ -361,7 +363,7 @@ platform_driver&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00070">70</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02276">cleanup()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02134">device_llseek()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01211">device_open()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01352">device_read()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01327">device_release()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01361">device_write()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02294">cleanup()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02149">device_llseek()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01211">device_open()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01352">device_read()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01327">device_release()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01361">device_write()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>.</p>
 
 </div>
 </div><p>
@@ -391,7 +393,7 @@ platform_driver&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00063">63</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l01211">device_open()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00789">dump_urb()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02202">init()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00218">vhci_urb_giveback()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l01211">device_open()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00789">dump_urb()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02220">init()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00218">vhci_urb_giveback()</a>.</p>
 
 </div>
 </div><p>
@@ -449,20 +451,20 @@ platform_driver&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02276">2276</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02294">2294</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00086">driver_name</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00070">vhci_dbg</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02277"></a>02277 {
-<a name="l02278"></a>02278 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02279"></a>02279 <span class="preprocessor"></span>    driver_remove_file(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>.driver, &amp;driver_attr_debug_output);
-<a name="l02280"></a>02280 <span class="preprocessor">#endif</span>
-<a name="l02281"></a>02281 <span class="preprocessor"></span>    device_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>);
-<a name="l02282"></a>02282     class_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a>);
-<a name="l02283"></a>02283     unregister_chrdev(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02284"></a>02284     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02285"></a>02285     platform_driver_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
-<a name="l02286"></a>02286     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"bin weg\n"</span>);
-<a name="l02287"></a>02287 }
+<div class="fragment"><pre class="fragment"><a name="l02295"></a>02295 {
+<a name="l02296"></a>02296 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02297"></a>02297 <span class="preprocessor"></span>    driver_remove_file(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>.driver, &amp;driver_attr_debug_output);
+<a name="l02298"></a>02298 <span class="preprocessor">#endif</span>
+<a name="l02299"></a>02299 <span class="preprocessor"></span>    device_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>);
+<a name="l02300"></a>02300     class_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a>);
+<a name="l02301"></a>02301     unregister_chrdev(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02302"></a>02302     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02303"></a>02303     platform_driver_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
+<a name="l02304"></a>02304     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"bin weg\n"</span>);
+<a name="l02305"></a>02305 }
 </pre></div>
 <p>
 
@@ -505,7 +507,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_d27a1cb6f41e63643c19d60699b542e1_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_d27a1cb6f41e63643c19d60699b542e1_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_d27a1cb6f41e63643c19d60699b542e1_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="172,5,287,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="337,5,431,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="172,5,287,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="336,5,453,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="503,5,596,32"></map>
 </div>
 
 </div>
@@ -551,7 +553,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_83ef7539910f4da5a423ba21ebd717ee_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_83ef7539910f4da5a423ba21ebd717ee_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_83ef7539910f4da5a423ba21ebd717ee_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="172,5,287,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="337,5,431,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="172,5,287,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="336,5,453,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="503,5,596,32"></map>
 </div>
 
 </div>
@@ -758,6 +760,135 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div><p>
+<a class="anchor" name="a0b1c2d28cb24a9a4a3acaa98a2e96ca"></a><!-- doxytag: member="usb-vhci-hcd.c::device_do_ioctl" ref="a0b1c2d28cb24a9a4a3acaa98a2e96ca" args="(struct file *file, unsigned int cmd, void __user *arg)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static long device_do_ioctl           </td>
+          <td>(</td>
+          <td class="paramtype">struct file *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&nbsp;</td>
+          <td class="paramname"> <em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void __user *&nbsp;</td>
+          <td class="paramname"> <em>arg</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">2061</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+
+<p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00157">hcd_to_vhci()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01971">ioc_fetch_data()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01518">ioc_fetch_work()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01851">ioc_giveback()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01371">ioc_port_stat()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00119">vhci_conf::pdev</a>, <a class="el" href="usb-vhci_8h-source.html#l00206">USB_VHCI_HCD_IOC_MAGIC</a>, <a class="el" href="usb-vhci_8h-source.html#l00224">USB_VHCI_HCD_IOC_MAXNR</a>, <a class="el" href="usb-vhci_8h-source.html#l00220">USB_VHCI_HCD_IOCFETCHDATA</a>, <a class="el" href="usb-vhci_8h-source.html#l00222">USB_VHCI_HCD_IOCFETCHDATA32</a>, <a class="el" href="usb-vhci_8h-source.html#l00214">USB_VHCI_HCD_IOCFETCHWORK</a>, <a class="el" href="usb-vhci_8h-source.html#l00212">USB_VHCI_HCD_IOCFETCHWORK_RO</a>, <a class="el" href="usb-vhci_8h-source.html#l00216">USB_VHCI_HCD_IOCGIVEBACK</a>, <a class="el" href="usb-vhci_8h-source.html#l00218">USB_VHCI_HCD_IOCGIVEBACK32</a>, <a class="el" href="usb-vhci_8h-source.html#l00209">USB_VHCI_HCD_IOCPORTSTAT</a>, and <a class="el" href="usb-vhci_8h-source.html#l00207">USB_VHCI_HCD_IOCREGISTER</a>.</p>
+
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02133">device_ioctl()</a>.</p>
+<div class="fragment"><pre class="fragment"><a name="l02064"></a>02064 {
+<a name="l02065"></a>02065     <span class="keyword">struct </span><a class="code" href="structvhci__conf.html">vhci_conf</a> *conf;
+<a name="l02066"></a>02066     <span class="keyword">struct </span>usb_hcd *hcd;
+<a name="l02067"></a>02067     <span class="keyword">struct </span><a class="code" href="structvhci.html">vhci</a> *vhc;
+<a name="l02068"></a>02068     <span class="keywordtype">long</span> ret = 0;
+<a name="l02069"></a>02069     s16 timeout;
+<a name="l02070"></a>02070 
+<a name="l02071"></a>02071     <span class="comment">// Floods the logs</span>
+<a name="l02072"></a>02072     <span class="comment">//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);</span>
+<a name="l02073"></a>02073 
+<a name="l02074"></a>02074     <span class="keywordflow">if</span>(unlikely(_IOC_TYPE(cmd) != <a class="code" href="usb-vhci_8h.html#7ddf35105b6e939c586b5f960713e38c">USB_VHCI_HCD_IOC_MAGIC</a>)) <span class="keywordflow">return</span> -ENOTTY;
+<a name="l02075"></a>02075     <span class="keywordflow">if</span>(unlikely(_IOC_NR(cmd) &gt; <a class="code" href="usb-vhci_8h.html#d6986b66e7a5e58b0416134e475af05b">USB_VHCI_HCD_IOC_MAXNR</a>)) <span class="keywordflow">return</span> -ENOTTY;
+<a name="l02076"></a>02076 
+<a name="l02077"></a>02077     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_READ) &amp;&amp; !access_ok(VERIFY_WRITE, arg, _IOC_SIZE(cmd))))
+<a name="l02078"></a>02078         <span class="keywordflow">return</span> -EFAULT;
+<a name="l02079"></a>02079     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_WRITE) &amp;&amp; !access_ok(VERIFY_READ, arg, _IOC_SIZE(cmd))))
+<a name="l02080"></a>02080         <span class="keywordflow">return</span> -EFAULT;
+<a name="l02081"></a>02081 
+<a name="l02082"></a>02082     <span class="keywordflow">if</span>(unlikely(cmd == <a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>))
+<a name="l02083"></a>02083         <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255">ioc_register</a>(file, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__register.html">usb_vhci_ioc_register</a> __user *)arg);
+<a name="l02084"></a>02084 
+<a name="l02085"></a>02085     conf = file-&gt;private_data;
+<a name="l02086"></a>02086 
+<a name="l02087"></a>02087     <span class="keywordflow">if</span>(unlikely(!conf))
+<a name="l02088"></a>02088         <span class="keywordflow">return</span> -EPROTO;
+<a name="l02089"></a>02089 
+<a name="l02090"></a>02090     hcd = platform_get_drvdata(conf-&gt;<a class="code" href="structvhci__conf.html#f8e1f01d20ec1ab975561a5013d079cb">pdev</a>);
+<a name="l02091"></a>02091     vhc = <a class="code" href="usb-vhci-hcd_8c.html#5cb2205ae7102f35acff3976061cd536">hcd_to_vhci</a>(hcd);
+<a name="l02092"></a>02092 
+<a name="l02093"></a>02093     <span class="keywordflow">switch</span>(__builtin_expect(cmd, <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>))
+<a name="l02094"></a>02094     {
+<a name="l02095"></a>02095     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>:
+<a name="l02096"></a>02096         ret = <a class="code" href="usb-vhci-hcd_8c.html#929681909872034797aa47cdfaedb75b">ioc_port_stat</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__port__stat.html">usb_vhci_ioc_port_stat</a> __user *)arg);
+<a name="l02097"></a>02097         <span class="keywordflow">break</span>;
+<a name="l02098"></a>02098 
+<a name="l02099"></a>02099     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>:
+<a name="l02100"></a>02100         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, 100);
+<a name="l02101"></a>02101         <span class="keywordflow">break</span>;
+<a name="l02102"></a>02102 
+<a name="l02103"></a>02103     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>:
+<a name="l02104"></a>02104         __get_user(timeout, &amp;((<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg)-&gt;timeout);
+<a name="l02105"></a>02105         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, timeout);
+<a name="l02106"></a>02106         <span class="keywordflow">break</span>;
+<a name="l02107"></a>02107 
+<a name="l02108"></a>02108     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>:
+<a name="l02109"></a>02109         ret = <a class="code" href="usb-vhci-hcd_8c.html#87200ed5c692f0211815b055b32b19f1">ioc_giveback</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__giveback.html">usb_vhci_ioc_giveback</a> __user *)arg);
+<a name="l02110"></a>02110         <span class="keywordflow">break</span>;
+<a name="l02111"></a>02111 
+<a name="l02112"></a>02112     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>:
+<a name="l02113"></a>02113         ret = <a class="code" href="usb-vhci-hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a">ioc_fetch_data</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__urb__data.html">usb_vhci_ioc_urb_data</a> __user *)arg);
+<a name="l02114"></a>02114         <span class="keywordflow">break</span>;
+<a name="l02115"></a>02115 
+<a name="l02116"></a>02116 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
+<a name="l02117"></a>02117 <span class="preprocessor"></span>    <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#8990c8d5ab4c686b60d34dcf659fbf29">USB_VHCI_HCD_IOCGIVEBACK32</a>:
+<a name="l02118"></a>02118         ret = ioc_giveback32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_giveback32 __user *)arg);
+<a name="l02119"></a>02119         <span class="keywordflow">break</span>;
+<a name="l02120"></a>02120 
+<a name="l02121"></a>02121     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5480af655385635d5bc3a911822cdc5e">USB_VHCI_HCD_IOCFETCHDATA32</a>:
+<a name="l02122"></a>02122         ret = ioc_fetch_data32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_urb_data32 __user *)arg);
+<a name="l02123"></a>02123         <span class="keywordflow">break</span>;
+<a name="l02124"></a>02124 <span class="preprocessor">#endif</span>
+<a name="l02125"></a>02125 <span class="preprocessor"></span>
+<a name="l02126"></a>02126     <span class="keywordflow">default</span>:
+<a name="l02127"></a>02127         ret = -ENOTTY;
+<a name="l02128"></a>02128     }
+<a name="l02129"></a>02129 
+<a name="l02130"></a>02130     <span class="keywordflow">return</span> ret;
+<a name="l02131"></a>02131 }
+</pre></div>
+<p>
+
+<p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dynsection">
+<p><center><img src="usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_cgraph.png" border="0" usemap="#usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_cgraph_map" alt=""></center>
+<map name="usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_cgraph_map">
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#5cb2205ae7102f35acff3976061cd536" title="hcd_to_vhci" alt="" coords="180,512,276,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="171,563,285,589"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="365,436,480,463"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="177,664,279,691"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="619,715,723,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="181,765,275,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="333,132,512,159"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="900,575,977,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#3239c5bfd0c0a11b1377a726a8eda98f" title="is_urb_dir_in" alt="" coords="621,107,720,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#16448e55dd0962d64927bc1d419b2238" title="urbp_from_handle" alt="" coords="601,157,740,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#266cde7bb57f9edbb6cc5c3f8ac76c2a" title="urbp_from_handle_in_cancel" alt="" coords="569,5,772,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1304cf94d1210cc6c73198cc88cfa28c" title="urbp_from_handle_in_canceling" alt="" coords="560,56,781,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="603,259,739,285"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="896,208,981,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a70aa0c4b41ff9ade79ee4a4f4e74019" title="get_status_str" alt="" coords="1113,233,1225,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="1121,575,1217,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d27a1cb6f41e63643c19d60699b542e1" title="conv_urb_flags" alt="" coords="612,411,729,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#83ef7539910f4da5a423ba21ebd717ee" title="conv_urb_type" alt="" coords="613,461,728,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#052202a54d37715152bc6a3e3f32f8d5" title="has_work" alt="" coords="631,512,711,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#60983b4f74308854907024142f4d933c" title="maybe_set_status" alt="" coords="601,360,740,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="340,221,505,248"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="831,715,1047,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#85d659ba8e043c8a7fc47b5ca4df09dd" title="trigger_work_event" alt="" coords="1097,715,1241,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#af4d1da19a68d7b6944c5b59fc4d2bf7" title="device_enum" alt="" coords="369,765,476,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#8f221917a707a50e5e3b9edd016a20e3" title="vhci_dev_name" alt="" coords="363,816,483,843"></map>
+</div>
+
+<p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<p><center><img src="usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_icgraph_map" alt=""></center>
+<map name="usb-vhci-hcd_8c_a0b1c2d28cb24a9a4a3acaa98a2e96ca_icgraph_map">
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="172,5,265,32"></map>
+</div>
+
+</div>
+</div><p>
 <a class="anchor" name="af4d1da19a68d7b6944c5b59fc4d2bf7"></a><!-- doxytag: member="usb-vhci-hcd.c::device_enum" ref="af4d1da19a68d7b6944c5b59fc4d2bf7" args="(struct device *dev, void *data)" -->
 <div class="memitem">
 <div class="memproto">
@@ -802,24 +933,18 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_af4d1da19a68d7b6944c5b59fc4d2bf7_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_af4d1da19a68d7b6944c5b59fc4d2bf7_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_af4d1da19a68d7b6944c5b59fc4d2bf7_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="161,5,255,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="305,5,399,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="161,5,255,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="304,5,421,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="471,5,564,32"></map>
 </div>
 
 </div>
 </div><p>
-<a class="anchor" name="1c1cae52ee0c9dfe8919aaa013a3c968"></a><!-- doxytag: member="usb-vhci-hcd.c::device_ioctl" ref="1c1cae52ee0c9dfe8919aaa013a3c968" args="(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)" -->
+<a class="anchor" name="7469c0e02a3b12a90b9505401fbac6a1"></a><!-- doxytag: member="usb-vhci-hcd.c::device_ioctl" ref="7469c0e02a3b12a90b9505401fbac6a1" args="(struct file *file, unsigned int cmd, unsigned long arg)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static int device_ioctl           </td>
+          <td class="memname">static long device_ioctl           </td>
           <td>(</td>
-          <td class="paramtype">struct inode *&nbsp;</td>
-          <td class="paramname"> <em>inode</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">struct file *&nbsp;</td>
           <td class="paramname"> <em>file</em>, </td>
         </tr>
@@ -846,77 +971,12 @@ Here is the caller graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">2061</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02133">2133</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00157">hcd_to_vhci()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01971">ioc_fetch_data()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01518">ioc_fetch_work()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01851">ioc_giveback()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01371">ioc_port_stat()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00119">vhci_conf::pdev</a>, <a class="el" href="usb-vhci_8h-source.html#l00206">USB_VHCI_HCD_IOC_MAGIC</a>, <a class="el" href="usb-vhci_8h-source.html#l00224">USB_VHCI_HCD_IOC_MAXNR</a>, <a class="el" href="usb-vhci_8h-source.html#l00220">USB_VHCI_HCD_IOCFETCHDATA</a>, <a class="el" href="usb-vhci_8h-source.html#l00222">USB_VHCI_HCD_IOCFETCHDATA32</a>, <a class="el" href="usb-vhci_8h-source.html#l00214">USB_VHCI_HCD_IOCFETCHWORK</a>, <a class="el" href="usb-vhci_8h-source.html#l00212">USB_VHCI_HCD_IOCFETCHWORK_RO</a>, <a class="el" href="usb-vhci_8h-source.html#l00216">USB_VHCI_HCD_IOCGIVEBACK</a>, <a class="el" href="usb-vhci_8h-source.html#l00218">USB_VHCI_HCD_IOCGIVEBACK32</a>, <a class="el" href="usb-vhci_8h-source.html#l00209">USB_VHCI_HCD_IOCPORTSTAT</a>, and <a class="el" href="usb-vhci_8h-source.html#l00207">USB_VHCI_HCD_IOCREGISTER</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02065"></a>02065 {
-<a name="l02066"></a>02066     <span class="keyword">struct </span><a class="code" href="structvhci__conf.html">vhci_conf</a> *conf;
-<a name="l02067"></a>02067     <span class="keyword">struct </span>usb_hcd *hcd;
-<a name="l02068"></a>02068     <span class="keyword">struct </span><a class="code" href="structvhci.html">vhci</a> *vhc;
-<a name="l02069"></a>02069     <span class="keywordtype">int</span> ret = 0;
-<a name="l02070"></a>02070     s16 timeout;
-<a name="l02071"></a>02071 
-<a name="l02072"></a>02072     <span class="comment">// Floods the logs</span>
-<a name="l02073"></a>02073     <span class="comment">//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);</span>
-<a name="l02074"></a>02074 
-<a name="l02075"></a>02075     <span class="keywordflow">if</span>(unlikely(_IOC_TYPE(cmd) != <a class="code" href="usb-vhci_8h.html#7ddf35105b6e939c586b5f960713e38c">USB_VHCI_HCD_IOC_MAGIC</a>)) <span class="keywordflow">return</span> -ENOTTY;
-<a name="l02076"></a>02076     <span class="keywordflow">if</span>(unlikely(_IOC_NR(cmd) &gt; <a class="code" href="usb-vhci_8h.html#d6986b66e7a5e58b0416134e475af05b">USB_VHCI_HCD_IOC_MAXNR</a>)) <span class="keywordflow">return</span> -ENOTTY;
-<a name="l02077"></a>02077 
-<a name="l02078"></a>02078     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_READ) &amp;&amp; !access_ok(VERIFY_WRITE, (<span class="keywordtype">void</span> *)arg, _IOC_SIZE(cmd))))
-<a name="l02079"></a>02079         <span class="keywordflow">return</span> -EFAULT;
-<a name="l02080"></a>02080     <span class="keywordflow">if</span>(unlikely((_IOC_DIR(cmd) &amp; _IOC_WRITE) &amp;&amp; !access_ok(VERIFY_READ, (<span class="keywordtype">void</span> *)arg, _IOC_SIZE(cmd))))
-<a name="l02081"></a>02081         <span class="keywordflow">return</span> -EFAULT;
-<a name="l02082"></a>02082 
-<a name="l02083"></a>02083     <span class="keywordflow">if</span>(unlikely(cmd == <a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>))
-<a name="l02084"></a>02084         <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255">ioc_register</a>(file, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__register.html">usb_vhci_ioc_register</a> __user *)arg);
-<a name="l02085"></a>02085 
-<a name="l02086"></a>02086     conf = file-&gt;private_data;
-<a name="l02087"></a>02087 
-<a name="l02088"></a>02088     <span class="keywordflow">if</span>(unlikely(!conf))
-<a name="l02089"></a>02089         <span class="keywordflow">return</span> -EPROTO;
-<a name="l02090"></a>02090 
-<a name="l02091"></a>02091     hcd = platform_get_drvdata(conf-&gt;<a class="code" href="structvhci__conf.html#f8e1f01d20ec1ab975561a5013d079cb">pdev</a>);
-<a name="l02092"></a>02092     vhc = <a class="code" href="usb-vhci-hcd_8c.html#5cb2205ae7102f35acff3976061cd536">hcd_to_vhci</a>(hcd);
-<a name="l02093"></a>02093 
-<a name="l02094"></a>02094     <span class="keywordflow">switch</span>(__builtin_expect(cmd, <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>))
-<a name="l02095"></a>02095     {
-<a name="l02096"></a>02096     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>:
-<a name="l02097"></a>02097         ret = <a class="code" href="usb-vhci-hcd_8c.html#929681909872034797aa47cdfaedb75b">ioc_port_stat</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__port__stat.html">usb_vhci_ioc_port_stat</a> __user *)arg);
-<a name="l02098"></a>02098         <span class="keywordflow">break</span>;
-<a name="l02099"></a>02099 
-<a name="l02100"></a>02100     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>:
-<a name="l02101"></a>02101         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, 100);
-<a name="l02102"></a>02102         <span class="keywordflow">break</span>;
-<a name="l02103"></a>02103 
-<a name="l02104"></a>02104     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>:
-<a name="l02105"></a>02105         __get_user(timeout, &amp;((<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg)-&gt;timeout);
-<a name="l02106"></a>02106         ret = <a class="code" href="usb-vhci-hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c">ioc_fetch_work</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__work.html">usb_vhci_ioc_work</a> __user *)arg, timeout);
-<a name="l02107"></a>02107         <span class="keywordflow">break</span>;
-<a name="l02108"></a>02108 
-<a name="l02109"></a>02109     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>:
-<a name="l02110"></a>02110         ret = <a class="code" href="usb-vhci-hcd_8c.html#87200ed5c692f0211815b055b32b19f1">ioc_giveback</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__giveback.html">usb_vhci_ioc_giveback</a> __user *)arg);
-<a name="l02111"></a>02111         <span class="keywordflow">break</span>;
-<a name="l02112"></a>02112 
-<a name="l02113"></a>02113     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>:
-<a name="l02114"></a>02114         ret = <a class="code" href="usb-vhci-hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a">ioc_fetch_data</a>(vhc, (<span class="keyword">struct</span> <a class="code" href="structusb__vhci__ioc__urb__data.html">usb_vhci_ioc_urb_data</a> __user *)arg);
-<a name="l02115"></a>02115         <span class="keywordflow">break</span>;
-<a name="l02116"></a>02116 
-<a name="l02117"></a>02117 <span class="preprocessor">#ifdef CONFIG_COMPAT</span>
-<a name="l02118"></a>02118 <span class="preprocessor"></span>    <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#8990c8d5ab4c686b60d34dcf659fbf29">USB_VHCI_HCD_IOCGIVEBACK32</a>:
-<a name="l02119"></a>02119         ret = ioc_giveback32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_giveback32 __user *)arg);
-<a name="l02120"></a>02120         <span class="keywordflow">break</span>;
-<a name="l02121"></a>02121 
-<a name="l02122"></a>02122     <span class="keywordflow">case</span> <a class="code" href="usb-vhci_8h.html#5480af655385635d5bc3a911822cdc5e">USB_VHCI_HCD_IOCFETCHDATA32</a>:
-<a name="l02123"></a>02123         ret = ioc_fetch_data32(vhc, (<span class="keyword">struct</span> usb_vhci_ioc_urb_data32 __user *)arg);
-<a name="l02124"></a>02124         <span class="keywordflow">break</span>;
-<a name="l02125"></a>02125 <span class="preprocessor">#endif</span>
-<a name="l02126"></a>02126 <span class="preprocessor"></span>
-<a name="l02127"></a>02127     <span class="keywordflow">default</span>:
-<a name="l02128"></a>02128         ret = -ENOTTY;
-<a name="l02129"></a>02129     }
-<a name="l02130"></a>02130 
-<a name="l02131"></a>02131     <span class="keywordflow">return</span> ret;
-<a name="l02132"></a>02132 }
+<p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
+<div class="fragment"><pre class="fragment"><a name="l02136"></a>02136 {
+<a name="l02137"></a>02137     <span class="keywordflow">return</span> <a class="code" href="usb-vhci-hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca">device_do_ioctl</a>(file, cmd, (<span class="keywordtype">void</span> __user *)arg);
+<a name="l02138"></a>02138 }
 </pre></div>
 <p>
 
@@ -924,9 +984,9 @@ Here is the caller graph for this function:</div>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
-<p><center><img src="usb-vhci-hcd_8c_1c1cae52ee0c9dfe8919aaa013a3c968_cgraph.png" border="0" usemap="#usb-vhci-hcd_8c_1c1cae52ee0c9dfe8919aaa013a3c968_cgraph_map" alt=""></center>
-<map name="usb-vhci-hcd_8c_1c1cae52ee0c9dfe8919aaa013a3c968_cgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#5cb2205ae7102f35acff3976061cd536" title="hcd_to_vhci" alt="" coords="159,512,255,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="149,563,264,589"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="344,436,459,463"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="156,664,257,691"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="597,715,701,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="160,765,253,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="312,132,491,159"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="879,575,956,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#3239c5bfd0c0a11b1377a726a8eda98f" title="is_urb_dir_in" alt="" coords="600,107,699,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#16448e55dd0962d64927bc1d419b2238" title="urbp_from_handle" alt="" coords="580,157,719,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#266cde7bb57f9edbb6cc5c3f8ac76c2a" title="urbp_from_handle_in_cancel" alt="" coords="548,5,751,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1304cf94d1210cc6c73198cc88cfa28c" title="urbp_from_handle_in_canceling" alt="" coords="539,56,760,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="581,259,717,285"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="875,208,960,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a70aa0c4b41ff9ade79ee4a4f4e74019" title="get_status_str" alt="" coords="1092,233,1204,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="1100,575,1196,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d27a1cb6f41e63643c19d60699b542e1" title="conv_urb_flags" alt="" coords="591,411,708,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#83ef7539910f4da5a423ba21ebd717ee" title="conv_urb_type" alt="" coords="592,461,707,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#052202a54d37715152bc6a3e3f32f8d5" title="has_work" alt="" coords="609,512,689,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#60983b4f74308854907024142f4d933c" title="maybe_set_status" alt="" coords="580,360,719,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="319,221,484,248"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="809,715,1025,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#85d659ba8e043c8a7fc47b5ca4df09dd" title="trigger_work_event" alt="" coords="1076,715,1220,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#af4d1da19a68d7b6944c5b59fc4d2bf7" title="device_enum" alt="" coords="348,765,455,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#8f221917a707a50e5e3b9edd016a20e3" title="vhci_dev_name" alt="" coords="341,816,461,843"></map>
+<p><center><img src="usb-vhci-hcd_8c_7469c0e02a3b12a90b9505401fbac6a1_cgraph.png" border="0" usemap="#usb-vhci-hcd_8c_7469c0e02a3b12a90b9505401fbac6a1_cgraph_map" alt=""></center>
+<map name="usb-vhci-hcd_8c_7469c0e02a3b12a90b9505401fbac6a1_cgraph_map">
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="149,639,267,665"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#5cb2205ae7102f35acff3976061cd536" title="hcd_to_vhci" alt="" coords="324,512,420,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="315,563,429,589"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="509,436,624,463"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="321,664,423,691"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="763,715,867,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="325,765,419,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="477,132,656,159"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="1044,575,1121,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#3239c5bfd0c0a11b1377a726a8eda98f" title="is_urb_dir_in" alt="" coords="765,107,864,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#16448e55dd0962d64927bc1d419b2238" title="urbp_from_handle" alt="" coords="745,157,884,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#266cde7bb57f9edbb6cc5c3f8ac76c2a" title="urbp_from_handle_in_cancel" alt="" coords="713,5,916,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1304cf94d1210cc6c73198cc88cfa28c" title="urbp_from_handle_in_canceling" alt="" coords="704,56,925,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="747,259,883,285"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="1040,208,1125,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a70aa0c4b41ff9ade79ee4a4f4e74019" title="get_status_str" alt="" coords="1257,233,1369,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#59d784aa0cd4089931e07f2783ffeac3" title="vhci_to_hcd" alt="" coords="1265,575,1361,601"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d27a1cb6f41e63643c19d60699b542e1" title="conv_urb_flags" alt="" coords="756,411,873,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#83ef7539910f4da5a423ba21ebd717ee" title="conv_urb_type" alt="" coords="757,461,872,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#052202a54d37715152bc6a3e3f32f8d5" title="has_work" alt="" coords="775,512,855,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#60983b4f74308854907024142f4d933c" title="maybe_set_status" alt="" coords="745,360,884,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="484,221,649,248"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="975,715,1191,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#85d659ba8e043c8a7fc47b5ca4df09dd" title="trigger_work_event" alt="" coords="1241,715,1385,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#af4d1da19a68d7b6944c5b59fc4d2bf7" title="device_enum" alt="" coords="513,765,620,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#8f221917a707a50e5e3b9edd016a20e3" title="vhci_dev_name" alt="" coords="507,816,627,843"></map>
 </div>
 
 </div>
@@ -964,13 +1024,13 @@ Here is the call graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02134">2134</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02149">2149</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00070">vhci_dbg</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02135"></a>02135 {
-<a name="l02136"></a>02136     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"%s(file=%p)\n"</span>, __FUNCTION__, file);
-<a name="l02137"></a>02137     <span class="keywordflow">return</span> -ESPIPE;
-<a name="l02138"></a>02138 }
+<div class="fragment"><pre class="fragment"><a name="l02150"></a>02150 {
+<a name="l02151"></a>02151     <a class="code" href="usb-vhci-hcd_8c.html#23f76d8a7db5dc31aa53907cab709ace">vhci_dbg</a>(<span class="stringliteral">"%s(file=%p)\n"</span>, __FUNCTION__, file);
+<a name="l02152"></a>02152     <span class="keywordflow">return</span> -ESPIPE;
+<a name="l02153"></a>02153 }
 </pre></div>
 <p>
 
@@ -1396,7 +1456,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_4df3b930087df2dc28cdd7993c16afde_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_4df3b930087df2dc28cdd7993c16afde_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_4df3b930087df2dc28cdd7993c16afde_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="360,5,475,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="143,95,279,121"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="719,56,812,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="328,56,507,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="335,107,500,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="351,157,484,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="349,208,485,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="555,56,669,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="561,107,663,133"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="360,5,475,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="143,95,279,121"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="717,56,835,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="884,56,977,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="328,56,507,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="335,107,500,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="351,157,484,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="349,208,485,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="555,56,669,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="561,107,663,133"></map>
 </div>
 
 </div>
@@ -1441,7 +1501,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_a70aa0c4b41ff9ade79ee4a4f4e74019_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_a70aa0c4b41ff9ade79ee4a4f4e74019_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_a70aa0c4b41ff9ade79ee4a4f4e74019_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="169,44,255,71"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="305,95,441,121"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="523,5,637,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="881,56,975,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="491,56,669,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="497,107,663,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="513,157,647,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="512,208,648,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="717,56,832,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="724,107,825,133"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4df3b930087df2dc28cdd7993c16afde" title="dump_urb" alt="" coords="169,44,255,71"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="305,95,441,121"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="523,5,637,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="880,56,997,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="1047,56,1140,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="491,56,669,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="497,107,663,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="513,157,647,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="512,208,648,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="717,56,832,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="724,107,825,133"></map>
 </div>
 
 </div>
@@ -1489,7 +1549,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_052202a54d37715152bc6a3e3f32f8d5_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_052202a54d37715152bc6a3e3f32f8d5_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_052202a54d37715152bc6a3e3f32f8d5_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="137,5,252,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="303,5,396,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="137,5,252,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="301,5,419,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="468,5,561,32"></map>
 </div>
 
 </div>
@@ -1514,7 +1574,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00157">157</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00922">show_urbs()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00728">vhci_bus_resume()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00693">vhci_bus_suspend()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01058">vhci_get_frame()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01106">vhci_hcd_remove()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01173">vhci_hcd_resume()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01151">vhci_hcd_suspend()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00442">vhci_hub_control()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00363">vhci_hub_status()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00967">vhci_start()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01033">vhci_stop()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00300">vhci_urb_dequeue()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00257">vhci_urb_enqueue()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00922">show_urbs()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00728">vhci_bus_resume()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00693">vhci_bus_suspend()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01058">vhci_get_frame()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01106">vhci_hcd_remove()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01173">vhci_hcd_resume()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01151">vhci_hcd_suspend()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00442">vhci_hub_control()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00363">vhci_hub_status()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00967">vhci_start()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01033">vhci_stop()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00300">vhci_urb_dequeue()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00257">vhci_urb_enqueue()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l00158"></a>00158 {
 <a name="l00159"></a>00159     <span class="keywordflow">return</span> (<span class="keyword">struct</span> <a class="code" href="structvhci.html">vhci</a> *)(hcd-&gt;hcd_priv);
 <a name="l00160"></a>00160 }
@@ -1527,7 +1587,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_5cb2205ae7102f35acff3976061cd536_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_5cb2205ae7102f35acff3976061cd536_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_5cb2205ae7102f35acff3976061cd536_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="172,5,265,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="175,56,263,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="153,107,284,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="151,157,287,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="159,208,279,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="152,259,285,285"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="153,309,284,336"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="151,360,287,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="155,411,283,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="157,461,280,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="177,512,260,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="179,563,259,589"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="151,613,287,640"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="151,664,287,691"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="160,5,277,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="175,56,263,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="153,107,284,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="151,157,287,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="159,208,279,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="152,259,285,285"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="153,309,284,336"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="151,360,287,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="155,411,283,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="157,461,280,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="177,512,260,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="179,563,259,589"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="151,613,287,640"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="151,664,287,691"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="337,5,431,32"></map>
 </div>
 
 </div>
@@ -1626,80 +1686,80 @@ Here is the caller graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02202">2202</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02220">2220</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00057">DRIVER_DESC</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00086">driver_name</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00058">DRIVER_VERSION</a>, <a class="el" href="usb-vhci_8h-source.html#l00220">USB_VHCI_HCD_IOCFETCHDATA</a>, <a class="el" href="usb-vhci_8h-source.html#l00214">USB_VHCI_HCD_IOCFETCHWORK</a>, <a class="el" href="usb-vhci_8h-source.html#l00212">USB_VHCI_HCD_IOCFETCHWORK_RO</a>, <a class="el" href="usb-vhci_8h-source.html#l00216">USB_VHCI_HCD_IOCGIVEBACK</a>, <a class="el" href="usb-vhci_8h-source.html#l00209">USB_VHCI_HCD_IOCPORTSTAT</a>, <a class="el" href="usb-vhci_8h-source.html#l00207">USB_VHCI_HCD_IOCREGISTER</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00063">vhci_printk</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02203"></a>02203 {
-<a name="l02204"></a>02204     <span class="keywordtype">int</span> retval;
-<a name="l02205"></a>02205 
-<a name="l02206"></a>02206     <span class="keywordflow">if</span>(usb_disabled()) <span class="keywordflow">return</span> -ENODEV;
-<a name="l02207"></a>02207 
-<a name="l02208"></a>02208     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <a class="code" href="usb-vhci-hcd_8c.html#ae26107a17c06584f8bbd0d6fb91013d">DRIVER_DESC</a> <span class="stringliteral">" -- Version "</span> <a class="code" href="usb-vhci-hcd_8c.html#e578001fe043b4cca7a0edd801cfe9c4">DRIVER_VERSION</a> <span class="stringliteral">"\n"</span>);
-<a name="l02209"></a>02209 
-<a name="l02210"></a>02210 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02211"></a>02211 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"register platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02212"></a>02212 <span class="preprocessor">#endif</span>
-<a name="l02213"></a>02213 <span class="preprocessor"></span>    retval = platform_driver_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
-<a name="l02214"></a>02214     <span class="keywordflow">if</span>(unlikely(retval &lt; 0))
-<a name="l02215"></a>02215     {
-<a name="l02216"></a>02216         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"register platform_driver failed\n"</span>);
-<a name="l02217"></a>02217         <span class="keywordflow">return</span> retval;
-<a name="l02218"></a>02218     }
-<a name="l02219"></a>02219 
-<a name="l02220"></a>02220     <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a> = register_chrdev(0, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>, &amp;<a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">fops</a>);
-<a name="l02221"></a>02221     <span class="keywordflow">if</span>(unlikely(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a> &lt; 0))
-<a name="l02222"></a>02222     {
-<a name="l02223"></a>02223         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"Sorry, registering the character device failed with %d.\n"</span>, retval);
-<a name="l02224"></a>02224 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02225"></a>02225 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02226"></a>02226 <span class="preprocessor">#endif</span>
-<a name="l02227"></a>02227 <span class="preprocessor"></span>        platform_driver_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
-<a name="l02228"></a>02228         <span class="keywordflow">return</span> retval;
-<a name="l02229"></a>02229     }
-<a name="l02230"></a>02230 
-<a name="l02231"></a>02231     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"Successfully registered the character device.\n"</span>);
-<a name="l02232"></a>02232     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"The major device number is %d.\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>);
-<a name="l02233"></a>02233 
-<a name="l02234"></a>02234     <span class="keywordflow">if</span>(unlikely(class_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a>)))
-<a name="l02235"></a>02235     {
-<a name="l02236"></a>02236         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register class %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
-<a name="l02237"></a>02237     }
-<a name="l02238"></a>02238     <span class="keywordflow">else</span>
-<a name="l02239"></a>02239     {
-<a name="l02240"></a>02240 <span class="preprocessor">#ifdef NO_DEV_INIT_NAME</span>
-<a name="l02241"></a>02241 <span class="preprocessor"></span><span class="preprocessor">#ifdef OLD_DEV_BUS_ID</span>
-<a name="l02242"></a>02242 <span class="preprocessor"></span>        strlcpy((<span class="keywordtype">void</span> *)&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>.bus_id, <span class="stringliteral">"vhci-ctrl"</span>, 10);
-<a name="l02243"></a>02243 <span class="preprocessor">#else</span>
-<a name="l02244"></a>02244 <span class="preprocessor"></span>        dev_set_name(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>, <span class="stringliteral">"vhci-ctrl"</span>);
-<a name="l02245"></a>02245 <span class="preprocessor">#endif</span>
-<a name="l02246"></a>02246 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l02247"></a>02247 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>.devt = MKDEV(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>, 0);
-<a name="l02248"></a>02248         <span class="keywordflow">if</span>(unlikely(device_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>)))
-<a name="l02249"></a>02249         {
-<a name="l02250"></a>02250             <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register device %s\n"</span>, <span class="stringliteral">"vhci-ctrl"</span>);
-<a name="l02251"></a>02251         }
-<a name="l02252"></a>02252     }
-<a name="l02253"></a>02253 
-<a name="l02254"></a>02254 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02255"></a>02255 <span class="preprocessor"></span>    retval = driver_create_file(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>.driver, &amp;driver_attr_debug_output);
-<a name="l02256"></a>02256     <span class="keywordflow">if</span>(unlikely(retval != 0))
+<div class="fragment"><pre class="fragment"><a name="l02221"></a>02221 {
+<a name="l02222"></a>02222     <span class="keywordtype">int</span> retval;
+<a name="l02223"></a>02223 
+<a name="l02224"></a>02224     <span class="keywordflow">if</span>(usb_disabled()) <span class="keywordflow">return</span> -ENODEV;
+<a name="l02225"></a>02225 
+<a name="l02226"></a>02226     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <a class="code" href="usb-vhci-hcd_8c.html#ae26107a17c06584f8bbd0d6fb91013d">DRIVER_DESC</a> <span class="stringliteral">" -- Version "</span> <a class="code" href="usb-vhci-hcd_8c.html#e578001fe043b4cca7a0edd801cfe9c4">DRIVER_VERSION</a> <span class="stringliteral">"\n"</span>);
+<a name="l02227"></a>02227 
+<a name="l02228"></a>02228 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02229"></a>02229 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"register platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02230"></a>02230 <span class="preprocessor">#endif</span>
+<a name="l02231"></a>02231 <span class="preprocessor"></span>    retval = platform_driver_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
+<a name="l02232"></a>02232     <span class="keywordflow">if</span>(unlikely(retval &lt; 0))
+<a name="l02233"></a>02233     {
+<a name="l02234"></a>02234         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"register platform_driver failed\n"</span>);
+<a name="l02235"></a>02235         <span class="keywordflow">return</span> retval;
+<a name="l02236"></a>02236     }
+<a name="l02237"></a>02237 
+<a name="l02238"></a>02238     <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a> = register_chrdev(0, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>, &amp;<a class="code" href="usb-vhci-hcd_8c.html#28ee7ed9613033920e733c9da671f79c">fops</a>);
+<a name="l02239"></a>02239     <span class="keywordflow">if</span>(unlikely(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a> &lt; 0))
+<a name="l02240"></a>02240     {
+<a name="l02241"></a>02241         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_ERR, <span class="stringliteral">"Sorry, registering the character device failed with %d.\n"</span>, retval);
+<a name="l02242"></a>02242 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02243"></a>02243 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"unregister platform_driver %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02244"></a>02244 <span class="preprocessor">#endif</span>
+<a name="l02245"></a>02245 <span class="preprocessor"></span>        platform_driver_unregister(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>);
+<a name="l02246"></a>02246         <span class="keywordflow">return</span> retval;
+<a name="l02247"></a>02247     }
+<a name="l02248"></a>02248 
+<a name="l02249"></a>02249     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"Successfully registered the character device.\n"</span>);
+<a name="l02250"></a>02250     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_INFO, <span class="stringliteral">"The major device number is %d.\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>);
+<a name="l02251"></a>02251 
+<a name="l02252"></a>02252     <span class="keywordflow">if</span>(unlikely(class_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#5ee9caa6f8c7d0d531f21cfcc5a423f1">vhci_class</a>)))
+<a name="l02253"></a>02253     {
+<a name="l02254"></a>02254         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register class %s\n"</span>, <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>);
+<a name="l02255"></a>02255     }
+<a name="l02256"></a>02256     <span class="keywordflow">else</span>
 <a name="l02257"></a>02257     {
-<a name="l02258"></a>02258         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"driver_create_file(&amp;vhci_hcd_driver, &amp;driver_attr_debug_output) failed\n"</span>);
-<a name="l02259"></a>02259         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"==&gt; ignoring\n"</span>);
-<a name="l02260"></a>02260     }
-<a name="l02261"></a>02261 <span class="preprocessor">#endif</span>
-<a name="l02262"></a>02262 <span class="preprocessor"></span>
-<a name="l02263"></a>02263 <span class="preprocessor">#ifdef DEBUG</span>
-<a name="l02264"></a>02264 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCREGISTER     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>);
-<a name="l02265"></a>02265     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCPORTSTAT     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>);
-<a name="l02266"></a>02266     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK_RO = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>);
-<a name="l02267"></a>02267     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>);
-<a name="l02268"></a>02268     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCGIVEBACK     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>);
-<a name="l02269"></a>02269     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHDATA    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>);
-<a name="l02270"></a>02270 <span class="preprocessor">#endif</span>
-<a name="l02271"></a>02271 <span class="preprocessor"></span>
-<a name="l02272"></a>02272     <span class="keywordflow">return</span> 0;
-<a name="l02273"></a>02273 }
+<a name="l02258"></a>02258 <span class="preprocessor">#ifdef NO_DEV_INIT_NAME</span>
+<a name="l02259"></a>02259 <span class="preprocessor"></span><span class="preprocessor">#ifdef OLD_DEV_BUS_ID</span>
+<a name="l02260"></a>02260 <span class="preprocessor"></span>        strlcpy((<span class="keywordtype">void</span> *)&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>.bus_id, <span class="stringliteral">"vhci-ctrl"</span>, 10);
+<a name="l02261"></a>02261 <span class="preprocessor">#else</span>
+<a name="l02262"></a>02262 <span class="preprocessor"></span>        dev_set_name(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>, <span class="stringliteral">"vhci-ctrl"</span>);
+<a name="l02263"></a>02263 <span class="preprocessor">#endif</span>
+<a name="l02264"></a>02264 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l02265"></a>02265 <span class="preprocessor"></span>        <a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>.devt = MKDEV(<a class="code" href="usb-vhci-hcd_8c.html#30e216efb475fb8e7a0b7d6c940f5b80">vhci_major</a>, 0);
+<a name="l02266"></a>02266         <span class="keywordflow">if</span>(unlikely(device_register(&amp;<a class="code" href="usb-vhci-hcd_8c.html#a09b127aa96ab3da0a54ece0126078fa">vhci_device</a>)))
+<a name="l02267"></a>02267         {
+<a name="l02268"></a>02268             <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_WARNING, <span class="stringliteral">"failed to register device %s\n"</span>, <span class="stringliteral">"vhci-ctrl"</span>);
+<a name="l02269"></a>02269         }
+<a name="l02270"></a>02270     }
+<a name="l02271"></a>02271 
+<a name="l02272"></a>02272 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02273"></a>02273 <span class="preprocessor"></span>    retval = driver_create_file(&amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>.driver, &amp;driver_attr_debug_output);
+<a name="l02274"></a>02274     <span class="keywordflow">if</span>(unlikely(retval != 0))
+<a name="l02275"></a>02275     {
+<a name="l02276"></a>02276         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"driver_create_file(&amp;vhci_hcd_driver, &amp;driver_attr_debug_output) failed\n"</span>);
+<a name="l02277"></a>02277         <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"==&gt; ignoring\n"</span>);
+<a name="l02278"></a>02278     }
+<a name="l02279"></a>02279 <span class="preprocessor">#endif</span>
+<a name="l02280"></a>02280 <span class="preprocessor"></span>
+<a name="l02281"></a>02281 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l02282"></a>02282 <span class="preprocessor"></span>    <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCREGISTER     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#cc5b760104a7aefb4106723c8694c77b">USB_VHCI_HCD_IOCREGISTER</a>);
+<a name="l02283"></a>02283     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCPORTSTAT     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#4c18290de4b2eadcf71d05b15021286b">USB_VHCI_HCD_IOCPORTSTAT</a>);
+<a name="l02284"></a>02284     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK_RO = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#218758f29fc0baa841157956a7a16f5a">USB_VHCI_HCD_IOCFETCHWORK_RO</a>);
+<a name="l02285"></a>02285     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHWORK    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#5bba8c4861c48c097e50fd66c3a20d2a">USB_VHCI_HCD_IOCFETCHWORK</a>);
+<a name="l02286"></a>02286     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCGIVEBACK     = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#943eb74a750e77f821ae2f6ced6ebf13">USB_VHCI_HCD_IOCGIVEBACK</a>);
+<a name="l02287"></a>02287     <a class="code" href="usb-vhci-hcd_8c.html#5410bd15cf154a7af019ef103de3f081">vhci_printk</a>(KERN_DEBUG, <span class="stringliteral">"USB_VHCI_HCD_IOCFETCHDATA    = %08x\n"</span>, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)<a class="code" href="usb-vhci_8h.html#da5556a8546cdf88b4ce692fdd078e36">USB_VHCI_HCD_IOCFETCHDATA</a>);
+<a name="l02288"></a>02288 <span class="preprocessor">#endif</span>
+<a name="l02289"></a>02289 <span class="preprocessor"></span>
+<a name="l02290"></a>02290     <span class="keywordflow">return</span> 0;
+<a name="l02291"></a>02291 }
 </pre></div>
 <p>
 
@@ -1736,7 +1796,7 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01888">ioc_fetch_data_common()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00167">vhci_dev()</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l01972"></a>01972 {
 <a name="l01973"></a>01973     u64 handle64;
 <a name="l01974"></a>01974     <span class="keyword">const</span> <span class="keywordtype">void</span> *handle;
@@ -1786,7 +1846,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_4b4660b8587aeec3d9b70aec2164cc6a_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_4b4660b8587aeec3d9b70aec2164cc6a_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_4b4660b8587aeec3d9b70aec2164cc6a_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="169,5,263,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="168,5,285,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="335,5,428,32"></map>
 </div>
 
 </div>
@@ -1945,7 +2005,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_a78e63bb1fc9bfe92363a441dd72fc12_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_a78e63bb1fc9bfe92363a441dd72fc12_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_a78e63bb1fc9bfe92363a441dd72fc12_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="232,5,347,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="396,5,489,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="232,5,347,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="395,5,512,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="561,5,655,32"></map>
 </div>
 
 </div>
@@ -1987,7 +2047,7 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l01497">conv_urb_flags()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01486">conv_urb_type()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00789">dump_urb()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01504">has_work()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00126">vhci::lock</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00186">maybe_set_status()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00113">vhci_port::port_change</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00134">vhci::port_count</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00114">vhci_port::port_flags</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00135">vhci::port_sched_offset</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00112">vhci_port::port_status</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00136">vhci::port_update</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00133">vhci::ports</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00098">vhci_urb_priv::urb</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00099">vhci_urb_priv::urbp_list</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00150">vhci::urbp_list_cancel</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00154">vhci::urbp_list_canceling</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00146">vhci::urbp_list_fetched</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00143">vhci::urbp_list_inbox</a>, <a class="el" href="usb-vhci_8h-source.html#l00140">USB_VHCI_IOC_WORK_TYPE_CANCEL_URB</a>, <a class="el" href="usb-vhci_8h-source.html#l00137">USB_VHCI_IOC_WORK_TYPE_PORT_STAT</a>, <a class="el" href="usb-vhci_8h-source.html#l00138">USB_VHCI_IOC_WORK_TYPE_PROCESS_URB</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00167">vhci_dev()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00218">vhci_urb_giveback()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00140">vhci::work_event</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l01519"></a>01519 {
 <a name="l01520"></a>01520     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> flags;
 <a name="l01521"></a>01521     u8 _port, port;
@@ -2158,7 +2218,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_bc4b326c90890cc659a5dca0e7840e8c_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_bc4b326c90890cc659a5dca0e7840e8c_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_bc4b326c90890cc659a5dca0e7840e8c_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="172,5,265,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="171,5,288,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="337,5,431,32"></map>
 </div>
 
 </div>
@@ -2194,7 +2254,7 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01719">ioc_giveback_common()</a>, <a class="el" href="usb-vhci_8h-source.html#l00163">usb_vhci_ioc_iso_packet_giveback::status</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00167">vhci_dev()</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l01852"></a>01852 {
 <a name="l01853"></a>01853     u64 handle64;
 <a name="l01854"></a>01854     <span class="keyword">const</span> <span class="keywordtype">void</span> *handle;
@@ -2247,7 +2307,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_87200ed5c692f0211815b055b32b19f1_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_87200ed5c692f0211815b055b32b19f1_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_87200ed5c692f0211815b055b32b19f1_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="156,5,249,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="155,5,272,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="321,5,415,32"></map>
 </div>
 
 </div>
@@ -2467,7 +2527,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_727f6aaf8c7d4b0cf03b244e87f63d0f_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_727f6aaf8c7d4b0cf03b244e87f63d0f_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_727f6aaf8c7d4b0cf03b244e87f63d0f_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="219,5,320,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="369,5,463,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="219,5,320,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="368,5,485,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="535,5,628,32"></map>
 </div>
 
 </div>
@@ -2503,7 +2563,7 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00126">vhci::lock</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00113">vhci_port::port_change</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00134">vhci::port_count</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00114">vhci_port::port_flags</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00112">vhci_port::port_status</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00133">vhci::ports</a>, <a class="el" href="usb-vhci_8h-source.html#l00057">USB_PORT_STAT_C_CONNECTION</a>, <a class="el" href="usb-vhci_8h-source.html#l00058">USB_PORT_STAT_C_ENABLE</a>, <a class="el" href="usb-vhci_8h-source.html#l00060">USB_PORT_STAT_C_OVERCURRENT</a>, <a class="el" href="usb-vhci_8h-source.html#l00061">USB_PORT_STAT_C_RESET</a>, <a class="el" href="usb-vhci_8h-source.html#l00059">USB_PORT_STAT_C_SUSPEND</a>, <a class="el" href="usb-vhci_8h-source.html#l00044">USB_PORT_STAT_CONNECTION</a>, <a class="el" href="usb-vhci_8h-source.html#l00045">USB_PORT_STAT_ENABLE</a>, <a class="el" href="usb-vhci_8h-source.html#l00051">USB_PORT_STAT_HIGH_SPEED</a>, <a class="el" href="usb-vhci_8h-source.html#l00050">USB_PORT_STAT_LOW_SPEED</a>, <a class="el" href="usb-vhci_8h-source.html#l00047">USB_PORT_STAT_OVERCURRENT</a>, <a class="el" href="usb-vhci_8h-source.html#l00049">USB_PORT_STAT_POWER</a>, <a class="el" href="usb-vhci_8h-source.html#l00048">USB_PORT_STAT_RESET</a>, <a class="el" href="usb-vhci_8h-source.html#l00046">USB_PORT_STAT_SUSPEND</a>, <a class="el" href="usb-vhci_8h-source.html#l00081">USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00436">userspace_needs_port_update()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00167">vhci_dev()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00162">vhci_to_hcd()</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l01372"></a>01372 {
 <a name="l01373"></a>01373     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> flags;
 <a name="l01374"></a>01374     u8 index;
@@ -2635,7 +2695,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_929681909872034797aa47cdfaedb75b_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_929681909872034797aa47cdfaedb75b_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_929681909872034797aa47cdfaedb75b_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="159,5,252,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="157,5,275,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="324,5,417,32"></map>
 </div>
 
 </div>
@@ -2671,7 +2731,7 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l01202">device_enum()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00086">driver_name</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00119">vhci_conf::pdev</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00121">vhci_conf::port_count</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00070">vhci_dbg</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00177">vhci_dev_name()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00063">vhci_printk</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_ioctl()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02061">device_do_ioctl()</a>.</p>
 <div class="fragment"><pre class="fragment"><a name="l01227"></a>01227 {
 <a name="l01228"></a>01228     <span class="keyword">const</span> <span class="keywordtype">char</span> *dname;
 <a name="l01229"></a>01229     <span class="keywordtype">int</span> retval, i, usbbusnum;
@@ -2789,7 +2849,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_d3902b33e0f291a3efad83c90e5f0255_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_d3902b33e0f291a3efad83c90e5f0255_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_d3902b33e0f291a3efad83c90e5f0255_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="151,5,244,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="149,5,267,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="316,5,409,32"></map>
 </div>
 
 </div>
@@ -2833,7 +2893,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_3239c5bfd0c0a11b1377a726a8eda98f_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_3239c5bfd0c0a11b1377a726a8eda98f_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_3239c5bfd0c0a11b1377a726a8eda98f_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="152,5,331,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="159,56,324,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="379,5,493,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="543,31,636,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="385,56,487,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="152,5,331,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="159,56,324,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="379,5,493,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="541,31,659,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="708,31,801,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="385,56,487,83"></map>
 </div>
 
 </div>
@@ -2891,7 +2951,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_60983b4f74308854907024142f4d933c_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_60983b4f74308854907024142f4d933c_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_60983b4f74308854907024142f4d933c_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="409,5,524,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="195,56,360,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="211,107,344,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="575,31,668,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="416,56,517,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="409,5,524,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="195,56,360,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="211,107,344,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="573,31,691,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="740,31,833,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="416,56,517,83"></map>
 </div>
 
 </div>
@@ -3023,22 +3083,22 @@ Here is the caller graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02151">2151</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02169">2169</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02152"></a>02152 {
-<a name="l02153"></a>02153     <span class="keywordflow">if</span>(buf != NULL)
-<a name="l02154"></a>02154     {
-<a name="l02155"></a>02155         <span class="keywordflow">switch</span>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>)
-<a name="l02156"></a>02156         {
-<a name="l02157"></a>02157         <span class="keywordflow">case</span> 0:  *buf = <span class="charliteral">'0'</span>; <span class="keywordflow">break</span>; <span class="comment">// No debug output</span>
-<a name="l02158"></a>02158         <span class="keywordflow">case</span> 1:  *buf = <span class="charliteral">'1'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output without data buffer dumps</span>
-<a name="l02159"></a>02159         <span class="keywordflow">case</span> 2:  *buf = <span class="charliteral">'2'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with short data buffer dumps</span>
-<a name="l02160"></a>02160         <span class="keywordflow">default</span>: *buf = <span class="charliteral">'3'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with full data buffer dumps</span>
-<a name="l02161"></a>02161         }
-<a name="l02162"></a>02162     }
-<a name="l02163"></a>02163     <span class="keywordflow">return</span> 1;
-<a name="l02164"></a>02164 }
+<div class="fragment"><pre class="fragment"><a name="l02170"></a>02170 {
+<a name="l02171"></a>02171     <span class="keywordflow">if</span>(buf != NULL)
+<a name="l02172"></a>02172     {
+<a name="l02173"></a>02173         <span class="keywordflow">switch</span>(<a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a>)
+<a name="l02174"></a>02174         {
+<a name="l02175"></a>02175         <span class="keywordflow">case</span> 0:  *buf = <span class="charliteral">'0'</span>; <span class="keywordflow">break</span>; <span class="comment">// No debug output</span>
+<a name="l02176"></a>02176         <span class="keywordflow">case</span> 1:  *buf = <span class="charliteral">'1'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output without data buffer dumps</span>
+<a name="l02177"></a>02177         <span class="keywordflow">case</span> 2:  *buf = <span class="charliteral">'2'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with short data buffer dumps</span>
+<a name="l02178"></a>02178         <span class="keywordflow">default</span>: *buf = <span class="charliteral">'3'</span>; <span class="keywordflow">break</span>; <span class="comment">// Debug output with full data buffer dumps</span>
+<a name="l02179"></a>02179         }
+<a name="l02180"></a>02180     }
+<a name="l02181"></a>02181     <span class="keywordflow">return</span> 1;
+<a name="l02182"></a>02182 }
 </pre></div>
 <p>
 
@@ -3251,20 +3311,20 @@ Here is the call graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02166">2166</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02184">2184</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 <p>References <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">debug_output</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02167"></a>02167 {
-<a name="l02168"></a>02168     <span class="keywordflow">if</span>(count != 1 || buf == NULL) <span class="keywordflow">return</span> -EINVAL;
-<a name="l02169"></a>02169     <span class="keywordflow">switch</span>(*buf)
-<a name="l02170"></a>02170     {
-<a name="l02171"></a>02171     <span class="keywordflow">case</span> <span class="charliteral">'0'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 0; <span class="keywordflow">return</span> 1;
-<a name="l02172"></a>02172     <span class="keywordflow">case</span> <span class="charliteral">'1'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 1; <span class="keywordflow">return</span> 1;
-<a name="l02173"></a>02173     <span class="keywordflow">case</span> <span class="charliteral">'2'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 2; <span class="keywordflow">return</span> 1;
-<a name="l02174"></a>02174     <span class="keywordflow">case</span> <span class="charliteral">'3'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 3; <span class="keywordflow">return</span> 1;
-<a name="l02175"></a>02175     }
-<a name="l02176"></a>02176     <span class="keywordflow">return</span> -EINVAL;
-<a name="l02177"></a>02177 }
+<div class="fragment"><pre class="fragment"><a name="l02185"></a>02185 {
+<a name="l02186"></a>02186     <span class="keywordflow">if</span>(count != 1 || buf == NULL) <span class="keywordflow">return</span> -EINVAL;
+<a name="l02187"></a>02187     <span class="keywordflow">switch</span>(*buf)
+<a name="l02188"></a>02188     {
+<a name="l02189"></a>02189     <span class="keywordflow">case</span> <span class="charliteral">'0'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 0; <span class="keywordflow">return</span> 1;
+<a name="l02190"></a>02190     <span class="keywordflow">case</span> <span class="charliteral">'1'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 1; <span class="keywordflow">return</span> 1;
+<a name="l02191"></a>02191     <span class="keywordflow">case</span> <span class="charliteral">'2'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 2; <span class="keywordflow">return</span> 1;
+<a name="l02192"></a>02192     <span class="keywordflow">case</span> <span class="charliteral">'3'</span>: <a class="code" href="usb-vhci-hcd_8c.html#e205b8760657386b859228b93c43e41e">debug_output</a> = 3; <span class="keywordflow">return</span> 1;
+<a name="l02193"></a>02193     }
+<a name="l02194"></a>02194     <span class="keywordflow">return</span> -EINVAL;
+<a name="l02195"></a>02195 }
 </pre></div>
 <p>
 
@@ -3305,7 +3365,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_85d659ba8e043c8a7fc47b5ca4df09dd_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_85d659ba8e043c8a7fc47b5ca4df09dd_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_85d659ba8e043c8a7fc47b5ca4df09dd_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="201,56,417,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="241,107,377,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="241,157,377,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="483,5,587,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="467,56,603,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="471,107,599,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="652,5,745,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d5e190efcd13677d5c88118eb9cd0fa8" title="userspace_needs_port_update" alt="" coords="201,56,417,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="241,107,377,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="241,157,377,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="483,5,587,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="467,56,603,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="471,107,599,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="651,5,768,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="817,5,911,32"></map>
 </div>
 
 </div>
@@ -3358,7 +3418,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_16448e55dd0962d64927bc1d419b2238_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_16448e55dd0962d64927bc1d419b2238_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_16448e55dd0962d64927bc1d419b2238_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="192,5,371,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="199,56,364,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="419,5,533,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="583,31,676,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="425,56,527,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="192,5,371,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="199,56,364,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="419,5,533,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="581,31,699,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="748,31,841,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="425,56,527,83"></map>
 </div>
 
 </div>
@@ -3411,7 +3471,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_266cde7bb57f9edbb6cc5c3f8ac76c2a_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_266cde7bb57f9edbb6cc5c3f8ac76c2a_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_266cde7bb57f9edbb6cc5c3f8ac76c2a_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="256,5,435,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="263,56,428,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="483,5,597,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="647,31,740,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="489,56,591,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="256,5,435,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="263,56,428,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="483,5,597,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="645,31,763,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="812,31,905,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="489,56,591,83"></map>
 </div>
 
 </div>
@@ -3464,7 +3524,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_1304cf94d1210cc6c73198cc88cfa28c_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_1304cf94d1210cc6c73198cc88cfa28c_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_1304cf94d1210cc6c73198cc88cfa28c_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="275,5,453,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="281,56,447,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="501,5,616,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="665,31,759,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="508,56,609,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="275,5,453,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="281,56,447,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="501,5,616,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="664,31,781,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="831,31,924,57"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="508,56,609,83"></map>
 </div>
 
 </div>
@@ -3523,7 +3583,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_d5e190efcd13677d5c88118eb9cd0fa8_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_d5e190efcd13677d5c88118eb9cd0fa8_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_d5e190efcd13677d5c88118eb9cd0fa8_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="288,5,392,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="272,56,408,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="276,107,404,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="457,5,551,32"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="288,5,392,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="272,56,408,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="276,107,404,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="456,5,573,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="623,5,716,32"></map>
 </div>
 
 </div>
@@ -3700,7 +3760,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_2426bd91f39109bf6006f165aba8839b_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_2426bd91f39109bf6006f165aba8839b_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_2426bd91f39109bf6006f165aba8839b_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="544,209,659,236"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="349,7,464,33"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="551,260,652,287"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="324,260,489,287"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="549,336,653,363"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="156,412,244,439"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="135,463,265,489"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="132,513,268,540"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="140,564,260,591"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="340,57,473,84"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="135,615,265,641"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="132,665,268,692"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="136,716,264,743"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="139,767,261,793"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="159,817,241,844"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="160,868,240,895"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="339,159,475,185"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="132,919,268,945"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="132,108,268,135"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="708,235,801,261"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="317,108,496,135"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="544,209,659,236"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="349,7,464,33"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="551,260,652,287"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="324,260,489,287"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="549,336,653,363"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="156,412,244,439"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="135,463,265,489"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="132,513,268,540"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="140,564,260,591"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="340,57,473,84"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="135,615,265,641"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="132,665,268,692"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="136,716,264,743"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="139,767,261,793"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="159,817,241,844"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="160,868,240,895"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="339,159,475,185"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="132,919,268,945"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="132,108,268,135"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="707,235,824,261"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="873,235,967,261"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="317,108,496,135"></map>
 </div>
 
 </div>
@@ -3742,7 +3802,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_8f221917a707a50e5e3b9edd016a20e3_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_8f221917a707a50e5e3b9edd016a20e3_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_8f221917a707a50e5e3b9edd016a20e3_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb" title="device_release" alt="" coords="179,5,293,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="189,56,283,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#94d2695ed151d94614ac4f9f41e85543" title="vhci_hcd_probe" alt="" coords="176,107,296,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="345,56,439,83"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb" title="device_release" alt="" coords="179,5,293,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d3902b33e0f291a3efad83c90e5f0255" title="ioc_register" alt="" coords="189,56,283,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#94d2695ed151d94614ac4f9f41e85543" title="vhci_hcd_probe" alt="" coords="176,107,296,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="344,56,461,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="511,56,604,83"></map>
 </div>
 
 </div>
@@ -3765,9 +3825,9 @@ Here is the caller graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02182">2182</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
-<div class="fragment"><pre class="fragment"><a name="l02183"></a>02183 {
-<a name="l02184"></a>02184 }
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02200">2200</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<div class="fragment"><pre class="fragment"><a name="l02201"></a>02201 {
+<a name="l02202"></a>02202 }
 </pre></div>
 <p>
 
@@ -4642,7 +4702,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_59d784aa0cd4089931e07f2783ffeac3_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_59d784aa0cd4089931e07f2783ffeac3_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_59d784aa0cd4089931e07f2783ffeac3_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="292,5,396,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="149,436,227,463"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="276,157,412,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="852,81,945,108"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="688,56,803,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="493,107,608,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="695,233,796,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="468,233,633,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="300,715,388,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="279,765,409,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="276,816,412,843"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="284,867,404,893"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="484,355,617,381"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="279,917,409,944"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="276,208,412,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="280,309,408,336"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="283,360,405,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="303,411,385,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="304,461,384,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="483,544,619,571"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="276,512,412,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="461,157,640,184"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#929681909872034797aa47cdfaedb75b" title="ioc_port_stat" alt="" coords="292,5,396,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2426bd91f39109bf6006f165aba8839b" title="vhci_dev" alt="" coords="149,436,227,463"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#2e9a555852470d202859c27832a2ae05" title="vhci_urb_giveback" alt="" coords="276,157,412,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="851,81,968,108"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="1017,81,1111,108"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="688,56,803,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="493,107,608,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="695,233,796,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="468,233,633,260"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#044f76363e4b0c0ab11588e205ee4d61" title="show_urbs" alt="" coords="300,715,388,741"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a66f95a58665abfa09f18a47cef436ad" title="vhci_bus_resume" alt="" coords="279,765,409,792"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#03d9d94633b4a2af833f2ad1abb1a31e" title="vhci_bus_suspend" alt="" coords="276,816,412,843"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#86750a99bd5dd6eb655d3791d10b54c5" title="vhci_get_frame" alt="" coords="284,867,404,893"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="484,355,617,381"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#d56aa02bb9604b14f91fe698d6e04816" title="vhci_hcd_resume" alt="" coords="279,917,409,944"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#6ecf48ca33cb0b271aa15cb041addadb" title="vhci_hcd_suspend" alt="" coords="276,208,412,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#ce2328d315482d3d8bca359de5e93482" title="vhci_hub_control" alt="" coords="280,309,408,336"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#559a9efb75d38331c3e5a7cf1cac60f3" title="vhci_hub_status" alt="" coords="283,360,405,387"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a053bea3baa021679daf5cb2917d56ab" title="vhci_start" alt="" coords="303,411,385,437"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#00d4fcd4ec2f66330b5cd67bd62c7f53" title="vhci_stop" alt="" coords="304,461,384,488"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="483,544,619,571"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#78301e11106b43794de6226c0a0c75e5" title="vhci_urb_enqueue" alt="" coords="276,512,412,539"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="461,157,640,184"></map>
 </div>
 
 </div>
@@ -4916,7 +4976,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <p><center><img src="usb-vhci-hcd_8c_2e9a555852470d202859c27832a2ae05_icgraph.png" border="0" usemap="#usb-vhci-hcd_8c_2e9a555852470d202859c27832a2ae05_icgraph_map" alt=""></center>
 <map name="usb-vhci-hcd_8c_2e9a555852470d202859c27832a2ae05_icgraph_map">
-<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="192,5,371,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="420,56,535,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="199,107,364,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="215,157,348,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="213,208,349,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="420,5,535,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="585,56,679,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="427,107,528,133"></map>
+<area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a78e63bb1fc9bfe92363a441dd72fc12" title="ioc_fetch_data_common" alt="" coords="192,5,371,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="420,56,535,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#727f6aaf8c7d4b0cf03b244e87f63d0f" title="ioc_giveback_common" alt="" coords="199,107,364,133"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#fbe80adbeab0893321c9b738a7806f20" title="vhci_hcd_remove" alt="" coords="215,157,348,184"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#f36af3d40e8c0aff61ff3f92ba867ed5" title="vhci_urb_dequeue" alt="" coords="213,208,349,235"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#4b4660b8587aeec3d9b70aec2164cc6a" title="ioc_fetch_data" alt="" coords="420,5,535,32"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="584,56,701,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="751,56,844,83"><area shape="rect" href="usb&#45;vhci&#45;hcd_8c.html#87200ed5c692f0211815b055b32b19f1" title="ioc_giveback" alt="" coords="427,107,528,133"></map>
 </div>
 
 </div>
@@ -4937,7 +4997,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00089">89</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l00789">dump_urb()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01971">ioc_fetch_data()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01518">ioc_fetch_work()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01851">ioc_giveback()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01719">ioc_giveback_common()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01371">ioc_port_stat()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02151">show_debug_output()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02166">store_debug_output()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00442">vhci_hub_control()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00363">vhci_hub_status()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00218">vhci_urb_giveback()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l00789">dump_urb()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01971">ioc_fetch_data()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01518">ioc_fetch_work()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01851">ioc_giveback()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01719">ioc_giveback_common()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01371">ioc_port_stat()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02169">show_debug_output()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02184">store_debug_output()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l01087">vhci_hcd_probe()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00442">vhci_hub_control()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l00363">vhci_hub_status()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l00218">vhci_urb_giveback()</a>.</p>
 
 </div>
 </div><p>
@@ -4990,7 +5050,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l00086">86</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
-<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02276">cleanup()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02202">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>.</p>
+<p>Referenced by <a class="el" href="usb-vhci-hcd_8c-source.html#l02294">cleanup()</a>, <a class="el" href="usb-vhci-hcd_8c-source.html#l02220">init()</a>, and <a class="el" href="usb-vhci-hcd_8c-source.html#l01226">ioc_register()</a>.</p>
 
 </div>
 </div><p>
@@ -5007,16 +5067,19 @@ Here is the caller graph for this function:</div>
 
 <p>
 <b>Initial value:</b><div class="fragment"><pre class="fragment"> {
-    .owner   = THIS_MODULE,
-    .llseek  = <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>,
-    .read    = <a class="code" href="usb-vhci-hcd_8c.html#c25a70ecbf8ce2c82fb3f7723e965da5">device_read</a>,
-    .write   = <a class="code" href="usb-vhci-hcd_8c.html#e86da577c3ccf2267f8f17feb8bd4c58">device_write</a>,
-    .ioctl   = <a class="code" href="usb-vhci-hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968">device_ioctl</a>,
-    .open    = <a class="code" href="usb-vhci-hcd_8c.html#e551618a4770b820ca8e41cc4b1cfa48">device_open</a>,
-    .release = <a class="code" href="usb-vhci-hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb">device_release</a> 
+    .owner          = THIS_MODULE,
+    .llseek         = <a class="code" href="usb-vhci-hcd_8c.html#91ed2fd01f043f3c414bb539e34cf006">device_llseek</a>,
+    .read           = <a class="code" href="usb-vhci-hcd_8c.html#c25a70ecbf8ce2c82fb3f7723e965da5">device_read</a>,
+    .write          = <a class="code" href="usb-vhci-hcd_8c.html#e86da577c3ccf2267f8f17feb8bd4c58">device_write</a>,
+    .unlocked_ioctl = <a class="code" href="usb-vhci-hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1">device_ioctl</a>,
+
+
+
+    .open           = <a class="code" href="usb-vhci-hcd_8c.html#e551618a4770b820ca8e41cc4b1cfa48">device_open</a>,
+    .release        = <a class="code" href="usb-vhci-hcd_8c.html#840f5f5a1916e668ef83d6acd94f06eb">device_release</a> 
 }
 </pre></div>
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02140">2140</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02155">2155</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 </div>
 </div><p>
@@ -5052,7 +5115,7 @@ Here is the caller graph for this function:</div>
     .name = <a class="code" href="usb-vhci-hcd_8c.html#233dee63f005c51abbc2253360a99ece">driver_name</a>
 }
 </pre></div>
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02188">2188</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02206">2206</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 </div>
 </div><p>
@@ -5077,7 +5140,7 @@ Here is the caller graph for this function:</div>
     .driver = &amp;<a class="code" href="usb-vhci-hcd_8c.html#d17d7890f8f5a3d9c5bc2e2eeded8cad">vhci_hcd_driver</a>.driver
 }
 </pre></div>
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02193">2193</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02211">2211</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 </div>
 </div><p>
@@ -5158,11 +5221,11 @@ Here is the caller graph for this function:</div>
 
 <p>
 
-<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02186">2186</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
+<p>Definition at line <a class="el" href="usb-vhci-hcd_8c-source.html#l02204">2204</a> of file <a class="el" href="usb-vhci-hcd_8c-source.html">usb-vhci-hcd.c</a>.</p>
 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Jun 10 20:06:16 2010 for usb_vhci_hcd by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Thu Jun 10 21:21:09 2010 for usb_vhci_hcd by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

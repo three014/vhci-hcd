@@ -1,2 +1,3 @@
 <area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#bc4b326c90890cc659a5dca0e7840e8c" title="ioc_fetch_work" alt="" coords="137,5,252,32">
-<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#1c1cae52ee0c9dfe8919aaa013a3c968" title="device_ioctl" alt="" coords="303,5,396,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#a0b1c2d28cb24a9a4a3acaa98a2e96ca" title="device_do_ioctl" alt="" coords="301,5,419,32">
+<area shape="rect" href="$usb&#45;vhci&#45;hcd_8c.html#7469c0e02a3b12a90b9505401fbac6a1" title="device_ioctl" alt="" coords="468,5,561,32">
