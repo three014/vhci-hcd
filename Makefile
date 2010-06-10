@@ -60,10 +60,11 @@ patchkernel: $(CONF_H)
 .PHONY: patchkernel
 
 clean-srcdox:
-	-rm -rf html/* usb_vhci_hcd.tag
+	-rm -rf html/ usb_vhci_hcd.tag
 .PHONY: clean-srcdox
 
 srcdox: clean-srcdox
+	mkdir -p html/
 	doxygen
 	-rm -f usb_vhci_hcd.tag
 .PHONY: srcdox
