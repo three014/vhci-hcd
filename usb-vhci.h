@@ -78,7 +78,7 @@ struct usb_vhci_ioc_port_stat
 	__u16 change;    // indicates changed status bits
 	__u8 index;      // index of port
 	__u8 flags;      // additional information from kernel to user space:
-#define USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING 0x01 // indicates resuming
+#define USB_VHCI_PORT_STAT_FLAG_RESUMING 0x01 // indicates resuming
 	__u8 reserved1, reserved2; // size of the struct should be dividable by four
 };
 
@@ -99,11 +99,11 @@ struct usb_vhci_ioc_urb
 	__s32 interval;
 	__s32 packet_count;                            // number of iso packets
 	__u16 flags;                                   // flags:
-#define USB_VHCI_IOC_URB_FLAGS_SHORT_NOT_OK 0x0001 // IN: treat incomming short
+#define USB_VHCI_URB_FLAGS_SHORT_NOT_OK 0x0001     // IN: treat incomming short
                                                    // packets as an error
-#define USB_VHCI_IOC_URB_FLAGS_ISO_ASAP     0x0002 // ISO: schedule as soon as
+#define USB_VHCI_URB_FLAGS_ISO_ASAP     0x0002     // ISO: schedule as soon as
                                                    // possible
-#define USB_VHCI_IOC_URB_FLAGS_ZERO_PACKET  0x0040 // BULK OUT: always send a
+#define USB_VHCI_URB_FLAGS_ZERO_PACKET  0x0040     // BULK OUT: always send a
                                                    // short packet at the end
                                                    // (send a zero length packet
                                                    // if necessary)
@@ -111,34 +111,34 @@ struct usb_vhci_ioc_urb
 	                                               // for which this urb is for
 	__u8 endpoint;                                 // endpoint incl. direction
 	__u8 type;
-#define USB_VHCI_IOC_URB_TYPE_ISO     0
-#define USB_VHCI_IOC_URB_TYPE_INT     1
-#define USB_VHCI_IOC_URB_TYPE_CONTROL 2
-#define USB_VHCI_IOC_URB_TYPE_BULK    3
+#define USB_VHCI_URB_TYPE_ISO     0
+#define USB_VHCI_URB_TYPE_INT     1
+#define USB_VHCI_URB_TYPE_CONTROL 2
+#define USB_VHCI_URB_TYPE_BULK    3
 };
 
 union usb_vhci_ioc_work_union
 {
-	struct usb_vhci_ioc_urb urb;             // for USB_VHCI_IOC_WORK_TYPE_PROCESS_URB
-	struct usb_vhci_ioc_port_stat port;      // for USB_VHCI_IOC_WORK_TYPE_PORT_STAT
+	struct usb_vhci_ioc_urb urb;         // for USB_VHCI_IOC_WORK_TYPE_PROCESS_URB
+	struct usb_vhci_ioc_port_stat port;  // for USB_VHCI_IOC_WORK_TYPE_PORT_STAT
 };
 
 struct usb_vhci_ioc_work
 {
-	__u64 handle;                            // for USB_VHCI_IOC_WORK_TYPE_PROCESS_URB
-	                                         // and USB_VHCI_IOC_WORK_TYPE_CANCEL_URB;
-	                                         // handle which identifies the urb
-	                                         // (it is just a pointer to the urb
-	                                         // in kernel space)
+	__u64 handle;                        // for USB_VHCI_IOC_WORK_TYPE_PROCESS_URB
+	                                     // and USB_VHCI_IOC_WORK_TYPE_CANCEL_URB;
+	                                     // handle which identifies the urb
+	                                     // (it is just a pointer to the urb
+	                                     // in kernel space)
 	union usb_vhci_ioc_work_union work;
-	__s16 timeout;                           // timeout in milliseconds (max. 1000)
-#define USB_VHCI_IOC_TIMEOUT_INFINITE     -1
+	__s16 timeout;                       // timeout in milliseconds (max. 1000)
+#define USB_VHCI_TIMEOUT_INFINITE     -1
 	__u8 type;
-#define USB_VHCI_IOC_WORK_TYPE_PORT_STAT   0 // the state of a port has changed
-#define USB_VHCI_IOC_WORK_TYPE_PROCESS_URB 1 // hand an urb to the (virtual)
-                                             // hardware
-#define USB_VHCI_IOC_WORK_TYPE_CANCEL_URB  2 // cancel urb if it isn't processed
-                                             // already
+#define USB_VHCI_WORK_TYPE_PORT_STAT   0 // the state of a port has changed
+#define USB_VHCI_WORK_TYPE_PROCESS_URB 1 // hand an urb to the (virtual)
+                                         // hardware
+#define USB_VHCI_WORK_TYPE_CANCEL_URB  2 // cancel urb if it isn't processed
+                                         // already
 };
 
 struct usb_vhci_ioc_iso_packet_data

@@ -490,7 +490,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d resuming\n", (int)wIndex);
 #endif
-				*pf |= USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+				*pf |= USB_VHCI_PORT_STAT_FLAG_RESUMING;
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
@@ -506,7 +506,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// clear all change bits except overcurrent (see USB 2.0 spec section 11.24.2.7.2)
 				*pc &= USB_PORT_STAT_C_OVERCURRENT;
 				// clear resuming flag
-				*pf &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 				userspace_needs_port_update(vhc, wIndex);
 			}
 			break;
@@ -522,7 +522,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// i'm not quite sure if the suspend change bit should be cleared too (see section 11.24.2.7.2.{2,3})
 				*pc &= ~(USB_PORT_STAT_C_ENABLE | USB_PORT_STAT_C_SUSPEND);
 				// clear resuming flag
-				*pf &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 				// TODO: maybe we should clear the low/high speed bits here (section 11.24.2.7.1.{7,8})
 				userspace_needs_port_update(vhc, wIndex);
 			}
@@ -636,7 +636,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				*ps |= USB_PORT_STAT_RESET; // reset initiated
 
 				// clear resuming flag
-				*pf &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 
 				userspace_needs_port_update(vhc, wIndex);
 			}
@@ -710,7 +710,7 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 		{
 			dev_dbg(vhci_dev(vhc), "Port %d suspended\n", (int)port + 1);
 			vhc->ports[port].port_status |= USB_PORT_STAT_SUSPEND;
-			vhc->ports[port].port_flags &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+			vhc->ports[port].port_flags &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 			userspace_needs_port_update(vhc, port + 1);
 		}
 	}
@@ -1415,7 +1415,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat 
 				overcurrent;
 		else
 			vhc->ports[index - 1].port_status = USB_PORT_STAT_POWER | overcurrent;
-		vhc->ports[index - 1].port_flags &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+		vhc->ports[index - 1].port_flags &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 		break;
 
 	case USB_PORT_STAT_C_ENABLE:
@@ -1428,7 +1428,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat 
 		}
 		vhc->ports[index - 1].port_change |= USB_PORT_STAT_C_ENABLE;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_ENABLE;
-		vhc->ports[index - 1].port_flags &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+		vhc->ports[index - 1].port_flags &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_SUSPEND;
 		break;
 
@@ -1441,7 +1441,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat 
 			spin_unlock_irqrestore(&vhc->lock, flags);
 			return -EPROTO;
 		}
-		vhc->ports[index - 1].port_flags &= ~USB_VHCI_IOC_PORT_STAT_FLAGS_RESUMING;
+		vhc->ports[index - 1].port_flags &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 		vhc->ports[index - 1].port_change |= USB_PORT_STAT_C_SUSPEND;
 		vhc->ports[index - 1].port_status &= ~USB_PORT_STAT_SUSPEND;
 		break;
@@ -1487,18 +1487,18 @@ static inline u8 conv_urb_type(u8 type)
 {
 	switch(type & 0x3)
 	{
-	case PIPE_ISOCHRONOUS: return USB_VHCI_IOC_URB_TYPE_ISO;
-	case PIPE_INTERRUPT:   return USB_VHCI_IOC_URB_TYPE_INT;
-	case PIPE_BULK:        return USB_VHCI_IOC_URB_TYPE_BULK;
-	default:               return USB_VHCI_IOC_URB_TYPE_CONTROL;
+	case PIPE_ISOCHRONOUS: return USB_VHCI_URB_TYPE_ISO;
+	case PIPE_INTERRUPT:   return USB_VHCI_URB_TYPE_INT;
+	case PIPE_BULK:        return USB_VHCI_URB_TYPE_BULK;
+	default:               return USB_VHCI_URB_TYPE_CONTROL;
 	}
 }
 
 static inline u16 conv_urb_flags(unsigned int flags)
 {
-	return ((flags & URB_SHORT_NOT_OK) ? USB_VHCI_IOC_URB_FLAGS_SHORT_NOT_OK : 0) |
-	       ((flags & URB_ISO_ASAP)     ? USB_VHCI_IOC_URB_FLAGS_ISO_ASAP     : 0) |
-	       ((flags & URB_ZERO_PACKET)  ? USB_VHCI_IOC_URB_FLAGS_ZERO_PACKET  : 0);
+	return ((flags & URB_SHORT_NOT_OK) ? USB_VHCI_URB_FLAGS_SHORT_NOT_OK : 0) |
+	       ((flags & URB_ISO_ASAP)     ? USB_VHCI_URB_FLAGS_ISO_ASAP     : 0) |
+	       ((flags & URB_ZERO_PACKET)  ? USB_VHCI_URB_FLAGS_ZERO_PACKET  : 0);
 }
 
 static int has_work(struct vhci *vhc)
@@ -1557,7 +1557,7 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct usb_vhci_ioc_work __us
 #ifdef DEBUG
 		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=CANCEL_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
 #endif
-		__put_user(USB_VHCI_IOC_WORK_TYPE_CANCEL_URB, &arg->type);
+		__put_user(USB_VHCI_WORK_TYPE_CANCEL_URB, &arg->type);
 		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
 		list_move_tail(&urbp->urbp_list, &vhc->urbp_list_canceling);
 		spin_unlock_irqrestore(&vhc->lock, flags);
@@ -1580,7 +1580,7 @@ static inline int ioc_fetch_work(struct vhci *vhc, struct usb_vhci_ioc_work __us
 #ifdef DEBUG
 				if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PORT_STAT port=%d status=0x%04x change=0x%04x]\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
 #endif
-				__put_user(USB_VHCI_IOC_WORK_TYPE_PORT_STAT, &arg->type);
+				__put_user(USB_VHCI_WORK_TYPE_PORT_STAT, &arg->type);
 				__put_user(port + 1, &arg->work.port.index);
 				__put_user(vhc->ports[port].port_status, &arg->work.port.status);
 				__put_user(vhc->ports[port].port_change, &arg->work.port.change);
@@ -1595,7 +1595,7 @@ repeat:
 	if(!list_empty(&vhc->urbp_list_inbox))
 	{
 		urbp = list_entry(vhc->urbp_list_inbox.next, struct vhci_urb_priv, urbp_list);
-		__put_user(USB_VHCI_IOC_WORK_TYPE_PROCESS_URB, &arg->type);
+		__put_user(USB_VHCI_WORK_TYPE_PROCESS_URB, &arg->type);
 		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
 		__put_user(usb_pipedevice(urbp->urb->pipe), &arg->work.urb.address);
 		__put_user(usb_pipeendpoint(urbp->urb->pipe) | (usb_pipein(urbp->urb->pipe) ? 0x80 : 0x00), &arg->work.urb.endpoint);
