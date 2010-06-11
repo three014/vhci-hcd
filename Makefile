@@ -33,12 +33,19 @@ default: $(CONF_H)
 .SUFFIXES:
 
 ifneq (,$(INSTALL_PREFIX))
-install:
-	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -b $(INSTALL_PREFIX) -v $(KVERSION)
+install-module:
+	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -b $(INSTALL_PREFIX) $(KVERSION)
 else
-install:
-	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a -v $(KVERSION)
+install-module:
+	mkdir -v -p $(DEST) && cp -v $(TARGET).ko $(DEST) && /sbin/depmod -a $(KVERSION)
 endif
+.PHONY: install-module
+
+install-devel:
+	mkdir -v -p $(INSTALL_PREFIX)/usr/include/linux/ && cp -v -p usb-vhci.h $(INSTALL_PREFIX)/usr/include/linux/
+.PHONY: install-devel
+
+install: install-module install-devel
 .PHONY: install
 
 clean-conf:
