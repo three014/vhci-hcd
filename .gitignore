@@ -7,10 +7,11 @@
 *.pcs
 *.symvers
 .tmp_versions
-/usb_vhci_hcd.tag
+/vhci-hcd.tag
 Module.markers
 modules.order
 /conf
 /*.tar.bz2
 /*.tar.gz
 /html
+*~

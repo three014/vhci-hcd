@@ -1,4 +1,7 @@
 # KDevelop Custom Project File List
 Makefile
 usb-vhci-hcd.c
+usb-vhci-hcd.h
+usb-vhci-iocifc.c
 usb-vhci.h
+usb-vhci-dump-urb.c

@@ -14,7 +14,7 @@
       <keyword>Linux</keyword>
       <keyword>Kernel</keyword>
     </keywords>
-    <projectname>usb_vhci_hcd</projectname>
+    <projectname>vhci-hcd</projectname>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
     <description/>
@@ -85,6 +85,7 @@
     </filetypes>
     <blacklist>
       <path>usb-vhci-hcd.mod.c</path>
+      <path>usb-vhci-iocifc.mod.c</path>
     </blacklist>
     <other>
       <prio>0</prio>
@@ -153,10 +154,10 @@
     </projectdoc>
   </kdevdocumentation>
   <substmap>
-    <APPNAME>usb_vhci_hcd</APPNAME>
-    <APPNAMELC>usb_vhci_hcd</APPNAMELC>
-    <APPNAMESC>Usb_vhci_hcd</APPNAMESC>
-    <APPNAMEUC>USB_VHCI_HCD</APPNAMEUC>
+    <APPNAME>vhci-hcd</APPNAME>
+    <APPNAMELC>vhci-hcd</APPNAMELC>
+    <APPNAMESC>Vhci-hcd</APPNAMESC>
+    <APPNAMEUC>VHCI-HCD</APPNAMEUC>
     <AUTHOR>Michael Singer</AUTHOR>
     <EMAIL>michael@a-singer.de</EMAIL>
     <LICENSE>GPL</LICENSE>

@@ -35,13 +35,6 @@
 #include <linux/usb.h>
 #include <linux/fs.h>
 #include <linux/device.h>
-#ifdef KBUILD_EXTMOD
-#	include "usb-vhci.h"
-#	include "conf/usb-vhci.config.h"
-#else
-#	include <linux/usb-vhci.h>
-#	include "usb-vhci.config.h"
-#endif
 
 #include <asm/atomic.h>
 #include <asm/bitops.h>
@@ -52,6 +45,8 @@
 #else
 #	include "../core/hcd.h"
 #endif
+
+#include "usb-vhci-hcd.h"
 
 #define DRIVER_NAME "usb_vhci_hcd"
 #define DRIVER_DESC "USB Virtual Host Controller Interface"
@@ -93,87 +88,6 @@ MODULE_DESCRIPTION(DRIVER_DESC " driver");
 MODULE_AUTHOR("Michael Singer <michael@a-singer.de>");
 MODULE_LICENSE("GPL");
 
-struct vhci_urb_priv
-{
-	struct urb *urb;
-	struct list_head urbp_list;
-	atomic_t status;
-};
-
-enum vhci_rh_state
-{
-	VHCI_RH_RESET     = 0,
-	VHCI_RH_SUSPENDED = 1,
-	VHCI_RH_RUNNING   = 2
-} __attribute__((packed));
-
-struct vhci_port
-{
-	u16 port_status;
-	u16 port_change;
-	u8 port_flags;
-};
-
-struct vhci_conf
-{
-	struct platform_device *pdev;
-
-	u8 port_count;
-};
-
-struct vhci
-{
-	spinlock_t lock;
-
-	enum vhci_rh_state rh_state;
-
-	// TODO: implement timer for incrementing frame_num every millisecond
-	//struct timer_list timer;
-
-	struct vhci_port *ports;
-	u8 port_count;
-	u8 port_sched_offset;
-	u32 port_update;
-
-	atomic_t frame_num;
-
-	wait_queue_head_t work_event;
-
-	// urbs which are waiting to get fetched by user space are in this list
-	struct list_head urbp_list_inbox;
-
-	// urbs which were fetched by user space but not already given back are in this list
-	struct list_head urbp_list_fetched;
-
-	// urbs which were fetched by user space and not already given back, and which should be
-	// canceled are in this list
-	struct list_head urbp_list_cancel;
-
-	// urbs which were fetched by user space and not already given back, and for which the
-	// user space already knows about the cancelation state are in this list
-	struct list_head urbp_list_canceling;
-};
-
-static inline struct vhci *hcd_to_vhci(struct usb_hcd *hcd)
-{
-	return (struct vhci *)(hcd->hcd_priv);
-}
-
-static inline struct usb_hcd *vhci_to_hcd(struct vhci *vhc)
-{
-	return container_of((void *)vhc, struct usb_hcd, hcd_priv);
-}
-
-static inline struct device *vhci_dev(struct vhci *vhc)
-{
-	return vhci_to_hcd(vhc)->self.controller;
-}
-
-static inline struct vhci_conf *dev_to_vhci_conf(struct device *dev)
-{
-	return (struct vhci_conf *)(*((struct file **)dev->platform_data))->private_data;
-}
-
 static inline const char *vhci_dev_name(struct device *dev)
 {
 #ifdef OLD_DEV_BUS_ID
@@ -183,7 +97,36 @@ static inline const char *vhci_dev_name(struct device *dev)
 #endif
 }
 
-static void maybe_set_status(struct vhci_urb_priv *urbp, int status)
+const char *usb_vhci_dev_name(struct usb_vhci_device *vdev)
+{
+	struct platform_device *pdev;
+	struct usb_vhci_hcd *vhc;
+
+	vhc = vhcidev_to_vhcihcd(vdev);
+
+	if(likely(vhc))
+	{
+		pdev = vhcidev_to_pdev(vdev);
+		return vhci_dev_name(&pdev->dev);
+	}
+
+	return "<unknown>";
+}
+EXPORT_SYMBOL_GPL(usb_vhci_dev_name);
+
+int usb_vhci_dev_id(struct usb_vhci_device *vdev)
+{
+	return vhcidev_to_pdev(vdev)->id;
+}
+EXPORT_SYMBOL_GPL(usb_vhci_dev_id);
+
+int usb_vhci_dev_busnum(struct usb_vhci_device *vdev)
+{
+	return vhcidev_to_usbhcd(vdev)->self.busnum;
+}
+EXPORT_SYMBOL_GPL(usb_vhci_dev_busnum);
+
+void usb_vhci_maybe_set_status(struct usb_vhci_urb_priv *urbp, int status)
 {
 #ifdef OLD_GIVEBACK_MECH
 	struct urb *const urb = urbp->urb;
@@ -196,60 +139,60 @@ static void maybe_set_status(struct vhci_urb_priv *urbp, int status)
 	(void)atomic_cmpxchg(&urbp->status, -EINPROGRESS, status);
 #endif
 }
-
-static void dump_urb(struct urb *urb);
+EXPORT_SYMBOL_GPL(usb_vhci_maybe_set_status);
 
 #ifdef DEBUG
-static const char *get_status_str(int status)
-{
-	switch(status)
-	{
-	case 0:            return "SUCCESS";
-	case -EINPROGRESS: return "-EINPROGRESS";
-	case -ECANCELED:   return "-ECANCELED";
-	case -EPIPE:       return "-EPIPE";
-	default:           return "???";
-	}
-}
+#include "usb-vhci-dump-urb.c"
+#else
+static inline void dump_urb(struct urb *urb) {/* do nothing */}
 #endif
+
+// caller has vhc->lock
+// first port is port# 1 (not 0)
+static void vhci_port_update(struct usb_vhci_hcd *vhc, u8 port)
+{
+	struct usb_vhci_device *vdev = vhcihcd_to_vhcidev(vhc);
+	vhc->port_update |= 1 << port;
+	vdev->ifc->wakeup(vdev);
+}
 
 // gives the urb back to its original owner/creator.
 // caller owns vhc->lock and has irq disabled.
-static void vhci_urb_giveback(struct vhci *vhc, struct vhci_urb_priv *urbp)
+void usb_vhci_urb_giveback(struct usb_vhci_hcd *vhc, struct usb_vhci_urb_priv *urbp)
 {
+	struct device *dev;
+	struct usb_hcd *hcd;
 	struct urb *const urb = urbp->urb;
 	struct usb_device *const udev = urb->dev;
 #ifndef OLD_GIVEBACK_MECH
 	int status;
 #endif
-	trace_function(vhci_dev(vhc));
+	hcd = vhcihcd_to_usbhcd(vhc);
+	dev = vhcihcd_to_dev(vhc);
+	trace_function(dev);
 #ifndef OLD_GIVEBACK_MECH
 	status = atomic_read(&urbp->status);
 #endif
 	urb->hcpriv = NULL;
 	list_del(&urbp->urbp_list);
 #ifndef OLD_GIVEBACK_MECH
-	usb_hcd_unlink_urb_from_ep(vhci_to_hcd(vhc), urb);
+	usb_hcd_unlink_urb_from_ep(hcd, urb);
 #endif
 	spin_unlock(&vhc->lock);
 	kfree(urbp);
 	dump_urb(urb);
 #ifdef OLD_GIVEBACK_MECH
-	usb_hcd_giveback_urb(vhci_to_hcd(vhc), urb);
+	usb_hcd_giveback_urb(hcd, urb);
 #else
 #	ifdef DEBUG
 	if(debug_output) vhci_printk(KERN_DEBUG, "status=%d(%s)\n", status, get_status_str(status));
 #	endif
-	usb_hcd_giveback_urb(vhci_to_hcd(vhc), urb, status);
+	usb_hcd_giveback_urb(hcd, urb, status);
 #endif
 	usb_put_dev(udev);
 	spin_lock(&vhc->lock);
 }
-
-static inline void trigger_work_event(struct vhci *vhc)
-{
-	wake_up_interruptible(&vhc->work_event);
-}
+EXPORT_SYMBOL_GPL(usb_vhci_urb_giveback);
 
 #ifdef OLD_GIVEBACK_MECH
 static int vhci_urb_enqueue(struct usb_hcd *hcd, struct usb_host_endpoint *ep, struct urb *urb, gfp_t mem_flags)
@@ -257,21 +200,25 @@ static int vhci_urb_enqueue(struct usb_hcd *hcd, struct usb_host_endpoint *ep, s
 static int vhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 #endif
 {
-	struct vhci *vhc;
-	struct vhci_urb_priv *urbp;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
+	struct usb_vhci_urb_priv *urbp;
+	struct usb_vhci_device *vdev;
 	unsigned long flags;
 #ifndef OLD_GIVEBACK_MECH
 	int retval;
 #endif
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
+	vdev = vhcihcd_to_vhcidev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	if(unlikely(!urb->transfer_buffer && urb->transfer_buffer_length))
 		return -EINVAL;
 
-	urbp = kzalloc(sizeof(struct vhci_urb_priv), mem_flags);
+	urbp = kzalloc(sizeof *urbp, mem_flags);
 	if(unlikely(!urbp))
 		return -ENOMEM;
 	urbp->urb = urb;
@@ -290,7 +237,7 @@ static int vhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flag
 	list_add_tail(&urbp->urbp_list, &vhc->urbp_list_inbox);
 	urb->hcpriv = urbp;
 	spin_unlock_irqrestore(&vhc->lock, flags);
-	trigger_work_event(vhc);
+	vdev->ifc->wakeup(vdev);
 	return 0;
 }
 
@@ -300,16 +247,20 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb)
 static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 #endif
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
+	struct usb_vhci_device *vdev;
 	unsigned long flags;
-	struct vhci_urb_priv *entry, *urbp = NULL;
+	struct usb_vhci_urb_priv *entry, *urbp = NULL;
 #ifndef OLD_GIVEBACK_MECH
 	int retval;
 #endif
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
+	vdev = vhcihcd_to_vhcidev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	spin_lock_irqsave(&vhc->lock, flags);
 #ifndef OLD_GIVEBACK_MECH
@@ -333,7 +284,7 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 
 	// if found in inbox
 	if(urbp)
-		vhci_urb_giveback(vhc, urbp);
+		usb_vhci_urb_giveback(vhc, urbp);
 	else // if not found...
 	{
 		// ...then check if the urb is on a vacation through user space
@@ -343,7 +294,7 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 			{
 				// move it into the cancel list
 				list_move_tail(&entry->urbp_list, &vhc->urbp_list_cancel);
-				trigger_work_event(vhc);
+				vdev->ifc->wakeup(vdev);
 				break;
 			}
 		}
@@ -356,21 +307,23 @@ static int vhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 /*
 static void vhci_timer(unsigned long _vhc)
 {
-	struct vhci *vhc = (struct vhci *)_vhc;
+	struct usb_vhci_hcd *vhc = (struct usb_vhci_hcd *)_vhc;
 }
 */
 
 static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
 	unsigned long flags;
 	u8 port;
 	int retval = 0;
 	int idx, rel_bit, abs_bit;
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	memset(buf, 0, 1 + vhc->port_count / 8);
 
@@ -392,20 +345,20 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 			retval = 1;
 		}
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "port %d status 0x%04x has changes at 0x%04x\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
+		if(debug_output) dev_dbg(dev, "port %d status 0x%04x has changes at 0x%04x\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
 #endif
 	}
 
-	if(vhc->rh_state == VHCI_RH_SUSPENDED)
+	if(vhc->rh_state == USB_VHCI_RH_SUSPENDED)
 		usb_hcd_resume_root_hub(hcd);
 
 	spin_unlock_irqrestore(&vhc->lock, flags);
 	return retval;
 }
 
-// caller has lock
+// caller has vhc->lock
 // called in vhci_hub_control only
-static inline void hub_descriptor(const struct vhci *vhc, char *buf, u16 len)
+static inline void hub_descriptor(const struct usb_vhci_hcd *vhc, char *buf, u16 len)
 {
 	struct usb_hub_descriptor desc;
 	int portArrLen = vhc->port_count / 8 + 1; // length of one port bit-array in bytes
@@ -431,14 +384,6 @@ static inline void hub_descriptor(const struct vhci *vhc, char *buf, u16 len)
 	memcpy(buf, &desc, l);
 }
 
-// caller has lock
-// first port is port# 1 (not 0)
-static inline void userspace_needs_port_update(struct vhci *vhc, u8 port)
-{
-	vhc->port_update |= 1 << port;
-	trigger_work_event(vhc);
-}
-
 static int vhci_hub_control(struct usb_hcd *hcd,
                             u16 typeReq,
                             u16 wValue,
@@ -446,16 +391,18 @@ static int vhci_hub_control(struct usb_hcd *hcd,
                             char *buf,
                             u16 wLength)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
 	int retval = 0;
 	unsigned long flags;
 	u16 *ps, *pc;
 	u8 *pf;
 	u8 port, has_changes = 0;
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	if(unlikely(!test_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags)))
 		return -ETIMEDOUT;
@@ -467,14 +414,14 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 	case ClearHubFeature:
 	case SetHubFeature:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: %sHubFeature [wValue=0x%04x]\n", __FUNCTION__, (typeReq == ClearHubFeature) ? "Clear" : "Set", (int)wValue);
+		if(debug_output) dev_dbg(dev, "%s: %sHubFeature [wValue=0x%04x]\n", __FUNCTION__, (typeReq == ClearHubFeature) ? "Clear" : "Set", (int)wValue);
 #endif
 		if(unlikely(wIndex || wLength || (wValue != C_HUB_LOCAL_POWER && wValue != C_HUB_OVER_CURRENT)))
 			goto err;
 		break;
 	case ClearPortFeature:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: ClearPortFeature [wValue=0x%04x, wIndex=%d]\n", __FUNCTION__, (int)wValue, (int)wIndex);
+		if(debug_output) dev_dbg(dev, "%s: ClearPortFeature [wValue=0x%04x, wIndex=%d]\n", __FUNCTION__, (int)wValue, (int)wIndex);
 #endif
 		if(unlikely(!wIndex || wIndex > vhc->port_count || wLength))
 			goto err;
@@ -488,10 +435,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(*ps & USB_PORT_STAT_SUSPEND)
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d resuming\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d resuming\n", (int)wIndex);
 #endif
 				*pf |= USB_VHCI_PORT_STAT_FLAG_RESUMING;
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_POWER:
@@ -499,7 +446,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(*ps & USB_PORT_STAT_POWER)
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d power-off\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d power-off\n", (int)wIndex);
 #endif
 				// clear all status bits except overcurrent (see USB 2.0 spec section 11.24.2.7.1)
 				*ps &= USB_PORT_STAT_OVERCURRENT;
@@ -507,7 +454,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				*pc &= USB_PORT_STAT_C_OVERCURRENT;
 				// clear resuming flag
 				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_ENABLE:
@@ -515,7 +462,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(*ps & USB_PORT_STAT_ENABLE)
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d disabled\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d disabled\n", (int)wIndex);
 #endif
 				// clear enable and suspend bits (see section 11.24.2.7.1.{2,3})
 				*ps &= ~(USB_PORT_STAT_ENABLE | USB_PORT_STAT_SUSPEND);
@@ -524,7 +471,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// clear resuming flag
 				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 				// TODO: maybe we should clear the low/high speed bits here (section 11.24.2.7.1.{7,8})
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_CONNECTION:
@@ -542,7 +489,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(*pc & (1 << (wValue - 16)))
 			{
 				*pc &= ~(1 << (wValue - 16));
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		//case USB_PORT_FEAT_TEST:
@@ -552,7 +499,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		break;
 	case GetHubDescriptor:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: GetHubDescriptor [wValue=0x%04x, wLength=%d]\n", __FUNCTION__, (int)wValue, (int)wLength);
+		if(debug_output) dev_dbg(dev, "%s: GetHubDescriptor [wValue=0x%04x, wLength=%d]\n", __FUNCTION__, (int)wValue, (int)wLength);
 #endif
 		if(unlikely(wIndex))
 			goto err;
@@ -560,7 +507,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		break;
 	case GetHubStatus:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: GetHubStatus\n", __FUNCTION__);
+		if(debug_output) dev_dbg(dev, "%s: GetHubStatus\n", __FUNCTION__);
 #endif
 		if(unlikely(wValue || wIndex || wLength != 4))
 			goto err;
@@ -568,12 +515,12 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		break;
 	case GetPortStatus:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: GetPortStatus [wIndex=%d]\n", __FUNCTION__, (int)wIndex);
+		if(debug_output) dev_dbg(dev, "%s: GetPortStatus [wIndex=%d]\n", __FUNCTION__, (int)wIndex);
 #endif
 		if(unlikely(wValue || !wIndex || wIndex > vhc->port_count || wLength != 4))
 			goto err;
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: ==> [port_status=0x%04x] [port_change=0x%04x]\n", __FUNCTION__, (int)vhc->ports[wIndex - 1].port_status, (int)vhc->ports[wIndex - 1].port_change);
+		if(debug_output) dev_dbg(dev, "%s: ==> [port_status=0x%04x] [port_change=0x%04x]\n", __FUNCTION__, (int)vhc->ports[wIndex - 1].port_status, (int)vhc->ports[wIndex - 1].port_change);
 #endif
 		buf[0] = (u8)vhc->ports[wIndex - 1].port_status;
 		buf[1] = (u8)(vhc->ports[wIndex - 1].port_status >> 8);
@@ -582,7 +529,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		break;
 	case SetPortFeature:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: SetPortFeature [wValue=0x%04x, wIndex=%d]\n", __FUNCTION__, (int)wValue, (int)wIndex);
+		if(debug_output) dev_dbg(dev, "%s: SetPortFeature [wValue=0x%04x, wIndex=%d]\n", __FUNCTION__, (int)wValue, (int)wIndex);
 #endif
 		if(unlikely(!wIndex || wIndex > vhc->port_count || wLength))
 			goto err;
@@ -600,10 +547,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if((*ps & USB_PORT_STAT_ENABLE) && !(*ps & USB_PORT_STAT_SUSPEND))
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d suspended\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d suspended\n", (int)wIndex);
 #endif
 				*ps |= USB_PORT_STAT_SUSPEND;
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_POWER:
@@ -611,10 +558,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(!(*ps & USB_PORT_STAT_POWER))
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d power-on\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d power-on\n", (int)wIndex);
 #endif
 				*ps |= USB_PORT_STAT_POWER;
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		case USB_PORT_FEAT_RESET:
@@ -623,7 +570,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if((*ps & USB_PORT_STAT_CONNECTION) && !(*ps & USB_PORT_STAT_RESET))
 			{
 #ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d resetting\n", (int)wIndex);
+				if(debug_output) dev_dbg(dev, "Port %d resetting\n", (int)wIndex);
 #endif
 
 				// keep the state of these bits and clear all others
@@ -638,10 +585,10 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 				// clear resuming flag
 				*pf &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
 
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 #ifdef DEBUG
-			else if(debug_output) dev_dbg(vhci_dev(vhc), "Port %d reset not possible because of port_state=%04x\n", (int)wIndex, (int)*ps);
+			else if(debug_output) dev_dbg(dev, "Port %d reset not possible because of port_state=%04x\n", (int)wIndex, (int)*ps);
 #endif
 			break;
 		case USB_PORT_FEAT_CONNECTION:
@@ -658,7 +605,7 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 			if(!(*pc & (1 << (wValue - 16))))
 			{
 				*pc |= 1 << (wValue - 16);
-				userspace_needs_port_update(vhc, wIndex);
+				vhci_port_update(vhc, wIndex);
 			}
 			break;
 		//case USB_PORT_FEAT_ENABLE: // port can't be enabled without reseting (USB 2.0 spec section 11.24.2.7.1.2)
@@ -669,11 +616,11 @@ static int vhci_hub_control(struct usb_hcd *hcd,
 		break;
 	default:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: +++UNHANDLED_REQUEST+++ [req=0x%04x, v=0x%04x, i=0x%04x, l=%d]\n", __FUNCTION__, (int)typeReq, (int)wValue, (int)wIndex, (int)wLength);
+		if(debug_output) dev_dbg(dev, "%s: +++UNHANDLED_REQUEST+++ [req=0x%04x, v=0x%04x, i=0x%04x, l=%d]\n", __FUNCTION__, (int)typeReq, (int)wValue, (int)wIndex, (int)wLength);
 #endif
 err:
 #ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "%s: STALL\n", __FUNCTION__);
+		if(debug_output) dev_dbg(dev, "%s: STALL\n", __FUNCTION__);
 #endif
 		// "protocol stall" on error
 		retval = -EPIPE;
@@ -692,13 +639,15 @@ err:
 
 static int vhci_bus_suspend(struct usb_hcd *hcd)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
 	unsigned long flags;
 	u8 port;
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	spin_lock_irqsave(&vhc->lock, flags);
 
@@ -708,16 +657,16 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 		if((vhc->ports[port].port_status & USB_PORT_STAT_ENABLE) &&
 			!(vhc->ports[port].port_status & USB_PORT_STAT_SUSPEND))
 		{
-			dev_dbg(vhci_dev(vhc), "Port %d suspended\n", (int)port + 1);
+			dev_dbg(dev, "Port %d suspended\n", (int)port + 1);
 			vhc->ports[port].port_status |= USB_PORT_STAT_SUSPEND;
 			vhc->ports[port].port_flags &= ~USB_VHCI_PORT_STAT_FLAG_RESUMING;
-			userspace_needs_port_update(vhc, port + 1);
+			vhci_port_update(vhc, port + 1);
 		}
 	}
 
 	// TODO: somehow we have to suppress the resuming of ports while the bus is suspended
 
-	vhc->rh_state = VHCI_RH_SUSPENDED;
+	vhc->rh_state = USB_VHCI_RH_SUSPENDED;
 	hcd->state = HC_STATE_SUSPENDED;
 
 	spin_unlock_irqrestore(&vhc->lock, flags);
@@ -727,13 +676,15 @@ static int vhci_bus_suspend(struct usb_hcd *hcd)
 
 static int vhci_bus_resume(struct usb_hcd *hcd)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
 	int rc = 0;
 	unsigned long flags;
 
-	vhc = hcd_to_vhci(hcd);
+	vhc = usbhcd_to_vhcihcd(hcd);
+	dev = vhcihcd_to_dev(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	spin_lock_irqsave(&vhc->lock, flags);
 	if(unlikely(!test_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags)))
@@ -743,7 +694,7 @@ static int vhci_bus_resume(struct usb_hcd *hcd)
 	}
 	else
 	{
-		vhc->rh_state = VHCI_RH_RUNNING;
+		vhc->rh_state = USB_VHCI_RH_RUNNING;
 		//set_link_state(vhc);
 		hcd->state = HC_STATE_RUNNING;
 	}
@@ -785,134 +736,6 @@ static inline ssize_t show_urb(char *buf, size_t size, struct urb *urb)
 		urb->actual_length, urb->transfer_buffer_length);
 }
 
-#ifdef DEBUG
-static void dump_urb(struct urb *urb)
-{
-	int i, j;
-	int max = urb->transfer_buffer_length;
-	int in = usb_pipein(urb->pipe);
-	if(!debug_output) return;
-	vhci_printk(KERN_DEBUG, "dump_urb 0x%016llx:\n", (u64)(unsigned long)urb);
-	vhci_printk(KERN_DEBUG, "dvadr=0x%02x epnum=%d epdir=%s eptpe=%s\n", (int)usb_pipedevice(urb->pipe), (int)usb_pipeendpoint(urb->pipe), (in ? "IN" : "OUT"), (usb_pipecontrol(urb->pipe) ? "CTRL" : (usb_pipebulk(urb->pipe) ? "BULK" : (usb_pipeint(urb->pipe) ? "INT" : (usb_pipeisoc(urb->pipe) ? "ISO" : "INV!")))));
-#ifdef OLD_GIVEBACK_MECH
-	vhci_printk(KERN_DEBUG, "status=%d(%s) flags=0x%08x buflen=%d/%d\n", urb->status, get_status_str(urb->status), urb->transfer_flags, urb->actual_length, max);
-#else
-	vhci_printk(KERN_DEBUG, "flags=0x%08x buflen=%d/%d\n", urb->transfer_flags, urb->actual_length, max);
-#endif
-	vhci_printk(KERN_DEBUG, "tbuf=0x%p tdma=0x%016llx sbuf=0x%p sdma=0x%016llx\n", urb->transfer_buffer, (u64)urb->transfer_dma, urb->setup_packet, (u64)urb->setup_dma);
-	if(usb_pipeint(urb->pipe))
-		vhci_printk(KERN_DEBUG, "interval=%d\n", urb->interval);
-	else if(usb_pipeisoc(urb->pipe))
-		vhci_printk(KERN_DEBUG, "interval=%d err=%d packets=%d startfrm=%d\n", urb->interval, urb->error_count, urb->number_of_packets, urb->start_frame);
-	else if(usb_pipecontrol(urb->pipe))
-	{
-		const char *const sr[13] =
-		{
-			"GET_STATUS",
-			"CLEAR_FEATURE",
-			"reserved",
-			"SET_FEATURE",
-			"reserved",
-			"SET_ADDRESS",
-			"GET_DESCRIPTOR",
-			"SET_DESCRIPTOR",
-			"GET_CONFIGURATION",
-			"SET_CONFIGURATION",
-			"GET_INTERFACE",
-			"SET_INTERFACE",
-			"SYNCH_FRAME"
-		};
-		const char *const sd[9] =
-		{
-			"invalid",
-			"DEVICE",
-			"CONFIGURATION",
-			"STRING",
-			"INTERFACE",
-			"ENDPOINT",
-			"DEVICE_QUALIFIER",
-			"OTHER_SPEED_CONFIGURATION",
-			"INTERFACE_POWER"
-		};
-		const char *const sf[3] =
-		{
-			"ENDPOINT_HALT",
-			"DEVICE_REMOTE_WAKEUP",
-			"TEST_MODE"
-		};
-		max = urb->setup_packet[6] | (urb->setup_packet[7] << 8);
-		in = urb->setup_packet[0] & 0x80;
-		if(urb->setup_packet == NULL)
-			vhci_printk(KERN_DEBUG, "(!!!) setup_packet is NULL\n");
-		else
-		{
-			unsigned int val = urb->setup_packet[2] | (urb->setup_packet[3] << 8);
-			vhci_printk(KERN_DEBUG, "bRequestType=0x%02x(%s,%s,%s) bRequest=0x%02x(%s)\n",
-				(int)urb->setup_packet[0],
-				in ? "IN" : "OUT",
-				(((urb->setup_packet[0] >> 5) & 0x03) == 0) ? "STD" : ((((urb->setup_packet[0] >> 5) & 0x03) == 1) ? "CLS" : ((((urb->setup_packet[0] >> 5) & 0x03) == 2) ? "VDR" : "???")),
-				((urb->setup_packet[0] & 0x1f) == 0) ? "DV" : (((urb->setup_packet[0] & 0x1f) == 1) ? "IF" : (((urb->setup_packet[0] & 0x1f) == 2) ? "EP" : (((urb->setup_packet[0] & 0x1f) == 3) ? "OT" : "??"))),
-				(int)urb->setup_packet[1],
-				(((urb->setup_packet[0] >> 5) & 0x03) == 0 && urb->setup_packet[1] < 13) ? sr[urb->setup_packet[1]] : "???");
-			vhci_printk(KERN_DEBUG, "wValue=0x%04x", val);
-			if(((urb->setup_packet[0] >> 5) & 0x03) == 0)
-			{
-				if(urb->setup_packet[1] == 1 || urb->setup_packet[1] == 3)
-					printk("(%s)", (val < 3) ? sf[val] : "???");
-				else if(urb->setup_packet[1] == 6 || urb->setup_packet[1] == 7)
-					printk("(%s)", (urb->setup_packet[3] < 9) ? sd[urb->setup_packet[3]] : "???");
-			}
-			printk(" wIndex=0x%04x wLength=0x%04x\n", urb->setup_packet[4] | (urb->setup_packet[5] << 8), max);
-		}
-	}
-	if(usb_pipeisoc(urb->pipe))
-	{
-		for(j = 0; j < urb->number_of_packets; j++)
-		{
-			vhci_printk(KERN_DEBUG, "PACKET%d: offset=%d pktlen=%d/%d status=%d(%s)\n", j, urb->iso_frame_desc[j].offset, urb->iso_frame_desc[j].actual_length, urb->iso_frame_desc[j].length, urb->iso_frame_desc[j].status, get_status_str(urb->iso_frame_desc[j].status));
-			if(debug_output >= 2)
-			{
-				vhci_printk(KERN_DEBUG, "PACKET%d: data stage (%d/%d bytes %s):\n", j, urb->iso_frame_desc[j].actual_length, urb->iso_frame_desc[j].length, in ? "received" : "transmitted");
-				vhci_printk(KERN_DEBUG, "PACKET%d: ", j);
-				max = in ? urb->iso_frame_desc[j].actual_length : urb->iso_frame_desc[j].length;
-				if(debug_output > 2 || max <= 16)
-					for(i = urb->iso_frame_desc[j].offset; i < max + urb->iso_frame_desc[j].offset; i++)
-						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-				else
-				{
-					for(i = urb->iso_frame_desc[j].offset; i < 8 + urb->iso_frame_desc[j].offset; i++)
-						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-					printk("... ");
-					for(i = max + urb->iso_frame_desc[j].offset - 8; i < max + urb->iso_frame_desc[j].offset; i++)
-						printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-				}
-				printk("\n");
-			}
-		}
-	}
-	else if(debug_output >= 2)
-	{
-		vhci_printk(KERN_DEBUG, "data stage (%d/%d bytes %s):\n", urb->actual_length, max, in ? "received" : "transmitted");
-		vhci_printk(KERN_DEBUG, "");
-		if(in) max = urb->actual_length;
-		if(debug_output > 2 || max <= 16)
-			for(i = 0; i < max; i++)
-				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-		else
-		{
-			for(i = 0; i < 8; i++)
-				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-			printk("... ");
-			for(i = max - 8; i < max; i++)
-				printk("%02x ", (unsigned int)((unsigned char*)urb->transfer_buffer)[i]);
-		}
-		printk("\n");
-	}
-}
-#else
-static inline void dump_urb(struct urb *urb) {/* do nothing */}
-#endif
-
 static ssize_t show_urbs(struct device *dev, struct device_attribute *attr, char *buf);
 static DEVICE_ATTR(urbs_inbox,     S_IRUSR, show_urbs, NULL);
 static DEVICE_ATTR(urbs_fetched,   S_IRUSR, show_urbs, NULL);
@@ -921,17 +744,17 @@ static DEVICE_ATTR(urbs_canceling, S_IRUSR, show_urbs, NULL);
 
 static ssize_t show_urbs(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	struct usb_hcd *hcd;
-	struct vhci *vhc;
-	struct vhci_urb_priv *urbp;
+	struct usb_vhci_hcd *vhc;
+	struct platform_device *pdev;
+	struct usb_vhci_urb_priv *urbp;
 	size_t size = 0;
 	unsigned long flags;
 	struct list_head *list;
 
-	hcd = dev_get_drvdata(dev);
-	vhc = hcd_to_vhci(hcd);
+	pdev = to_platform_device(dev);
+	vhc = pdev_to_vhcihcd(pdev);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
 	if(attr == &dev_attr_urbs_inbox)
 		list = &vhc->urbp_list_inbox;
@@ -943,7 +766,7 @@ static ssize_t show_urbs(struct device *dev, struct device_attribute *attr, char
 		list = &vhc->urbp_list_canceling;
 	else
 	{
-		dev_err(vhci_dev(vhc), "unreachable code reached... wtf?\n");
+		dev_err(dev, "unreachable code reached... wtf?\n");
 		return -EINVAL;
 	}
 
@@ -966,18 +789,20 @@ static ssize_t show_urbs(struct device *dev, struct device_attribute *attr, char
 
 static int vhci_start(struct usb_hcd *hcd)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
 	int retval;
-	struct vhci_port *ports;
-	struct vhci_conf *conf;
+	struct usb_vhci_port *ports;
+	struct usb_vhci_device *vdev;
+	struct device *dev;
 
-	vhc = hcd_to_vhci(hcd);
+	dev = usbhcd_to_dev(hcd);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
-	conf = dev_to_vhci_conf(vhci_dev(vhc));
+	vhc = usbhcd_to_vhcihcd(hcd);
+	vdev = vhcihcd_to_vhcidev(vhc);
 
-	ports = kzalloc(conf->port_count * sizeof(struct vhci_port), GFP_KERNEL);
+	ports = kzalloc(vdev->port_count * sizeof(struct usb_vhci_port), GFP_KERNEL);
 	if(unlikely(ports == NULL)) return -ENOMEM;
 
 	spin_lock_init(&vhc->lock);
@@ -985,43 +810,38 @@ static int vhci_start(struct usb_hcd *hcd)
 	//vhc->timer.function = vhci_timer;
 	//vhc->timer.data = (unsigned long)vhc;
 	vhc->ports = ports;
-	vhc->port_count = conf->port_count;
-	vhc->port_sched_offset = 0;
+	vhc->port_count = vdev->port_count;
 	vhc->port_update = 0;
 	atomic_set(&vhc->frame_num, 0);
-	init_waitqueue_head(&vhc->work_event);
 	INIT_LIST_HEAD(&vhc->urbp_list_inbox);
 	INIT_LIST_HEAD(&vhc->urbp_list_fetched);
 	INIT_LIST_HEAD(&vhc->urbp_list_cancel);
 	INIT_LIST_HEAD(&vhc->urbp_list_canceling);
-	vhc->rh_state = VHCI_RH_RUNNING;
+	vhc->rh_state = USB_VHCI_RH_RUNNING;
 
-	hcd->power_budget = 30000; // practically we have unlimited power because this is a virtual device with... err... virtual power!
+	hcd->power_budget = 500; // NOTE: practically we have unlimited power because this is a virtual device with... err... virtual power!
 	hcd->state = HC_STATE_RUNNING;
 	hcd->uses_new_polling = 1;
 
-	retval = device_create_file(vhci_dev(vhc), &dev_attr_urbs_inbox);
+	retval = device_create_file(dev, &dev_attr_urbs_inbox);
 	if(unlikely(retval != 0)) goto kfree_port_arr;
-
-	retval = device_create_file(vhci_dev(vhc), &dev_attr_urbs_fetched);
+	retval = device_create_file(dev, &dev_attr_urbs_fetched);
 	if(unlikely(retval != 0)) goto rem_file_inbox;
-
-	retval = device_create_file(vhci_dev(vhc), &dev_attr_urbs_cancel);
+	retval = device_create_file(dev, &dev_attr_urbs_cancel);
 	if(unlikely(retval != 0)) goto rem_file_fetched;
-
-	retval = device_create_file(vhci_dev(vhc), &dev_attr_urbs_canceling);
+	retval = device_create_file(dev, &dev_attr_urbs_canceling);
 	if(unlikely(retval != 0)) goto rem_file_cancel;
 
 	return 0;
 
 rem_file_cancel:
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_cancel);
+	device_remove_file(dev, &dev_attr_urbs_cancel);
 
 rem_file_fetched:
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_fetched);
+	device_remove_file(dev, &dev_attr_urbs_fetched);
 
 rem_file_inbox:
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_inbox);
+	device_remove_file(dev, &dev_attr_urbs_inbox);
 
 kfree_port_arr:
 	kfree(ports);
@@ -1032,16 +852,19 @@ kfree_port_arr:
 
 static void vhci_stop(struct usb_hcd *hcd)
 {
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
+	struct device *dev;
 
-	vhc = hcd_to_vhci(hcd);
+	dev = usbhcd_to_dev(hcd);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(dev);
 
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_canceling);
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_cancel);
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_fetched);
-	device_remove_file(vhci_dev(vhc), &dev_attr_urbs_inbox);
+	vhc = usbhcd_to_vhcihcd(hcd);
+
+	device_remove_file(dev, &dev_attr_urbs_canceling);
+	device_remove_file(dev, &dev_attr_urbs_cancel);
+	device_remove_file(dev, &dev_attr_urbs_fetched);
+	device_remove_file(dev, &dev_attr_urbs_inbox);
 
 	if(likely(vhc->ports))
 	{
@@ -1050,23 +873,22 @@ static void vhci_stop(struct usb_hcd *hcd)
 		vhc->port_count = 0;
 	}
 
-	vhc->rh_state = VHCI_RH_RESET;
-
-	dev_info(vhci_dev(vhc), "stopped\n");
+	vhc->rh_state = USB_VHCI_RH_RESET;
+	dev_info(dev, "stopped\n");
 }
 
 static int vhci_get_frame(struct usb_hcd *hcd)
 {
-	struct vhci *vhc;
-	vhc = hcd_to_vhci(hcd);
-	trace_function(vhci_dev(vhc));
+	struct usb_vhci_hcd *vhc;
+	vhc = usbhcd_to_vhcihcd(hcd);
+	trace_function(usbhcd_to_dev(hcd));
 	return atomic_read(&vhc->frame_num);
 }
 
 static const struct hc_driver vhci_hcd = {
 	.description      = driver_name,
 	.product_desc     = "VHCI Host Controller",
-	.hcd_priv_size    = sizeof(struct vhci),
+	.hcd_priv_size    = sizeof(struct usb_vhci_hcd),
 
 	.flags            = HCD_USB2,
 
@@ -1087,17 +909,22 @@ static const struct hc_driver vhci_hcd = {
 static int vhci_hcd_probe(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd;
+	struct usb_vhci_device *vdev;
 	int retval;
+
+	vdev = pdev_to_vhcidev(pdev);
 
 #ifdef DEBUG
 	if(debug_output) dev_dbg(&pdev->dev, "%s\n", __FUNCTION__);
 #endif
 	dev_info(&pdev->dev, DRIVER_DESC " -- Version " DRIVER_VERSION "\n");
+	dev_info(&pdev->dev, "--> Backend: %s\n", vdev->ifc->ifc_desc);
 
 	hcd = usb_create_hcd(&vhci_hcd, &pdev->dev, vhci_dev_name(&pdev->dev));
 	if(unlikely(!hcd)) return -ENOMEM;
+	vdev->vhc = usbhcd_to_vhcihcd(hcd);
 
-	retval = usb_add_hcd(hcd, 0, 0);
+	retval = usb_add_hcd(hcd, 0, 0); // calls vhci_start
 	if(unlikely(retval)) usb_put_hcd(hcd);
 
 	return retval;
@@ -1107,43 +934,52 @@ static int vhci_hcd_remove(struct platform_device *pdev)
 {
 	unsigned long flags;
 	struct usb_hcd *hcd;
-	struct vhci *vhc;
-	struct vhci_urb_priv *urbp;
+	struct usb_vhci_hcd *vhc;
+	struct usb_vhci_urb_priv *urbp;
+	struct usb_vhci_device *vdev;
 
-    hcd = platform_get_drvdata(pdev);
-	vhc = hcd_to_vhci(hcd);
+	vdev = pdev_to_vhcidev(pdev);
+	vhc = vhcidev_to_vhcihcd(vdev);
+	hcd = vhcidev_to_usbhcd(vdev);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(vhcihcd_to_dev(vhc));
 
 	spin_lock_irqsave(&vhc->lock, flags);
 	while(!list_empty(&vhc->urbp_list_inbox))
 	{
-		urbp = list_entry(vhc->urbp_list_inbox.next, struct vhci_urb_priv, urbp_list);
-		maybe_set_status(urbp, -ESHUTDOWN);
-		vhci_urb_giveback(vhc, urbp);
+		urbp = list_entry(vhc->urbp_list_inbox.next, struct usb_vhci_urb_priv, urbp_list);
+		usb_vhci_maybe_set_status(urbp, -ESHUTDOWN);
+		usb_vhci_urb_giveback(vhc, urbp);
 	}
 	while(!list_empty(&vhc->urbp_list_fetched))
 	{
-		urbp = list_entry(vhc->urbp_list_fetched.next, struct vhci_urb_priv, urbp_list);
-		maybe_set_status(urbp, -ESHUTDOWN);
-		vhci_urb_giveback(vhc, urbp);
+		urbp = list_entry(vhc->urbp_list_fetched.next, struct usb_vhci_urb_priv, urbp_list);
+		usb_vhci_maybe_set_status(urbp, -ESHUTDOWN);
+		usb_vhci_urb_giveback(vhc, urbp);
 	}
 	while(!list_empty(&vhc->urbp_list_cancel))
 	{
-		urbp = list_entry(vhc->urbp_list_cancel.next, struct vhci_urb_priv, urbp_list);
-		maybe_set_status(urbp, -ESHUTDOWN);
-		vhci_urb_giveback(vhc, urbp);
+		urbp = list_entry(vhc->urbp_list_cancel.next, struct usb_vhci_urb_priv, urbp_list);
+		usb_vhci_maybe_set_status(urbp, -ESHUTDOWN);
+		usb_vhci_urb_giveback(vhc, urbp);
 	}
 	while(!list_empty(&vhc->urbp_list_canceling))
 	{
-		urbp = list_entry(vhc->urbp_list_canceling.next, struct vhci_urb_priv, urbp_list);
-		maybe_set_status(urbp, -ESHUTDOWN);
-		vhci_urb_giveback(vhc, urbp);
+		urbp = list_entry(vhc->urbp_list_canceling.next, struct usb_vhci_urb_priv, urbp_list);
+		usb_vhci_maybe_set_status(urbp, -ESHUTDOWN);
+		usb_vhci_urb_giveback(vhc, urbp);
 	}
 	spin_unlock_irqrestore(&vhc->lock, flags);
 
-    usb_remove_hcd(hcd);
-    usb_put_hcd(hcd);
+	usb_remove_hcd(hcd); // calls vhci_stop
+	usb_put_hcd(hcd);
+	vdev->vhc = NULL;
+
+	if(vdev->ifc->destroy)
+	{
+		vhci_dbg("call ifc->destroy\n");
+		vdev->ifc->destroy(vhcidev_to_ifc(vdev));
+	}
 
 	return 0;
 }
@@ -1151,15 +987,15 @@ static int vhci_hcd_remove(struct platform_device *pdev)
 static int vhci_hcd_suspend(struct platform_device *pdev, pm_message_t state)
 {
 	struct usb_hcd *hcd;
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
 	int rc = 0;
 
-	hcd = platform_get_drvdata(pdev);
-	vhc = hcd_to_vhci(hcd);
+	vhc = pdev_to_vhcihcd(pdev);
+	hcd = vhcihcd_to_usbhcd(vhc);
 
-	trace_function(vhci_dev(vhc));
+	trace_function(vhcihcd_to_dev(vhc));
 
-	if(unlikely(vhc->rh_state == VHCI_RH_RUNNING))
+	if(unlikely(vhc->rh_state == USB_VHCI_RH_RUNNING))
 	{
 		dev_warn(&pdev->dev, "Root hub isn't suspended! You have to suspend the root hub before you suspend the host controller device.\n");
 		rc = -EBUSY;
@@ -1173,11 +1009,12 @@ static int vhci_hcd_suspend(struct platform_device *pdev, pm_message_t state)
 static int vhci_hcd_resume(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd;
-	struct vhci *vhc;
+	struct usb_vhci_hcd *vhc;
 
-	hcd = platform_get_drvdata(pdev);
-	vhc = hcd_to_vhci(hcd);
-	trace_function(vhci_dev(vhc));
+	vhc = pdev_to_vhcihcd(pdev);
+	hcd = vhcihcd_to_usbhcd(vhc);
+
+	trace_function(vhcihcd_to_dev(vhc));
 
 	set_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
 	usb_hcd_poll_rh_status(hcd);
@@ -1195,7 +1032,7 @@ static struct platform_driver vhci_hcd_driver = {
 	}
 };
 
-// Callback function for driver_for_each_device(..) in ioc_register(...).
+// Callback function for driver_for_each_device(..) in usb_vhci_hcd_register(...).
 // Data points to the device-id we're looking for.
 // This funktion returns an error (-EINVAL), if the device has the given id assigned to it.
 // (Enumeration stops/finishes on errors.)
@@ -1208,40 +1045,13 @@ static int device_enum(struct device *dev, void *data)
 
 static spinlock_t dev_enum_lock = SPIN_LOCK_UNLOCKED;
 
-static int device_open(struct inode *inode, struct file *file)
+int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port_count, struct usb_vhci_device **vdev_ret)
 {
-	vhci_dbg("%s(inode=%p, file=%p)\n", __FUNCTION__, inode, file);
-
-	if(unlikely(file->private_data != NULL))
-	{
-		vhci_printk(KERN_ERR, "file->private_data != NULL (Da is schon vor mir einer drueber grutscht.)\n");
-		return -EINVAL;
-	}
-
-	try_module_get(THIS_MODULE);
-	return 0;
-}
-
-// called in device_ioctl only
-static inline int ioc_register(struct file *file, struct usb_vhci_ioc_register __user *arg)
-{
-	const char *dname;
-	int retval, i, usbbusnum;
+	int retval, i;
 	struct platform_device *pdev;
-	struct vhci_conf *conf;
-	struct usb_hcd *hcd;
-	u8 pc;
+	struct usb_vhci_device vdev, *vdev_ptr;
 
-	vhci_dbg("cmd=USB_VHCI_HCD_IOCREGISTER\n");
-
-	if(unlikely(file->private_data))
-	{
-		vhci_printk(KERN_ERR, "file->private_data != NULL (USB_VHCI_HCD_IOCREGISTER already done?)\n");
-		return -EPROTO;
-	}
-
-	__get_user(pc, &arg->port_count);
-	if(pc > 31)
+	if(unlikely(port_count > 31))
 		return -EINVAL;
 
 	// search for free device-id
@@ -1254,7 +1064,7 @@ static inline int ioc_register(struct file *file, struct usb_vhci_ioc_register _
 	if(unlikely(i >= 10000))
 	{
 		spin_unlock(&dev_enum_lock);
-		vhci_printk(KERN_ERR, "there are too much devices!\n");
+		vhci_printk(KERN_ERR, "there are too many devices!\n");
 		return -EBUSY;
 	}
 
@@ -1266,121 +1076,106 @@ static inline int ioc_register(struct file *file, struct usb_vhci_ioc_register _
 		return -ENOMEM;
 	}
 
-	vhci_dbg("associate ptr to file structure with platform_device\n");
-	retval = platform_device_add_data(pdev, &file, sizeof(struct file *));
+	if(!try_module_get(ifc->owner))
+	{
+		spin_unlock(&dev_enum_lock);
+		vhci_printk(KERN_ERR, "ifc module died\n");
+		retval = -ENODEV;
+		goto pdev_put;
+	}
+
+	vdev.ifc = ifc;
+	vdev.pdev = pdev;
+	vdev.vhc = NULL;
+	vdev.port_count = port_count;
+
+	vhci_dbg("install usb_vhci_device structure within pdev->dev.platform_data\n");
+	retval = platform_device_add_data(pdev, &vdev, sizeof vdev + ifc->ifc_priv_size);
 	if(unlikely(retval < 0))
 	{
 		spin_unlock(&dev_enum_lock);
-		goto pdev_put;
+		goto mod_put;
 	}
+	vdev_ptr = pdev_to_vhcidev(pdev);
 
-	vhci_dbg("allocate and associate vhci_conf structure with file->private_data\n");
-	conf = kmalloc(sizeof(struct vhci_conf), GFP_KERNEL);
-	if(unlikely(!conf))
+	if(ifc->init)
 	{
-		spin_unlock(&dev_enum_lock);
-		retval = -ENOMEM;
-		goto pdev_put;
+		vhci_dbg("call ifc->init\n");
+		retval = ifc->init(context, vhcidev_to_ifc(vdev_ptr));
+		if(unlikely(retval < 0))
+		{
+			spin_unlock(&dev_enum_lock);
+			goto mod_put;
+		}
 	}
-	conf->pdev = pdev;
-	conf->port_count = pc;
-	file->private_data = conf;
 
 	vhci_dbg("add platform_device %s.%d\n", pdev->name, pdev->id);
-	retval = platform_device_add(pdev);
+	retval = platform_device_add(pdev); // calls vhci_hcd_probe
 	spin_unlock(&dev_enum_lock);
 	if(unlikely(retval < 0))
 	{
 		vhci_printk(KERN_ERR, "add platform_device %s.%d failed\n", pdev->name, pdev->id);
-		kfree(conf);
-		file->private_data = NULL;
-		goto pdev_put;
+		if(ifc->destroy)
+		{
+			vhci_dbg("call ifc->destroy\n");
+			ifc->destroy(vhcidev_to_ifc(vdev_ptr));
+		}
+		goto mod_put;
 	}
 
-	// copy id to user space
-	__put_user(pdev->id, &arg->id);
-
-	// copy bus-id to user space
-	dname = vhci_dev_name(&pdev->dev);
-	i = strlen(dname);
-	i = (i < sizeof(arg->bus_id)) ? i : sizeof(arg->bus_id) - 1;
-	if(copy_to_user(arg->bus_id, dname, i))
-	{
-		vhci_printk(KERN_WARNING, "Failed to copy bus_id to userspace.\n");
-		__put_user('\0', arg->bus_id);
-	}
-	// make sure the last character is null
-	__put_user('\0', arg->bus_id + i);
-
-	hcd = platform_get_drvdata(pdev);
-	usbbusnum = hcd->self.busnum;
-	vhci_printk(KERN_INFO, "Usb bus #%d\n", usbbusnum);
-	__put_user(usbbusnum, &arg->usb_busnum);
-
+	try_module_get(THIS_MODULE);
+	*vdev_ret = vdev_ptr;
 	return 0;
+
+mod_put:
+	module_put(ifc->owner);
 
 pdev_put:
 	platform_device_put(pdev);
 	return retval;
 }
+EXPORT_SYMBOL_GPL(usb_vhci_hcd_register);
 
-static int device_release(struct inode *inode, struct file *file)
+int usb_vhci_hcd_unregister(struct usb_vhci_device *vdev)
 {
-	struct vhci_conf *conf;
+	struct platform_device *pdev;
+	struct device *dev;
+	struct module *ifc_owner = vdev->ifc->owner; // we need a copy, because vdev gets destroyed on platform_device_unregister
 
-	vhci_dbg("%s(inode=%p, file=%p)\n", __FUNCTION__, inode, file);
+	pdev = vhcidev_to_pdev(vdev);
+	dev = &pdev->dev;
 
-	conf = file->private_data;
-	file->private_data = NULL;
+	vhci_dbg("unregister platform_device %s\n", vhci_dev_name(dev));
+	platform_device_unregister(pdev); // calls vhci_hcd_remove which calls ifc->destroy
 
-	if(likely(conf))
-	{
-		vhci_dbg("unregister platform_device %s\n", vhci_dev_name(&conf->pdev->dev));
-		platform_device_unregister(conf->pdev);
-
-		kfree(conf);
-	}
-	else
-	{
-		vhci_dbg("was not configured\n");
-	}
-
+	module_put(ifc_owner);
 	module_put(THIS_MODULE);
 	return 0;
 }
+EXPORT_SYMBOL_GPL(usb_vhci_hcd_unregister);
 
-static ssize_t device_read(struct file *file,
-                           char __user *buffer,
-                           size_t length,
-                           loff_t *offset)
-{
-	vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
-	return -ENODEV;
-}
-
-static ssize_t device_write(struct file *file,
-                            const char __user *buffer,
-                            size_t length,
-                            loff_t *offset)
-{
-	vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
-	return -ENODEV;
-}
-
-// called in device_ioctl only
-static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat __user *arg)
+int usb_vhci_hcd_has_work(struct usb_vhci_hcd *vhc)
 {
 	unsigned long flags;
-	u8 index;
-	u16 status, change, overcurrent;
+	int y = 0;
+	spin_lock_irqsave(&vhc->lock, flags);
+	if(vhc->port_update ||
+	   !list_empty(&vhc->urbp_list_cancel) ||
+	   !list_empty(&vhc->urbp_list_inbox))
+		y = 1;
+	spin_unlock_irqrestore(&vhc->lock, flags);
+	return y;
+}
+EXPORT_SYMBOL_GPL(usb_vhci_hcd_has_work);
 
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCPORTSTAT\n");
-#endif
+int usb_vhci_apply_port_stat(struct usb_vhci_hcd *vhc, u16 status, u16 change, u8 index)
+{
+	struct device *dev;
+	unsigned long flags;
+	u16 overcurrent;
 
-	__get_user(status, &arg->status);
-	__get_user(change, &arg->change);
-	__get_user(index, &arg->index);
+	dev = vhcihcd_to_dev(vhc);
+
 	if(unlikely(!index || index > vhc->port_count))
 		return -EINVAL;
 
@@ -1400,7 +1195,7 @@ static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat 
 	}
 
 #ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "performing PORT_STAT [port=%d ~status=0x%04x ~change=0x%04x]\n", (int)index, (int)status, (int)change);
+	if(debug_output) dev_dbg(dev, "performing PORT_STAT [port=%d ~status=0x%04x ~change=0x%04x]\n", (int)index, (int)status, (int)change);
 #endif
 
 	switch(change)
@@ -1476,694 +1271,13 @@ static inline int ioc_port_stat(struct vhci *vhc, struct usb_vhci_ioc_port_stat 
 		break;
 	}
 
-	userspace_needs_port_update(vhc, index);
+	vhci_port_update(vhc, index);
 	spin_unlock_irqrestore(&vhc->lock, flags);
 
-	usb_hcd_poll_rh_status(vhci_to_hcd(vhc));
+	usb_hcd_poll_rh_status(vhcihcd_to_usbhcd(vhc));
 	return 0;
 }
-
-static inline u8 conv_urb_type(u8 type)
-{
-	switch(type & 0x3)
-	{
-	case PIPE_ISOCHRONOUS: return USB_VHCI_URB_TYPE_ISO;
-	case PIPE_INTERRUPT:   return USB_VHCI_URB_TYPE_INT;
-	case PIPE_BULK:        return USB_VHCI_URB_TYPE_BULK;
-	default:               return USB_VHCI_URB_TYPE_CONTROL;
-	}
-}
-
-static inline u16 conv_urb_flags(unsigned int flags)
-{
-	return ((flags & URB_SHORT_NOT_OK) ? USB_VHCI_URB_FLAGS_SHORT_NOT_OK : 0) |
-	       ((flags & URB_ISO_ASAP)     ? USB_VHCI_URB_FLAGS_ISO_ASAP     : 0) |
-	       ((flags & URB_ZERO_PACKET)  ? USB_VHCI_URB_FLAGS_ZERO_PACKET  : 0);
-}
-
-static int has_work(struct vhci *vhc)
-{
-	unsigned long flags;
-	int y = 0;
-	spin_lock_irqsave(&vhc->lock, flags);
-	if(vhc->port_update ||
-		!list_empty(&vhc->urbp_list_cancel) ||
-		!list_empty(&vhc->urbp_list_inbox))
-		y = 1;
-	spin_unlock_irqrestore(&vhc->lock, flags);
-	return y;
-}
-
-// called in device_ioctl only
-static inline int ioc_fetch_work(struct vhci *vhc, struct usb_vhci_ioc_work __user *arg, s16 timeout)
-{
-	unsigned long flags;
-	u8 _port, port;
-	struct vhci_urb_priv *urbp;
-	long wret;
-
-#ifdef DEBUG
-	// Floods the logs
-	//if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK\n");
-#endif
-
-	if(timeout)
-	{
-		if(timeout > 1000)
-			timeout = 1000;
-		if(timeout > 0)
-			wret = wait_event_interruptible_timeout(vhc->work_event, has_work(vhc), msecs_to_jiffies(timeout));
-		else
-			wret = wait_event_interruptible(vhc->work_event, has_work(vhc));
-		if(unlikely(wret < 0))
-		{
-			if(likely(wret == -ERESTARTSYS))
-				return -EINTR;
-			return wret;
-		}
-		else if(!wret)
-			return -ETIMEDOUT;
-	}
-	else
-	{
-		if(!has_work(vhc))
-			return -ETIMEDOUT;
-	}
-
-	spin_lock_irqsave(&vhc->lock, flags);
-	if(!list_empty(&vhc->urbp_list_cancel))
-	{
-		urbp = list_entry(vhc->urbp_list_cancel.next, struct vhci_urb_priv, urbp_list);
-#ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=CANCEL_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
-#endif
-		__put_user(USB_VHCI_WORK_TYPE_CANCEL_URB, &arg->type);
-		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
-		list_move_tail(&urbp->urbp_list, &vhc->urbp_list_canceling);
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return 0;
-	}
-
-	if(vhc->port_update)
-	{
-		if(vhc->port_sched_offset >= vhc->port_count)
-			vhc->port_sched_offset = 0;
-		for(_port = 0; _port < vhc->port_count; _port++)
-		{
-			// The port which will be checked first, is rotated by port_sched_offset, so that every port
-			// has its chance to be reported to user space, even if the hcd is under heavy load.
-			port = (_port + vhc->port_sched_offset) % vhc->port_count;
-			if(vhc->port_update & (1 << (port + 1))) // test bit
-			{
-				vhc->port_update &= ~(1 << (port + 1)); // clear bit
-				vhc->port_sched_offset = port + 1;
-#ifdef DEBUG
-				if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PORT_STAT port=%d status=0x%04x change=0x%04x]\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
-#endif
-				__put_user(USB_VHCI_WORK_TYPE_PORT_STAT, &arg->type);
-				__put_user(port + 1, &arg->work.port.index);
-				__put_user(vhc->ports[port].port_status, &arg->work.port.status);
-				__put_user(vhc->ports[port].port_change, &arg->work.port.change);
-				__put_user(vhc->ports[port].port_flags, &arg->work.port.flags);
-				spin_unlock_irqrestore(&vhc->lock, flags);
-				return 0;
-			}
-		}
-	}
-
-repeat:
-	if(!list_empty(&vhc->urbp_list_inbox))
-	{
-		urbp = list_entry(vhc->urbp_list_inbox.next, struct vhci_urb_priv, urbp_list);
-		__put_user(USB_VHCI_WORK_TYPE_PROCESS_URB, &arg->type);
-		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
-		__put_user(usb_pipedevice(urbp->urb->pipe), &arg->work.urb.address);
-		__put_user(usb_pipeendpoint(urbp->urb->pipe) | (usb_pipein(urbp->urb->pipe) ? 0x80 : 0x00), &arg->work.urb.endpoint);
-		__put_user(conv_urb_type(usb_pipetype(urbp->urb->pipe)), &arg->work.urb.type);
-		__put_user(conv_urb_flags(urbp->urb->transfer_flags), &arg->work.urb.flags);
-		if(usb_pipecontrol(urbp->urb->pipe))
-		{
-			const struct usb_ctrlrequest *cmd;
-			u16 wValue, wIndex, wLength;
-			if(unlikely(!urbp->urb->setup_packet))
-				goto invalid_urb;
-			cmd = (struct usb_ctrlrequest *)urbp->urb->setup_packet;
-			wValue = le16_to_cpu(cmd->wValue);
-			wIndex = le16_to_cpu(cmd->wIndex);
-			wLength = le16_to_cpu(cmd->wLength);
-			if(unlikely(wLength > urbp->urb->transfer_buffer_length))
-				goto invalid_urb;
-			if(cmd->bRequestType & 0x80)
-			{
-				if(unlikely(!wLength || !urbp->urb->transfer_buffer))
-					goto invalid_urb;
-			}
-			else
-			{
-				if(unlikely(wLength && !urbp->urb->transfer_buffer))
-					goto invalid_urb;
-			}
-			__put_user(wLength, &arg->work.urb.buffer_length);
-			__put_user(cmd->bRequestType, &arg->work.urb.setup_packet.bmRequestType);
-			__put_user(cmd->bRequest, &arg->work.urb.setup_packet.bRequest);
-			__put_user(wValue, &arg->work.urb.setup_packet.wValue);
-			__put_user(wIndex, &arg->work.urb.setup_packet.wIndex);
-			__put_user(wLength, &arg->work.urb.setup_packet.wLength);
-		}
-		else
-		{
-			if(usb_pipein(urbp->urb->pipe))
-			{
-				if(unlikely(!urbp->urb->transfer_buffer_length || !urbp->urb->transfer_buffer))
-					goto invalid_urb;
-			}
-			else
-			{
-				if(unlikely(urbp->urb->transfer_buffer_length && !urbp->urb->transfer_buffer))
-					goto invalid_urb;
-			}
-			__put_user(urbp->urb->transfer_buffer_length, &arg->work.urb.buffer_length);
-		}
-		__put_user(urbp->urb->interval, &arg->work.urb.interval);
-		__put_user(urbp->urb->number_of_packets, &arg->work.urb.packet_count);
-
-#ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PROCESS_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
-#endif
-		dump_urb(urbp->urb);
-		list_move_tail(&urbp->urbp_list, &vhc->urbp_list_fetched);
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return 0;
-
-	invalid_urb:
-		// reject invalid urbs immediately
-#ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHWORK  <<< THROWING AWAY INVALID URB >>>  [handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
-#endif
-		maybe_set_status(urbp, -EPIPE);
-		vhci_urb_giveback(vhc, urbp);
-		goto repeat;
-	}
-
-	spin_unlock_irqrestore(&vhc->lock, flags);
-	return -ENODATA;
-}
-
-// caller has lock
-static inline struct vhci_urb_priv *urbp_from_handle(struct vhci *vhc, const void *handle)
-{
-	struct vhci_urb_priv *entry;
-	list_for_each_entry(entry, &vhc->urbp_list_fetched, urbp_list)
-		if(entry->urb == handle)
-			return entry;
-	return NULL;
-}
-
-// caller has lock
-static inline struct vhci_urb_priv *urbp_from_handle_in_cancel(struct vhci *vhc, const void *handle)
-{
-	struct vhci_urb_priv *entry;
-	list_for_each_entry(entry, &vhc->urbp_list_cancel, urbp_list)
-		if(entry->urb == handle)
-			return entry;
-	return NULL;
-}
-
-// caller has lock
-static inline struct vhci_urb_priv *urbp_from_handle_in_canceling(struct vhci *vhc, const void *handle)
-{
-	struct vhci_urb_priv *entry;
-	list_for_each_entry(entry, &vhc->urbp_list_canceling, urbp_list)
-		if(entry->urb == handle)
-			return entry;
-	return NULL;
-}
-
-// caller has lock
-static inline int is_urb_dir_in(const struct urb *urb)
-{
-	if(unlikely(usb_pipecontrol(urb->pipe)))
-	{
-		const struct usb_ctrlrequest *cmd = (struct usb_ctrlrequest *)urb->setup_packet;
-		return cmd->bRequestType & 0x80;
-	}
-	else
-		return usb_pipein(urb->pipe);
-}
-
-// -ECANCELED doesn't report an error, but it indicates that the urb was in the "cancel"
-// list or in the "canceling" list.
-// If this function reports an error, then the urb will be given back to its creator anyway,
-// if its handle was found.
-// called in ioc_giveback{,32} only
-static inline int ioc_giveback_common(struct vhci *vhc, const void *handle, int status, int act, int iso_count, int err_count, const void __user *buf, const struct usb_vhci_ioc_iso_packet_giveback __user *iso)
-{
-	unsigned long flags;
-	int retval = 0, is_in, is_iso, i;
-	struct vhci_urb_priv *urbp;
-
-	spin_lock_irqsave(&vhc->lock, flags);
-	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
-	{
-		// if not found, check the cancel{,ing} list
-		if(likely((urbp = urbp_from_handle_in_canceling(vhc, handle)) ||
-			(urbp = urbp_from_handle_in_cancel(vhc, handle))))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: urb was canceled\n");
-#endif
-			retval = -ECANCELED;
-		}
-		else
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: handle not found\n");
-#endif
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -ENOENT;
-		}
-	}
-
-	is_in = is_urb_dir_in(urbp->urb);
-	is_iso = usb_pipeisoc(urbp->urb->pipe);
-
-	if(likely(is_iso))
-	{
-		if(unlikely(is_in && act != urbp->urb->transfer_buffer_length))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: buffer_actual != buffer_length\n");
-#endif
-			retval = -ENOBUFS;
-			goto done_with_errors;
-		}
-		if(unlikely(iso_count != urbp->urb->number_of_packets))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: number_of_packets missmatch\n");
-#endif
-			retval = -EINVAL;
-			goto done_with_errors;
-		}
-		if(unlikely(iso_count && !iso))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK(ISO): invalid: iso_packets must not be zero\n");
-#endif
-			retval = -EINVAL;
-			goto done_with_errors;
-		}
-		if(likely(iso_count))
-		{
-			if(!access_ok(VERIFY_READ, (void *)iso, iso_count * sizeof(struct usb_vhci_ioc_iso_packet_giveback)))
-			{
-				retval = -EFAULT;
-				goto done_with_errors;
-			}
-		}
-	}
-	else if(unlikely(act > urbp->urb->transfer_buffer_length))
-	{
-#ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: invalid: buffer_actual > buffer_length\n");
-#endif
-		retval = is_in ? -ENOBUFS : -EINVAL;
-		goto done_with_errors;
-	}
-	if(is_in)
-	{
-		if(unlikely(act && !buf))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: buf must not be zero\n");
-#endif
-			retval = -EINVAL;
-			goto done_with_errors;
-		}
-		if(unlikely(copy_from_user(urbp->urb->transfer_buffer, buf, act)))
-		{
-#ifdef DEBUG
-			if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: copy_from_user(buf) failed\n");
-#endif
-			retval = -EFAULT;
-			goto done_with_errors;
-		}
-	}
-	else if(unlikely(buf))
-	{
-#ifdef DEBUG
-		if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: invalid: buf should be NULL\n");
-#endif
-		// no data expected, so buf should be NULL
-		retval = -EINVAL;
-		goto done_with_errors;
-	}
-	if(likely(is_iso && iso_count))
-	{
-		for(i = 0; i < iso_count; i++)
-		{
-			__get_user(urbp->urb->iso_frame_desc[i].status, &iso[i].status);
-			__get_user(urbp->urb->iso_frame_desc[i].actual_length, &iso[i].packet_actual);
-		}
-	}
-	urbp->urb->actual_length = act;
-	urbp->urb->error_count = err_count;
-
-	// now we are done with this urb and it can return to its creator
-	maybe_set_status(urbp, status);
-	vhci_urb_giveback(vhc, urbp);
-	spin_unlock_irqrestore(&vhc->lock, flags);
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: done\n");
-#endif
-	return retval;
-
-done_with_errors:
-	vhci_urb_giveback(vhc, urbp);
-	spin_unlock_irqrestore(&vhc->lock, flags);
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "GIVEBACK: done (with errors)\n");
-#endif
-	return retval;
-}
-
-// called in device_ioctl only
-static inline int ioc_giveback(struct vhci *vhc, const struct usb_vhci_ioc_giveback __user *arg)
-{
-	u64 handle64;
-	const void *handle;
-	const void __user *buf;
-	const struct usb_vhci_ioc_iso_packet_giveback __user *iso;
-	int status, act, iso_count, err_count;
-
-#ifdef DEBUF
-	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCGIVEBACK\n");
-#endif
-
-	if(sizeof(void *) > 4)
-		__get_user(handle64, &arg->handle);
-	else
-	{
-		u32 handle1, handle2;
-		__get_user(handle1, (u32 __user *)&arg->handle);
-		__get_user(handle2, (u32 __user *)&arg->handle + 1);
-		*((u32 *)&handle64) = handle1;
-		*((u32 *)&handle64 + 1) = handle2;
-		if(handle64 >> 32)
-			return -EINVAL;
-	}
-	__get_user(status, &arg->status);
-	__get_user(act, &arg->buffer_actual);
-	__get_user(iso_count, &arg->packet_count);
-	__get_user(err_count, &arg->error_count);
-	__get_user(buf, &arg->buffer);
-	__get_user(iso, &arg->iso_packets);
-	handle = (const void *)(unsigned long)handle64;
-	if(unlikely(!handle))
-		return -EINVAL;
-	return ioc_giveback_common(vhc, handle, status, act, iso_count, err_count, buf, iso);
-}
-
-// called in ioc_fetch_data{,32} only
-static inline int ioc_fetch_data_common(struct vhci *vhc, const void *handle, void __user *user_buf, int user_len, struct usb_vhci_ioc_iso_packet_data __user *iso, int iso_count)
-{
-	unsigned long flags;
-	int tb_len, is_in, is_iso, i;
-	struct vhci_urb_priv *urbp;
-
-	spin_lock_irqsave(&vhc->lock, flags);
-	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
-	{
-		// if not found, check the cancel{,ing} list
-		if(likely((urbp = urbp_from_handle_in_cancel(vhc, handle)) ||
-			(urbp = urbp_from_handle_in_canceling(vhc, handle))))
-		{
-			// we can give the urb back to its creator now, because the user space is informed about
-			// its cancelation
-			vhci_urb_giveback(vhc, urbp);
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -ECANCELED;
-		}
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -ENOENT;
-	}
-
-	tb_len = urbp->urb->transfer_buffer_length;
-	if(unlikely(usb_pipecontrol(urbp->urb->pipe)))
-	{
-		const struct usb_ctrlrequest *cmd = (struct usb_ctrlrequest *)urbp->urb->setup_packet;
-		tb_len = le16_to_cpu(cmd->wLength);
-	}
-
-	is_in = is_urb_dir_in(urbp->urb);
-	is_iso = usb_pipeisoc(urbp->urb->pipe);
-
-	if(likely(is_iso))
-	{
-		if(unlikely(iso_count != urbp->urb->number_of_packets))
-		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EINVAL;
-		}
-		if(likely(iso_count))
-		{
-			if(unlikely(!iso))
-			{
-				spin_unlock_irqrestore(&vhc->lock, flags);
-				return -EINVAL;
-			}
-			if(!access_ok(VERIFY_WRITE, (void *)iso, iso_count * sizeof(struct usb_vhci_ioc_iso_packet_data)))
-			{
-				spin_unlock_irqrestore(&vhc->lock, flags);
-				return -EFAULT;
-			}
-			for(i = 0; i < iso_count; i++)
-			{
-				__put_user(urbp->urb->iso_frame_desc[i].offset, &iso[i].offset);
-				__put_user(urbp->urb->iso_frame_desc[i].length, &iso[i].packet_length);
-			}
-		}
-	}
-	else if(unlikely(is_in || !tb_len || !urbp->urb->transfer_buffer))
-	{
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -ENODATA;
-	}
-
-	if(likely(!is_in && tb_len))
-	{
-		if(unlikely(!user_buf || user_len < tb_len))
-		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EINVAL;
-		}
-		if(unlikely(copy_to_user(user_buf, urbp->urb->transfer_buffer, tb_len)))
-		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EFAULT;
-		}
-	}
-	spin_unlock_irqrestore(&vhc->lock, flags);
-	return 0;
-}
-
-// called in device_ioctl only
-static inline int ioc_fetch_data(struct vhci *vhc, struct usb_vhci_ioc_urb_data __user *arg)
-{
-	u64 handle64;
-	const void *handle;
-	void __user *user_buf;
-	struct usb_vhci_ioc_iso_packet_data __user *iso;
-	int user_len, iso_count;
-
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHDATA\n");
-#endif
-	if(sizeof(void *) > 4)
-		__get_user(handle64, &arg->handle);
-	else
-	{
-		u32 handle1, handle2;
-		__get_user(handle1, (u32 __user *)&arg->handle);
-		__get_user(handle2, (u32 __user *)&arg->handle + 1);
-		*((u32 *)&handle64) = handle1;
-		*((u32 *)&handle64 + 1) = handle2;
-		if(handle64 >> 32)
-			return -EINVAL;
-	}
-	__get_user(user_len, &arg->buffer_length);
-	__get_user(iso_count, &arg->packet_count);
-	__get_user(user_buf, &arg->buffer);
-	__get_user(iso, &arg->iso_packets);
-	handle = (const void *)(unsigned long)handle64;
-	if(unlikely(!handle))
-		return -EINVAL;
-	return ioc_fetch_data_common(vhc, handle, user_buf, user_len, iso, iso_count);
-}
-
-#ifdef CONFIG_COMPAT
-// called in device_ioctl only
-static inline int ioc_giveback32(struct vhci *vhc, const struct usb_vhci_ioc_giveback32 __user *arg)
-{
-	u64 handle64;
-	const void *handle;
-	u32 buf32, iso32;
-	const void __user *buf;
-	const struct usb_vhci_ioc_iso_packet_giveback __user *iso;
-	int status, act, iso_count, err_count;
-
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCGIVEBACK32\n");
-#endif
-	__get_user(handle64, &arg->handle);
-	__get_user(status, &arg->status);
-	__get_user(act, &arg->buffer_actual);
-	__get_user(iso_count, &arg->packet_count);
-	__get_user(err_count, &arg->error_count);
-	__get_user(buf32, &arg->buffer);
-	__get_user(iso32, &arg->iso_packets);
-	handle = (const void *)(unsigned long)handle64;
-	if(unlikely(!handle))
-		return -EINVAL;
-	buf = compat_ptr(buf32);
-	iso = compat_ptr(iso32);
-	return ioc_giveback_common(vhc, handle, status, act, iso_count, err_count, buf, iso);
-}
-
-// called in device_ioctl only
-static inline int ioc_fetch_data32(struct vhci *vhc, struct usb_vhci_ioc_urb_data32 __user *arg)
-{
-	u64 handle64;
-	const void *handle;
-	u32 user_buf32, iso32;
-	void __user *user_buf;
-	struct usb_vhci_ioc_iso_packet_data __user *iso;
-	int user_len, iso_count;
-
-#ifdef DEBUG
-	if(debug_output) dev_dbg(vhci_dev(vhc), "cmd=USB_VHCI_HCD_IOCFETCHDATA32\n");
-#endif
-
-	__get_user(handle64, &arg->handle);
-	__get_user(user_len, &arg->buffer_length);
-	__get_user(iso_count, &arg->packet_count);
-	__get_user(user_buf32, &arg->buffer);
-	__get_user(iso32, &arg->iso_packets);
-	handle = (const void *)(unsigned long)handle64;
-	if(unlikely(!handle))
-		return -EINVAL;
-	user_buf = compat_ptr(user_buf32);
-	iso = compat_ptr(iso32);
-	return ioc_fetch_data_common(vhc, handle, user_buf, user_len, iso, iso_count);
-}
-#endif
-
-static long device_do_ioctl(struct file *file,
-                           unsigned int cmd,
-                           void __user *arg)
-{
-	struct vhci_conf *conf;
-	struct usb_hcd *hcd;
-	struct vhci *vhc;
-	long ret = 0;
-	s16 timeout;
-
-	// Floods the logs
-	//vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
-
-	if(unlikely(_IOC_TYPE(cmd) != USB_VHCI_HCD_IOC_MAGIC)) return -ENOTTY;
-	if(unlikely(_IOC_NR(cmd) > USB_VHCI_HCD_IOC_MAXNR)) return -ENOTTY;
-
-	if(unlikely((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(VERIFY_WRITE, arg, _IOC_SIZE(cmd))))
-		return -EFAULT;
-	if(unlikely((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(VERIFY_READ, arg, _IOC_SIZE(cmd))))
-		return -EFAULT;
-
-	if(unlikely(cmd == USB_VHCI_HCD_IOCREGISTER))
-		return ioc_register(file, (struct usb_vhci_ioc_register __user *)arg);
-
-	conf = file->private_data;
-
-	if(unlikely(!conf))
-		return -EPROTO;
-
-	hcd = platform_get_drvdata(conf->pdev);
-	vhc = hcd_to_vhci(hcd);
-
-	switch(__builtin_expect(cmd, USB_VHCI_HCD_IOCFETCHWORK))
-	{
-	case USB_VHCI_HCD_IOCPORTSTAT:
-		ret = ioc_port_stat(vhc, (struct usb_vhci_ioc_port_stat __user *)arg);
-		break;
-
-	case USB_VHCI_HCD_IOCFETCHWORK_RO:
-		ret = ioc_fetch_work(vhc, (struct usb_vhci_ioc_work __user *)arg, 100);
-		break;
-
-	case USB_VHCI_HCD_IOCFETCHWORK:
-		__get_user(timeout, &((struct usb_vhci_ioc_work __user *)arg)->timeout);
-		ret = ioc_fetch_work(vhc, (struct usb_vhci_ioc_work __user *)arg, timeout);
-		break;
-
-	case USB_VHCI_HCD_IOCGIVEBACK:
-		ret = ioc_giveback(vhc, (struct usb_vhci_ioc_giveback __user *)arg);
-		break;
-
-	case USB_VHCI_HCD_IOCFETCHDATA:
-		ret = ioc_fetch_data(vhc, (struct usb_vhci_ioc_urb_data __user *)arg);
-		break;
-
-#ifdef CONFIG_COMPAT
-	case USB_VHCI_HCD_IOCGIVEBACK32:
-		ret = ioc_giveback32(vhc, (struct usb_vhci_ioc_giveback32 __user *)arg);
-		break;
-
-	case USB_VHCI_HCD_IOCFETCHDATA32:
-		ret = ioc_fetch_data32(vhc, (struct usb_vhci_ioc_urb_data32 __user *)arg);
-		break;
-#endif
-
-	default:
-		ret = -ENOTTY;
-	}
-
-	return ret;
-}
-
-static long device_ioctl(struct file *file,
-                         unsigned int cmd,
-                         unsigned long arg)
-{
-	return device_do_ioctl(file, cmd, (void __user *)arg);
-}
-
-#ifdef CONFIG_COMPAT
-static long device_ioctl32(struct file *file,
-                           unsigned int cmd,
-                           unsigned long arg)
-{
-	return device_do_ioctl(file, cmd, compat_ptr(arg));
-}
-#endif
-
-static loff_t device_llseek(struct file *file, loff_t offset, int origin)
-{
-	vhci_dbg("%s(file=%p)\n", __FUNCTION__, file);
-	return -ESPIPE;
-}
-
-static struct file_operations fops = {
-	.owner          = THIS_MODULE,
-	.llseek         = device_llseek,
-	.read           = device_read,
-	.write          = device_write,
-	.unlocked_ioctl = device_ioctl,
-#ifdef CONFIG_COMPAT
-	.compat_ioctl   = device_ioctl32,
-#endif
-	.open           = device_open,
-	.release        = device_release // a.k.a. close
-};
+EXPORT_SYMBOL_GPL(usb_vhci_apply_port_stat);
 
 #ifdef DEBUG
 static ssize_t show_debug_output(struct device_driver *drv, char *buf)
@@ -2197,29 +1311,9 @@ static ssize_t store_debug_output(struct device_driver *drv, const char *buf, si
 static DRIVER_ATTR(debug_output, S_IRUSR | S_IWUSR, show_debug_output, store_debug_output);
 #endif
 
-static void vhci_device_release(struct device *dev)
-{
-}
-
-static int vhci_major;
-
-static struct class vhci_class = {
-	.owner = THIS_MODULE,
-	.name = driver_name
-};
-
-static struct device vhci_device = {
-	.class = &vhci_class,
-	.release = vhci_device_release,
-#ifndef NO_DEV_INIT_NAME
-	.init_name = "vhci-ctrl",
-#endif
-	.driver = &vhci_hcd_driver.driver
-};
-
 static int __init init(void)
 {
-	int	retval;
+	int retval;
 
 	if(usb_disabled()) return -ENODEV;
 
@@ -2235,40 +1329,6 @@ static int __init init(void)
 		return retval;
 	}
 
-	vhci_major = register_chrdev(0, driver_name, &fops);
-	if(unlikely(vhci_major < 0))
-	{
-		vhci_printk(KERN_ERR, "Sorry, registering the character device failed with %d.\n", retval);
-#ifdef DEBUG
-		vhci_printk(KERN_DEBUG, "unregister platform_driver %s\n", driver_name);
-#endif
-		platform_driver_unregister(&vhci_hcd_driver);
-		return retval;
-	}
-
-	vhci_printk(KERN_INFO, "Successfully registered the character device.\n");
-	vhci_printk(KERN_INFO, "The major device number is %d.\n", vhci_major);
-
-	if(unlikely(class_register(&vhci_class)))
-	{
-		vhci_printk(KERN_WARNING, "failed to register class %s\n", driver_name);
-	}
-	else
-	{
-#ifdef NO_DEV_INIT_NAME
-#ifdef OLD_DEV_BUS_ID
-		strlcpy((void *)&vhci_device.bus_id, "vhci-ctrl", 10);
-#else
-		dev_set_name(&vhci_device, "vhci-ctrl");
-#endif
-#endif
-		vhci_device.devt = MKDEV(vhci_major, 0);
-		if(unlikely(device_register(&vhci_device)))
-		{
-			vhci_printk(KERN_WARNING, "failed to register device %s\n", "vhci-ctrl");
-		}
-	}
-
 #ifdef DEBUG
 	retval = driver_create_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
 	if(unlikely(retval != 0))
@@ -2276,15 +1336,6 @@ static int __init init(void)
 		vhci_printk(KERN_DEBUG, "driver_create_file(&vhci_hcd_driver, &driver_attr_debug_output) failed\n");
 		vhci_printk(KERN_DEBUG, "==> ignoring\n");
 	}
-#endif
-
-#ifdef DEBUG
-	vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCREGISTER     = %08x\n", (unsigned int)USB_VHCI_HCD_IOCREGISTER);
-    vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCPORTSTAT     = %08x\n", (unsigned int)USB_VHCI_HCD_IOCPORTSTAT);
-	vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCFETCHWORK_RO = %08x\n", (unsigned int)USB_VHCI_HCD_IOCFETCHWORK_RO);
-    vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCFETCHWORK    = %08x\n", (unsigned int)USB_VHCI_HCD_IOCFETCHWORK);
-    vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCGIVEBACK     = %08x\n", (unsigned int)USB_VHCI_HCD_IOCGIVEBACK);
-    vhci_printk(KERN_DEBUG, "USB_VHCI_HCD_IOCFETCHDATA    = %08x\n", (unsigned int)USB_VHCI_HCD_IOCFETCHDATA);
 #endif
 
 	return 0;
@@ -2296,12 +1347,8 @@ static void __exit cleanup(void)
 #ifdef DEBUG
 	driver_remove_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
 #endif
-	device_unregister(&vhci_device);
-	class_unregister(&vhci_class);
-	unregister_chrdev(vhci_major, driver_name);
 	vhci_dbg("unregister platform_driver %s\n", driver_name);
 	platform_driver_unregister(&vhci_hcd_driver);
-	vhci_dbg("bin weg\n");
+	vhci_dbg("gone\n");
 }
 module_exit(cleanup);
-

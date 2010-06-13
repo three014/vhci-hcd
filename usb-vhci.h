@@ -68,7 +68,7 @@ struct usb_vhci_ioc_register
 	__s32 id;         // [out] identifier which was assigned by the kernel
 	__s32 usb_busnum; // [out] assigned USB bus number
 	char bus_id[20];  // [out] null-terminated bus-id of the controller
-	                  //       (something similar to vhci_hcd.<id>)
+	                  //       (something similar to usb_vhci_hcd.<id>)
 	__u8 port_count;  // [in]  number of ports the controller should have
 };
 

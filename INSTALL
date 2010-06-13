@@ -9,12 +9,13 @@ and
 
   make install   # (as root)
 
-to build and install the module for the currently running kernel.
-The module is called usb-vhci-hcd. Run
+to build and install the modules for the currently running kernel.
+The modules are called usb-vhci-hcd and usb-vhci-iocifc. Run
 
-  modprobe usb-vhci-hcd
+  modprobe usb-vhci-hcd &&
+  modprobe usb-vhci-iocifc
 
-to load the module.
+to load the modules.
 
 
 Patch into kernel
@@ -24,7 +25,7 @@ Run
 
   make KVERSION=<VERSION> KSRC=<PATH_TO_KERNEL_SOURCE> patchkernel
 
-(replace <PATH_TO_KERNEL_SOURCE> with the actual path) to patch the usb-vhci-hcd
+(replace <PATH_TO_KERNEL_SOURCE> with the actual path) to patch the vhci-hcd
 sources into the kernel source. If you want to do this for a kernel with a
 different version than the currently running one, then you need to create
 the config header first by running
