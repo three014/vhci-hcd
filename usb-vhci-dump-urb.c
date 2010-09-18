@@ -6,8 +6,21 @@ static const char *get_status_str(int status)
 	{
 	case 0:            return "SUCCESS";
 	case -EINPROGRESS: return "-EINPROGRESS";
-	case -ECANCELED:   return "-ECANCELED";
-	case -EPIPE:       return "-EPIPE";
+	case -EREMOTEIO:   return "-EREMOTEIO [short packet]";
+	case -ENOENT:      return "-ENOENT [sync cancel]";
+	case -ECONNRESET:  return "-ECONNRESET [async cancel]";
+	case -ETIMEDOUT:   return "-ETIMEDOUT";
+	case -ESHUTDOWN:   return "-ESHUTDOWN [dev disabled]";
+	case -ENODEV:      return "-ENODEV [dev disconn]";
+	case -EPROTO:      return "-EPROTO [bit stuff]";
+	case -EILSEQ:      return "-EILSEQ [crc]";
+	case -ETIME:       return "-ETIME [no response]";
+	case -EOVERFLOW:   return "-EOVERFLOW [babble]";
+	case -EPIPE:       return "-EPIPE [stall]";
+	case -ECOMM:       return "-ECOMM [buf overrun]";
+	case -ENOSR:       return "-ENOSR [buf underrun]";
+	case -EXDEV:       return "-EXDEV [see iso-pkt status]";
+	case -EINVAL:      return "-EINVAL [all iso-pkts failed]";
 	default:           return "???";
 	}
 }
