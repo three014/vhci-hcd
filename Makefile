@@ -22,7 +22,7 @@ KSRC = $(KDIR)
 
 CONF_H = conf/usb-vhci.config.h
 
-VHCI_HCD_VERSION = 1.10
+VHCI_HCD_VERSION = 1.11
 USB_VHCI_HCD_VERSION = $(VHCI_HCD_VERSION)
 USB_VHCI_IOCIFC_VERSION = $(VHCI_HCD_VERSION)
 DIST_DIRS = patch test
@@ -68,6 +68,9 @@ patchkernel: $(CONF_H)
 	cd $(KSRC)/$(MDIR); grep -q $(HCD_TARGET).o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_HCD)	+= $(HCD_TARGET).o" >>Makefile
 	cd $(KSRC)/$(MDIR); grep -q $(IOCIFC_TARGET).o Makefile || echo "obj-\$$(CONFIG_USB_VHCI_IOCIFC)	+= $(IOCIFC_TARGET).o" >>Makefile
 	cd $(KSRC)/$(MDIR); patch -N -i $(PWD)/patch/Kconfig.patch || :
+	if [ "$(KVERSION_VERSION)" -eq 2 -a "$(KVERSION_PATCHLEVEL)" -eq 6 -a "$(KVERSION_SUBLEVEL)" -lt 35 ]; then \
+		sed -i -e 's,<linux/usb/hcd.h>,"../core/hcd.h",' $(KSRC)/$(MDIR)/usb-vhci-hcd.h; \
+	fi
 .PHONY: patchkernel
 
 clean-srcdox:

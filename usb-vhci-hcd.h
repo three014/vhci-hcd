@@ -36,7 +36,12 @@
 #ifdef KBUILD_EXTMOD
 #	include INCLUDE_CORE_HCD
 #else
-#	include "../core/hcd.h"
+#	include <linux/usb/hcd.h>
+#endif
+
+// this is undefined in linux >= 2.6.35
+#ifndef USB_PORT_FEAT_HIGHSPEED
+#	define USB_PORT_FEAT_HIGHSPEED (10)
 #endif
 
 #ifdef KBUILD_EXTMOD

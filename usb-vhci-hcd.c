@@ -40,12 +40,6 @@
 #include <asm/bitops.h>
 #include <asm/uaccess.h>
 
-#ifdef KBUILD_EXTMOD
-#	include INCLUDE_CORE_HCD
-#else
-#	include "../core/hcd.h"
-#endif
-
 #include "usb-vhci-hcd.h"
 
 #define DRIVER_NAME "usb_vhci_hcd"
