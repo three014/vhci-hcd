@@ -7,9 +7,10 @@ PREFIX =
 BUILD_PREFIX = $(PREFIX)
 INSTALL_PREFIX = $(PREFIX)
 EXTRA_CFLAGS = -DEXPORT_SYMTAB -DKBUILD_EXTMOD -DINCLUDE_CORE_HCD=\"$(CORE_INCLUDE_DIR)/hcd.h\"
-ORIG_CORE_INCLUDE_DIR = $(KDIR)/drivers/usb/core
+OLD_CORE_INCLUDE_DIR = $(KDIR)/drivers/usb/core
+ORIG_CORE_INCLUDE_DIR = $(KDIR)/include/linux/usb
 COPY_CORE_INCLUDE_DIR = $(PWD)/linux/$(KVERSION_VERSION).$(KVERSION_PATCHLEVEL).$(KVERSION_SUBLEVEL)/drivers/usb/core
-CORE_INCLUDE_DIR = $(shell test -e $(ORIG_CORE_INCLUDE_DIR)/hcd.h -a -e $(ORIG_CORE_INCLUDE_DIR)/hub.h && echo $(ORIG_CORE_INCLUDE_DIR) || echo $(COPY_CORE_INCLUDE_DIR))
+CORE_INCLUDE_DIR = $(shell test -e $(ORIG_CORE_INCLUDE_DIR)/hcd.h && echo $(ORIG_CORE_INCLUDE_DIR) || (test -e $(OLD_CORE_INCLUDE_DIR)/hcd.h && echo $(OLD_CORE_INCLUDE_DIR) || echo $(COPY_CORE_INCLUDE_DIR)))
 KVERSION = $(shell uname -r)
 KVERSION_VERSION = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$1 }')
 KVERSION_PATCHLEVEL = $(shell echo $(KVERSION) | awk -F - '{ print $$1 }' | awk -F . '{ print $$2 }')
