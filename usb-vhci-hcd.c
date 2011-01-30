@@ -179,7 +179,7 @@ void usb_vhci_urb_giveback(struct usb_vhci_hcd *vhc, struct usb_vhci_urb_priv *u
 	usb_hcd_giveback_urb(hcd, urb);
 #else
 #	ifdef DEBUG
-	if(debug_output) vhci_printk(KERN_DEBUG, "status=%d(%s)\n", status, get_status_str(status));
+	if(debug_output) vhci_printk(KERN_DEBUG, "usb_vhci_urb_giveback: status=%d(%s)\n", status, get_status_str(status));
 #	endif
 	usb_hcd_giveback_urb(hcd, urb, status);
 #endif
@@ -216,6 +216,9 @@ static int vhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flag
 	if(unlikely(!urbp))
 		return -ENOMEM;
 	urbp->urb = urb;
+	atomic_set(&urbp->status, urb->status);
+
+	vhci_dbg("vhci_urb_enqueue: urb->status = %d(%s)",urb->status,get_status_str(urb->status));
 
 	spin_lock_irqsave(&vhc->lock, flags);
 #ifndef OLD_GIVEBACK_MECH
