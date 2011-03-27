@@ -509,8 +509,8 @@ static inline int is_urb_dir_in(const struct urb *urb)
 
 // -ECANCELED doesn't report an error, but it indicates that the urb was in the "cancel"
 // list or in the "canceling" list.
-// If this function reports an error, then the urb will be given back to its creator anyway,
-// if its handle was found.
+// If this function reports an error (other than -ENOENT), then the urb will be given back to its creator anyway,
+// if its handle was found. (If its handle wasn't found, then -ENOENT is returned.)
 // called in ioc_giveback{,32} only
 static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int status, int act, int iso_count, int err_count, const void __user *buf, const struct usb_vhci_ioc_iso_packet_giveback __user *iso)
 {
@@ -521,7 +521,9 @@ static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int
 	struct device *dev = vhcihcd_to_dev(vhc);
 #endif
 
+	// TODO: do we really need to disable interrupts for accessing the urb lists?
 	spin_lock_irqsave(&vhc->lock, flags);
+
 	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
 	{
 		// if not found, check the cancel{,ing} list
@@ -542,6 +544,15 @@ static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int
 			return -ENOENT;
 		}
 	}
+
+	// remove urb from list before we release the spinlock
+	list_del(&urbp->urbp_list);
+
+	spin_unlock_irqrestore(&vhc->lock, flags);
+
+	// usb_vhci_urb_giveback() (called below) will fail if we don't re-initialize
+	// the list entry, because it calls list_del(), too!
+	INIT_LIST_HEAD(&urbp->urbp_list);
 
 	is_in = is_urb_dir_in(urbp->urb);
 	is_iso = usb_pipeisoc(urbp->urb->pipe);
@@ -630,6 +641,7 @@ static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int
 
 	// now we are done with this urb and it can return to its creator
 	usb_vhci_maybe_set_status(urbp, status);
+	spin_lock_irqsave(&vhc->lock, flags);
 	usb_vhci_urb_giveback(vhc, urbp);
 	spin_unlock_irqrestore(&vhc->lock, flags);
 #ifdef DEBUG
@@ -638,6 +650,7 @@ static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int
 	return retval;
 
 done_with_errors:
+	spin_lock_irqsave(&vhc->lock, flags);
 	usb_vhci_urb_giveback(vhc, urbp);
 	spin_unlock_irqrestore(&vhc->lock, flags);
 #ifdef DEBUG
