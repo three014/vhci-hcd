@@ -701,7 +701,23 @@ static int ioc_fetch_data_common(struct usb_vhci_hcd *vhc, const void *handle, v
 {
 	struct usb_vhci_urb_priv *urbp;
 	unsigned long flags;
-	int tb_len, is_in, is_iso, i;
+	int tb_len, is_in, is_iso, i, ret = -ENOMEM;
+	void *user_buf_tmp = NULL;
+	struct usb_vhci_ioc_iso_packet_data *iso_tmp = NULL;
+
+	if(likely(user_len))
+	{
+		user_buf_tmp = kmalloc(user_len, GFP_KERNEL);
+		if(unlikely(!user_buf_tmp))
+			goto end;
+	}
+	if(likely(iso_count))
+	{
+		iso_tmp = kmalloc(iso_count * sizeof *iso_tmp, GFP_KERNEL);
+		if(unlikely(!iso_tmp))
+			goto end;
+	}
+	ret = 0;
 
 	spin_lock_irqsave(&vhc->lock, flags);
 	if(unlikely(!(urbp = urbp_from_handle(vhc, handle))))
@@ -713,11 +729,11 @@ static int ioc_fetch_data_common(struct usb_vhci_hcd *vhc, const void *handle, v
 			// we can give the urb back to its creator now, because the user space is informed about
 			// its cancelation
 			usb_vhci_urb_giveback(vhc, urbp);
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -ECANCELED;
+			ret = -ECANCELED;
+			goto end_unlock;
 		}
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -ENOENT;
+		ret = -ENOENT;
+		goto end_unlock;
 	}
 
 	tb_len = urbp->urb->transfer_buffer_length;
@@ -734,49 +750,69 @@ static int ioc_fetch_data_common(struct usb_vhci_hcd *vhc, const void *handle, v
 	{
 		if(unlikely(iso_count != urbp->urb->number_of_packets))
 		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EINVAL;
+			ret = -EINVAL;
+			goto end_unlock;
 		}
 		if(likely(iso_count))
 		{
 			if(unlikely(!iso))
 			{
-				spin_unlock_irqrestore(&vhc->lock, flags);
-				return -EINVAL;
-			}
-			if(!access_ok(VERIFY_WRITE, (void *)iso, iso_count * sizeof(struct usb_vhci_ioc_iso_packet_data)))
-			{
-				spin_unlock_irqrestore(&vhc->lock, flags);
-				return -EFAULT;
+				ret = -EINVAL;
+				goto end_unlock;
 			}
 			for(i = 0; i < iso_count; i++)
 			{
-				__put_user(urbp->urb->iso_frame_desc[i].offset, &iso[i].offset);
-				__put_user(urbp->urb->iso_frame_desc[i].length, &iso[i].packet_length);
+				iso_tmp[i].offset = urbp->urb->iso_frame_desc[i].offset;
+				iso_tmp[i].packet_length = urbp->urb->iso_frame_desc[i].length;
 			}
 		}
 	}
 	else if(unlikely(is_in || !tb_len || !urbp->urb->transfer_buffer))
 	{
-		spin_unlock_irqrestore(&vhc->lock, flags);
-		return -ENODATA;
+		ret = -ENODATA;
+		goto end_unlock;
 	}
 
 	if(likely(!is_in && tb_len))
 	{
 		if(unlikely(!user_buf || user_len < tb_len))
 		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EINVAL;
+			ret = -EINVAL;
+			goto end_unlock;
 		}
-		if(unlikely(copy_to_user(user_buf, urbp->urb->transfer_buffer, tb_len)))
+		memcpy(user_buf_tmp, urbp->urb->transfer_buffer, tb_len);
+	}
+
+	// we have copied all data into our private buffers, so we can release the spinlock
+	spin_unlock_irqrestore(&vhc->lock, flags);
+
+	// since we do not hold the spinlock any longer, we can now safely write the user-mode buffers
+
+	if(likely(is_iso && iso_count))
+	{
+		if(unlikely(copy_to_user(iso, iso_tmp, iso_count * sizeof *iso_tmp)))
 		{
-			spin_unlock_irqrestore(&vhc->lock, flags);
-			return -EFAULT;
+			ret = -EFAULT;
+			goto end;
 		}
 	}
+
+	if(likely(!is_in && tb_len))
+	{
+		if(unlikely(copy_to_user(user_buf, user_buf_tmp, tb_len)))
+		{
+			ret = -EFAULT;
+			goto end;
+		}
+	}
+
+	goto end;
+end_unlock:
 	spin_unlock_irqrestore(&vhc->lock, flags);
-	return 0;
+end:
+	kfree(user_buf_tmp);
+	kfree(iso_tmp);
+	return ret;
 }
 
 // called in device_ioctl only
