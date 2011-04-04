@@ -307,14 +307,17 @@ static inline void dump_urb(struct urb *urb) {/* do nothing */}
 // called in device_ioctl only
 static int ioc_fetch_work(struct usb_vhci_hcd *vhc, struct usb_vhci_ioc_work __user *arg, s16 timeout)
 {
-	struct usb_vhci_urb_priv *urbp;
-	struct vhci_ifc_priv *ifcp;
-	unsigned long flags;
-	u8 _port, port;
-	long wret;
 #ifdef DEBUG
 	struct device *dev = vhcihcd_to_dev(vhc);
 #endif
+	struct usb_vhci_urb_priv *urbp;
+	struct vhci_ifc_priv *ifcp;
+	struct usb_vhci_port port_stat;
+	struct usb_vhci_ioc_urb urb;
+	u64 handle;
+	unsigned long flags;
+	long wret;
+	u8 _port, port;
 
 #ifdef DEBUG
 	// Floods the logs
@@ -353,10 +356,11 @@ static int ioc_fetch_work(struct usb_vhci_hcd *vhc, struct usb_vhci_ioc_work __u
 #ifdef DEBUG
 		if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=CANCEL_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
 #endif
-		__put_user(USB_VHCI_WORK_TYPE_CANCEL_URB, &arg->type);
-		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
+		handle = (u64)(unsigned long)urbp->urb;
 		list_move_tail(&urbp->urbp_list, &vhc->urbp_list_canceling);
 		spin_unlock_irqrestore(&vhc->lock, flags);
+		__put_user(USB_VHCI_WORK_TYPE_CANCEL_URB, &arg->type);
+		__put_user(handle, &arg->handle);
 		return 0;
 	}
 
@@ -369,19 +373,20 @@ static int ioc_fetch_work(struct usb_vhci_hcd *vhc, struct usb_vhci_ioc_work __u
 			// The port which will be checked first, is rotated by port_sched_offset, so that every port
 			// has its chance to be reported to user space, even if the hcd is under heavy load.
 			port = (_port + ifcp->port_sched_offset) % vhc->port_count;
-			if(vhc->port_update & (1 << (port + 1))) // test bit
+			if(vhc->port_update & (1 << (port + 1)))
 			{
-				vhc->port_update &= ~(1 << (port + 1)); // clear bit
+				vhc->port_update &= ~(1 << (port + 1));
 				ifcp->port_sched_offset = port + 1;
+				port_stat = vhc->ports[port];
+				spin_unlock_irqrestore(&vhc->lock, flags);
 #ifdef DEBUG
-				if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PORT_STAT port=%d status=0x%04x change=0x%04x]\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
+				if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PORT_STAT port=%d status=0x%04x change=0x%04x]\n", (int)(port + 1), (int)port_stat.port_status, (int)port_stat.port_change);
 #endif
 				__put_user(USB_VHCI_WORK_TYPE_PORT_STAT, &arg->type);
 				__put_user(port + 1, &arg->work.port.index);
-				__put_user(vhc->ports[port].port_status, &arg->work.port.status);
-				__put_user(vhc->ports[port].port_change, &arg->work.port.change);
-				__put_user(vhc->ports[port].port_flags, &arg->work.port.flags);
-				spin_unlock_irqrestore(&vhc->lock, flags);
+				__put_user(port_stat.port_status, &arg->work.port.status);
+				__put_user(port_stat.port_change, &arg->work.port.change);
+				__put_user(port_stat.port_flags, &arg->work.port.flags);
 				return 0;
 			}
 		}
@@ -391,12 +396,12 @@ repeat:
 	if(!list_empty(&vhc->urbp_list_inbox))
 	{
 		urbp = list_entry(vhc->urbp_list_inbox.next, struct usb_vhci_urb_priv, urbp_list);
-		__put_user(USB_VHCI_WORK_TYPE_PROCESS_URB, &arg->type);
-		__put_user((u64)(unsigned long)urbp->urb, &arg->handle);
-		__put_user(usb_pipedevice(urbp->urb->pipe), &arg->work.urb.address);
-		__put_user(usb_pipeendpoint(urbp->urb->pipe) | (usb_pipein(urbp->urb->pipe) ? 0x80 : 0x00), &arg->work.urb.endpoint);
-		__put_user(conv_urb_type(usb_pipetype(urbp->urb->pipe)), &arg->work.urb.type);
-		__put_user(conv_urb_flags(urbp->urb->transfer_flags), &arg->work.urb.flags);
+		handle = (u64)(unsigned long)urbp->urb;
+		memset(&urb, 0, sizeof urb);
+		urb.address = usb_pipedevice(urbp->urb->pipe);
+		urb.endpoint = usb_pipeendpoint(urbp->urb->pipe) | (usb_pipein(urbp->urb->pipe) ? 0x80 : 0x00);
+		urb.type = conv_urb_type(usb_pipetype(urbp->urb->pipe));
+		urb.flags = conv_urb_flags(urbp->urb->transfer_flags);
 		if(usb_pipecontrol(urbp->urb->pipe))
 		{
 			const struct usb_ctrlrequest *cmd;
@@ -419,12 +424,12 @@ repeat:
 				if(unlikely(wLength && !urbp->urb->transfer_buffer))
 					goto invalid_urb;
 			}
-			__put_user(wLength, &arg->work.urb.buffer_length);
-			__put_user(cmd->bRequestType, &arg->work.urb.setup_packet.bmRequestType);
-			__put_user(cmd->bRequest, &arg->work.urb.setup_packet.bRequest);
-			__put_user(wValue, &arg->work.urb.setup_packet.wValue);
-			__put_user(wIndex, &arg->work.urb.setup_packet.wIndex);
-			__put_user(wLength, &arg->work.urb.setup_packet.wLength);
+			urb.buffer_length = wLength;
+			urb.setup_packet.bmRequestType = cmd->bRequestType;
+			urb.setup_packet.bRequest = cmd->bRequest;
+			urb.setup_packet.wValue = wValue;
+			urb.setup_packet.wIndex = wIndex;
+			urb.setup_packet.wLength = wLength;
 		}
 		else
 		{
@@ -438,23 +443,28 @@ repeat:
 				if(unlikely(urbp->urb->transfer_buffer_length && !urbp->urb->transfer_buffer))
 					goto invalid_urb;
 			}
-			__put_user(urbp->urb->transfer_buffer_length, &arg->work.urb.buffer_length);
+			urb.buffer_length = urbp->urb->transfer_buffer_length;
 		}
-		__put_user(urbp->urb->interval, &arg->work.urb.interval);
-		__put_user(urbp->urb->number_of_packets, &arg->work.urb.packet_count);
+		urb.interval = urbp->urb->interval;
+		urb.packet_count = urbp->urb->number_of_packets;
 
 #ifdef DEBUG
-		if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PROCESS_URB handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
+		if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK [work=PROCESS_URB handle=0x%016llx]\n", handle);
 #endif
 		dump_urb(urbp->urb);
 		list_move_tail(&urbp->urbp_list, &vhc->urbp_list_fetched);
 		spin_unlock_irqrestore(&vhc->lock, flags);
+
+		__put_user(USB_VHCI_WORK_TYPE_PROCESS_URB, &arg->type);
+		__put_user(handle, &arg->handle);
+		if(unlikely(__copy_to_user(&arg->work.urb, &urb, sizeof urb)))
+			return -EFAULT;
 		return 0;
 
 	invalid_urb:
 		// reject invalid urbs immediately
 #ifdef DEBUG
-		if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK  <<< THROWING AWAY INVALID URB >>>  [handle=0x%016llx]\n", (u64)(unsigned long)urbp->urb);
+		if(debug_output) dev_dbg(dev, "cmd=USB_VHCI_HCD_IOCFETCHWORK  <<< THROWING AWAY INVALID URB >>>  [handle=0x%016llx]\n", handle);
 #endif
 		usb_vhci_maybe_set_status(urbp, -EPIPE);
 		usb_vhci_urb_giveback(vhc, urbp);
