@@ -23,7 +23,7 @@ KSRC = $(KDIR)
 
 CONF_H = conf/usb-vhci.config.h
 
-VHCI_HCD_VERSION = 1.13
+VHCI_HCD_VERSION = 1.14
 USB_VHCI_HCD_VERSION = $(VHCI_HCD_VERSION)
 USB_VHCI_IOCIFC_VERSION = $(VHCI_HCD_VERSION)
 DIST_DIRS = patch test
@@ -123,6 +123,12 @@ testconfig: testcc
 	else \
 		echo "#define NO_DEV_INIT_NAME" >>$(CONF_H); \
 	fi
+	$(MAKE) clean-test
+	if $(call TESTMAKE,-DTEST_HAS_TT_FLAG) >/dev/null 2>&1; then \
+		echo "//#define NO_HAS_TT_FLAG" >>$(CONF_H); \
+	else \
+		echo "#define NO_HAS_TT_FLAG" >>$(CONF_H); \
+	fi
 	echo "// end of file" >>$(CONF_H)
 .PHONY: testconfig
 
@@ -143,7 +149,7 @@ config:
 	echo "NOTE: You can cancel this at any time (by pressing CTRL-C). $(CONF_H)"; \
 	echo "      will not be overwritten then."; \
 	echo; \
-	echo "Question 1 of 3:"; \
+	echo "Question 1 of 4:"; \
 	echo "  What does the signature of usb_hcd_giveback_urb look like?"; \
 	echo "   a) usb_hcd_giveback_urb(struct usb_hcd *, struct urb *, int)    <-- recent kernels"; \
 	echo "   b) usb_hcd_giveback_urb(struct usb_hcd *, struct urb *)         <-- older kernels"; \
@@ -159,7 +165,7 @@ config:
 		fi; \
 	done; \
 	echo; \
-	echo "Question 2 of 3:"; \
+	echo "Question 2 of 4:"; \
 	echo "  Are the functions dev_name and dev_set_name defined?"; \
 	echo "  You may find them in <KERNEL_SRCDIR>/include/linux/device.h."; \
 	OLD_DEV_BUS_ID=; \
@@ -173,8 +179,8 @@ config:
 		fi; \
 	done; \
 	echo; \
-	echo "Question 3 of 3:"; \
-	echo "  Does the device structure have the init_name field?"; \
+	echo "Question 3 of 4:"; \
+	echo "  Does the device structure has the init_name field?"; \
 	echo "  You may check <KERNEL_SRCDIR>/include/linux/device.h to find out."; \
 	echo "  It is always safe to answer 'n'."; \
 	NO_DEV_INIT_NAME=; \
@@ -184,6 +190,20 @@ config:
 		if [ "$$ANSWER" = y ]; then break; \
 		elif [ "$$ANSWER" = n ]; then \
 			NO_DEV_INIT_NAME=y; \
+			break; \
+		fi; \
+	done; \
+	echo; \
+	echo "Question 4 of 4:"; \
+	echo "  Does the usb_hcd structure has the has_tt field?"; \
+	echo "  This field was added in kernel version 2.6.35."; \
+	NO_HAS_TT_FLAG=; \
+	while true; do \
+		echo -n "Answer (y/n): "; \
+		read ANSWER; \
+		if [ "$$ANSWER" = y ]; then break; \
+		elif [ "$$ANSWER" = n ]; then \
+			NO_HAS_TT_FLAG=y; \
 			break; \
 		fi; \
 	done; \
@@ -209,6 +229,11 @@ config:
 		echo "//#define NO_DEV_INIT_NAME" >>$(CONF_H); \
 	else \
 		echo "#define NO_DEV_INIT_NAME" >>$(CONF_H); \
+	fi; \
+	if [ -z "$$NO_HAS_TT_FLAG" ]; then \
+		echo "//#define NO_HAS_TT_FLAG" >>$(CONF_H); \
+	else \
+		echo "#define NO_HAS_TT_FLAG" >>$(CONF_H); \
 	fi; \
 	echo "// end of file" >>$(CONF_H)
 .PHONY: config

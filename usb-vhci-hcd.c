@@ -819,6 +819,9 @@ static int vhci_start(struct usb_hcd *hcd)
 	hcd->power_budget = 500; // NOTE: practically we have unlimited power because this is a virtual device with... err... virtual power!
 	hcd->state = HC_STATE_RUNNING;
 	hcd->uses_new_polling = 1;
+#ifndef NO_HAS_TT_FLAG
+	hcd->has_tt = 1;
+#endif
 
 	retval = device_create_file(dev, &dev_attr_urbs_inbox);
 	if(unlikely(retval != 0)) goto kfree_port_arr;

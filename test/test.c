@@ -54,13 +54,19 @@ MODULE_AUTHOR("Michael Singer <michael@a-singer.de>");
 MODULE_LICENSE("GPL");
 
 static struct device testdev = {
-    .class = NULL,
-    .release = NULL,
+	.class = NULL,
+	.release = NULL,
 #ifdef TEST_DEV_INIT_NAME
-    .init_name = "test",
+	.init_name = "test",
 #endif
-    .driver = NULL
+	.driver = NULL
 };
+
+#ifdef TEST_HAS_TT_FLAG
+static struct usb_hcd testhcd = {
+	.has_tt = 1
+};
+#endif
 
 static int __init init(void)
 {
