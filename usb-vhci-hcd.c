@@ -1043,7 +1043,7 @@ static int device_enum(struct device *dev, void *data)
 	return unlikely(*((const int *)data) == pdev->id) ? -EINVAL : 0;
 }
 
-static spinlock_t dev_enum_lock = SPIN_LOCK_UNLOCKED;
+static DEFINE_SPINLOCK(dev_enum_lock);
 
 int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port_count, struct usb_vhci_device **vdev_ret)
 {
