@@ -26,6 +26,7 @@
 #include <linux/delay.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
+#include <linux/mutex.h>
 #include <linux/errno.h>
 #include <linux/init.h>
 #include <linux/timer.h>
@@ -1043,7 +1044,7 @@ static int device_enum(struct device *dev, void *data)
 	return unlikely(*((const int *)data) == pdev->id) ? -EINVAL : 0;
 }
 
-static DEFINE_SPINLOCK(dev_enum_lock);
+static DEFINE_MUTEX(dev_enum_lock);
 
 int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port_count, struct usb_vhci_device **vdev_ret)
 {
@@ -1055,7 +1056,7 @@ int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port
 		return -EINVAL;
 
 	// search for free device-id
-	spin_lock(&dev_enum_lock);
+	mutex_lock(&dev_enum_lock);
 	for(i = 0; i < 10000; i++)
 	{
 		retval = driver_for_each_device(&vhci_hcd_driver.driver, NULL, &i, device_enum);
@@ -1063,7 +1064,7 @@ int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port
 	}
 	if(unlikely(i >= 10000))
 	{
-		spin_unlock(&dev_enum_lock);
+		mutex_unlock(&dev_enum_lock);
 		vhci_printk(KERN_ERR, "there are too many devices!\n");
 		return -EBUSY;
 	}
@@ -1072,13 +1073,13 @@ int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port
 	pdev = platform_device_alloc(driver_name, i);
 	if(unlikely(!pdev))
 	{
-		spin_unlock(&dev_enum_lock);
+		mutex_unlock(&dev_enum_lock);
 		return -ENOMEM;
 	}
 
 	if(!try_module_get(ifc->owner))
 	{
-		spin_unlock(&dev_enum_lock);
+		mutex_unlock(&dev_enum_lock);
 		vhci_printk(KERN_ERR, "ifc module died\n");
 		retval = -ENODEV;
 		goto pdev_put;
@@ -1093,7 +1094,7 @@ int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port
 	retval = platform_device_add_data(pdev, &vdev, sizeof vdev + ifc->ifc_priv_size);
 	if(unlikely(retval < 0))
 	{
-		spin_unlock(&dev_enum_lock);
+		mutex_unlock(&dev_enum_lock);
 		goto mod_put;
 	}
 	vdev_ptr = pdev_to_vhcidev(pdev);
@@ -1104,14 +1105,14 @@ int usb_vhci_hcd_register(const struct usb_vhci_ifc *ifc, void *context, u8 port
 		retval = ifc->init(context, vhcidev_to_ifc(vdev_ptr));
 		if(unlikely(retval < 0))
 		{
-			spin_unlock(&dev_enum_lock);
+			mutex_unlock(&dev_enum_lock);
 			goto mod_put;
 		}
 	}
 
 	vhci_dbg("add platform_device %s.%d\n", pdev->name, pdev->id);
 	retval = platform_device_add(pdev); // calls vhci_hcd_probe
-	spin_unlock(&dev_enum_lock);
+	mutex_unlock(&dev_enum_lock);
 	if(unlikely(retval < 0))
 	{
 		vhci_printk(KERN_ERR, "add platform_device %s.%d failed\n", pdev->name, pdev->id);
