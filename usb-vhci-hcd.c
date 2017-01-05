@@ -315,7 +315,7 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 	struct device *dev;
 	unsigned long flags;
 	u8 port;
-	int retval = 0;
+	int changed = 0;
 	int idx, rel_bit, abs_bit;
 
 	vhc = usbhcd_to_vhcihcd(hcd);
@@ -340,18 +340,18 @@ static int vhci_hub_status(struct usb_hcd *hcd, char *buf)
 			idx     = abs_bit / (sizeof *buf * 8);
 			rel_bit = abs_bit % (sizeof *buf * 8);
 			buf[idx] |= (1 << rel_bit);
-			retval = 1;
+			changed = 1;
 		}
 #ifdef DEBUG
 		if(debug_output) dev_dbg(dev, "port %d status 0x%04x has changes at 0x%04x\n", (int)(port + 1), (int)vhc->ports[port].port_status, (int)vhc->ports[port].port_change);
 #endif
 	}
 
-	if(vhc->rh_state == USB_VHCI_RH_SUSPENDED)
+	if(vhc->rh_state == USB_VHCI_RH_SUSPENDED && changed)
 		usb_hcd_resume_root_hub(hcd);
 
 	spin_unlock_irqrestore(&vhc->lock, flags);
-	return retval;
+	return changed;
 }
 
 // caller has vhc->lock
