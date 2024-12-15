@@ -931,7 +931,7 @@ static int vhci_hcd_probe(struct platform_device *pdev)
 	return retval;
 }
 
-static int vhci_hcd_remove(struct platform_device *pdev)
+static void vhci_hcd_remove(struct platform_device *pdev)
 {
 	unsigned long flags;
 	struct usb_hcd *hcd;
@@ -981,8 +981,6 @@ static int vhci_hcd_remove(struct platform_device *pdev)
 		vhci_dbg("call ifc->destroy\n");
 		vdev->ifc->destroy(vhcidev_to_ifc(vdev));
 	}
-
-	return 0;
 }
 
 static int vhci_hcd_suspend(struct platform_device *pdev, pm_message_t state)
@@ -1281,7 +1279,7 @@ int usb_vhci_apply_port_stat(struct usb_vhci_hcd *vhc, u16 status, u16 change, u
 EXPORT_SYMBOL_GPL(usb_vhci_apply_port_stat);
 
 #ifdef DEBUG
-static ssize_t show_debug_output(struct device_driver *drv, char *buf)
+static ssize_t debugger_output_show(struct device_driver *drv, char *buf)
 {
 	if(buf != NULL)
 	{
@@ -1296,7 +1294,7 @@ static ssize_t show_debug_output(struct device_driver *drv, char *buf)
 	return 1;
 }
 
-static ssize_t store_debug_output(struct device_driver *drv, const char *buf, size_t count)
+static ssize_t debugger_output_store(struct device_driver *drv, const char *buf, size_t count)
 {
 	if(count != 1 || buf == NULL) return -EINVAL;
 	switch(*buf)
@@ -1309,7 +1307,7 @@ static ssize_t store_debug_output(struct device_driver *drv, const char *buf, si
 	return -EINVAL;
 }
 
-static DRIVER_ATTR(debug_output, S_IRUSR | S_IWUSR, show_debug_output, store_debug_output);
+static DRIVER_ATTR_RW(debugger_output);
 #endif
 
 static int __init init(void)
@@ -1331,7 +1329,7 @@ static int __init init(void)
 	}
 
 #ifdef DEBUG
-	retval = driver_create_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
+	retval = driver_create_file(&vhci_hcd_driver.driver, &driver_attr_debugger_output);
 	if(unlikely(retval != 0))
 	{
 		vhci_printk(KERN_DEBUG, "driver_create_file(&vhci_hcd_driver, &driver_attr_debug_output) failed\n");
@@ -1346,7 +1344,7 @@ module_init(init);
 static void __exit cleanup(void)
 {
 #ifdef DEBUG
-	driver_remove_file(&vhci_hcd_driver.driver, &driver_attr_debug_output);
+	driver_remove_file(&vhci_hcd_driver.driver, &driver_attr_debugger_output);
 #endif
 	vhci_dbg("unregister platform_driver %s\n", driver_name);
 	platform_driver_unregister(&vhci_hcd_driver);

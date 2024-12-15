@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "linux/device/driver.h"
 #define DEBUG
 
 #include <linux/module.h>
@@ -216,7 +217,7 @@ static int ioc_register(struct file *file, struct usb_vhci_ioc_register __user *
 	if(copy_to_user(arg->bus_id, dname, i))
 	{
 		vhci_printk(KERN_WARNING, "Failed to copy bus_id to userspace.\n");
-		__put_user('\0', arg->bus_id);
+		__put_user('\0', &arg->bus_id[0]);
 	}
 	// make sure the last character is null
 	__put_user('\0', arg->bus_id + i);
@@ -595,7 +596,7 @@ static int ioc_giveback_common(struct usb_vhci_hcd *vhc, const void *handle, int
 		}
 		if(likely(iso_count))
 		{
-			if(!access_ok(VERIFY_READ, (void *)iso, iso_count * sizeof(struct usb_vhci_ioc_iso_packet_giveback)))
+			if(!access_ok((void *)iso, iso_count * sizeof(struct usb_vhci_ioc_iso_packet_giveback)))
 			{
 				retval = -EFAULT;
 				goto done_with_errors;
@@ -933,9 +934,9 @@ static long device_do_ioctl(struct file *file,
 	if(unlikely(_IOC_TYPE(cmd) != USB_VHCI_HCD_IOC_MAGIC)) return -ENOTTY;
 	if(unlikely(_IOC_NR(cmd) > USB_VHCI_HCD_IOC_MAXNR)) return -ENOTTY;
 
-	if(unlikely((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(VERIFY_WRITE, arg, _IOC_SIZE(cmd))))
+	if(unlikely((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(arg, _IOC_SIZE(cmd))))
 		return -EFAULT;
-	if(unlikely((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(VERIFY_READ, arg, _IOC_SIZE(cmd))))
+	if(unlikely((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(arg, _IOC_SIZE(cmd))))
 		return -EFAULT;
 
 	if(unlikely(cmd == USB_VHCI_HCD_IOCREGISTER))
@@ -1024,7 +1025,7 @@ static struct file_operations fops = {
 };
 
 #ifdef DEBUG
-static ssize_t show_debug_output(struct device_driver *drv, char *buf)
+static ssize_t debugger_output_show(struct device_driver *drv, char *buf)
 {
 	if(buf != NULL)
 	{
@@ -1039,7 +1040,7 @@ static ssize_t show_debug_output(struct device_driver *drv, char *buf)
 	return 1;
 }
 
-static ssize_t store_debug_output(struct device_driver *drv, const char *buf, size_t count)
+static ssize_t debugger_output_store(struct device_driver *drv, const char *buf, size_t count)
 {
 	if(count != 1 || buf == NULL) return -EINVAL;
 	switch(*buf)
@@ -1052,7 +1053,7 @@ static ssize_t store_debug_output(struct device_driver *drv, const char *buf, si
 	return -EINVAL;
 }
 
-static DRIVER_ATTR(debug_output, S_IRUSR | S_IWUSR, show_debug_output, store_debug_output);
+static DRIVER_ATTR_RW(debugger_output);
 #endif
 
 static struct platform_driver vhci_iocifc_driver = {
@@ -1069,7 +1070,7 @@ static void vhci_iocifc_device_release(struct device *dev)
 static int vhci_iocifc_major;
 
 static struct class vhci_iocifc_class = {
-	.owner = THIS_MODULE,
+	// .owner = THIS_MODULE,
 	.name = driver_name
 };
 
@@ -1137,7 +1138,7 @@ static int __init init(void)
 	}
 
 #ifdef DEBUG
-	retval = driver_create_file(&vhci_iocifc_driver.driver, &driver_attr_debug_output);
+	retval = driver_create_file(&vhci_iocifc_driver.driver, &driver_attr_debugger_output);
 	if(unlikely(retval != 0))
 	{
 		vhci_printk(KERN_DEBUG, "driver_create_file(&vhci_iocifc_driver, &driver_attr_debug_output) failed\n");
@@ -1161,7 +1162,7 @@ module_init(init);
 static void __exit cleanup(void)
 {
 #ifdef DEBUG
-	driver_remove_file(&vhci_iocifc_driver.driver, &driver_attr_debug_output);
+	driver_remove_file(&vhci_iocifc_driver.driver, &driver_attr_debugger_output);
 #endif
 	device_unregister(&vhci_iocifc_device);
 	class_unregister(&vhci_iocifc_class);
