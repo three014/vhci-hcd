@@ -30,14 +30,9 @@
 #include <linux/platform_device.h>
 #include <linux/usb.h>
 #include <linux/device.h>
+#include <linux/usb/hcd.h>
 
 #include <asm/atomic.h>
-
-#ifdef KBUILD_EXTMOD
-#	include "../linux-6.13-rc1/include/linux/usb/hcd.h"
-#else
-#	include <linux/usb/hcd.h>
-#endif
 
 // this is undefined in linux >= 2.6.35
 #ifndef USB_PORT_FEAT_HIGHSPEED
