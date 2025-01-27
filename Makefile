@@ -34,8 +34,7 @@ DIST_FILES = AUTHORS ChangeLog COPYING INSTALL Makefile NEWS README TODO usb-vhc
 obj-m := $(OBJS)
 
 default: $(CONF_H)
-	# make -f $(KDIR_MAKEFILE) SUBDIRS=$(PWD) M=$(PWD) LLVM=1
-	make -f $(KDIR_MAKEFILE) M=$(PWD) LLVM=1
+	make -C $(KDIR) M=$(PWD)
 .PHONY: default
 .SUFFIXES:
 
